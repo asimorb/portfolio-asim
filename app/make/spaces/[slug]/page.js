@@ -217,7 +217,14 @@ export default function SpaceDetailPage() {
             aria-label="Previous project"
             style={{ position: 'absolute', left: 0, bottom: '-6px', background: 'none', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <-
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
+            >
               <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>
           </button>
@@ -226,7 +233,14 @@ export default function SpaceDetailPage() {
             aria-label="Next project"
             style={{ position: 'absolute', right: 0, bottom: '-6px', background: 'none', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            ->
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
+            >
               <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
             </svg>
           </button>
@@ -237,14 +251,14 @@ export default function SpaceDetailPage() {
               aria-label="Previous project"
               style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: '#000', display: 'none' }}
             >
-              <-
+              {'<'}
             </button>
             <button
               onClick={() => goToIndex(activeIndex + 1)}
               aria-label="Next project"
               style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: '#000', display: 'none' }}
             >
-              ->
+              {'>'}
             </button>
           </div>
         </div>
