@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from '../../components/TransformChrome'
+import { clearHomeLayout, pushNavStack } from '../../components/navState'
 
 const syncGlowOffset = () => {
   if (typeof window === 'undefined') return { delaySeconds: 0 }
@@ -274,6 +275,19 @@ export default function CurriculumVitaePage() {
   const [pageOpacity, setPageOpacity] = useState(0)
   const [glowDelaySeconds] = useState(() => syncGlowOffset().delaySeconds)
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0)
+  const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
+    const target = path.startsWith('/') ? path : `/${path}`
+    if (typeof window !== 'undefined') {
+      if (target === '/' && !preserveHomeLayout) {
+        clearHomeLayout()
+      }
+      pushNavStack(window.location.pathname + window.location.search)
+    }
+    window.location.href = target
+  }
+  const handleBack = () => {
+    navigateWithFade('/connect')
+  }
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => setPageOpacity(1), 30)
@@ -466,6 +480,7 @@ export default function CurriculumVitaePage() {
         hideTooltip={hideTooltip}
         activePage="connect"
         glowActive
+        onNavigate={(category) => navigateWithFade(`/${category}`)}
       />
 
       <LeftPanelTransform
@@ -475,6 +490,8 @@ export default function CurriculumVitaePage() {
         hideTooltip={hideTooltip}
         label="CV"
         labelTop={85}
+        onBack={handleBack}
+        onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
       />
 
       <RightPanelTransform
@@ -492,15 +509,15 @@ export default function CurriculumVitaePage() {
         glowActive
         onNavigate={(sub, category) => {
           if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
-            window.location.href = sub === 'things' ? '/make/things' : '/make/spaces'
+            navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
           } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
-            window.location.href = `/view/${sub}`
+            navigateWithFade(`/view/${sub}`)
           } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
-            window.location.href = `/reflect/${sub}`
+            navigateWithFade(`/reflect/${sub}`)
           } else if (category === 'connect' && sub === 'curriculum vitae') {
-            window.location.href = '/connect/curriculum-vitae'
+            navigateWithFade('/connect/curriculum-vitae')
           } else {
-            window.location.href = `/${category}`
+            navigateWithFade(`/${category}`)
           }
         }}
       />

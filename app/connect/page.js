@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from '../components/TransformChrome'
+import { MobileChrome } from '../components/MobileChrome'
+import { clearHomeLayout, pushNavStack } from '../components/navState'
+import { useMediaQuery } from '../components/useMediaQuery'
 
 const syncGlowOffset = () => {
   if (typeof window === 'undefined') return { delaySeconds: 0 }
@@ -74,6 +77,158 @@ const sampleSmoothPoints = (pts, samplesPerSegment = 12) => {
   return samples
 }
 
+const MobileMenuOverlay = ({
+  categories,
+  open,
+  onClose,
+  onNavigate,
+  glowFilter,
+  activeMenuCategory,
+  setActiveMenuCategory
+}) => {
+  const lineWidth = '220px'
+  const [visible, setVisible] = useState(false)
+  const [closing, setClosing] = useState(false)
+  const [animatingIn, setAnimatingIn] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true)
+      setClosing(false)
+      requestAnimationFrame(() => setAnimatingIn(true))
+      return
+    }
+    if (visible) {
+      setClosing(true)
+      setAnimatingIn(false)
+      const timer = setTimeout(() => setVisible(false), 220)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [open, visible])
+
+  if (!visible) return null
+
+  const panelScale = closing || !animatingIn ? 'scaleY(0.001)' : 'scaleY(1)'
+  const panelOpacity = closing ? 0 : 1
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'transparent',
+        backdropFilter: 'none',
+        zIndex: 90,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        pointerEvents: open ? 'auto' : 'none',
+        transition: 'opacity 200ms ease'
+      }}
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        style={{
+          minWidth: lineWidth,
+          maxWidth: '80%',
+          background: 'transparent',
+          borderRadius: 0,
+          boxShadow: 'none',
+          padding: '12px 0px 18px',
+          fontFamily: 'var(--font-karla)',
+          color: '#000',
+          alignSelf: 'flex-end',
+          position: 'relative',
+          right: '20px',
+          bottom: 'calc(65px + env(safe-area-inset-bottom, 0px))',
+          transformOrigin: 'bottom right',
+          transform: panelScale,
+          opacity: panelOpacity,
+          transition: 'transform 200ms ease, opacity 200ms ease'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            right: '10px',
+            top: 8,
+            height: '350px',
+            width: '0px',
+            background: 'repeating-linear-gradient(to bottom, #000 0px, #000 2px, transparent 3px, transparent 6px)',
+            opacity: 0.8,
+            pointerEvents: 'none'
+          }}
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', alignItems: 'flex-end', paddingRight: '0px', minWidth: lineWidth }}>
+          {categories.map((category) => {
+            const isActive = activeMenuCategory === category.name
+            const titleStyle = {
+              fontSize: '20px',
+              fontWeight: 700,
+              textTransform: 'lowercase',
+              cursor: 'default',
+              color: isActive ? '#FDABD3' : '#000',
+              filter: isActive ? glowFilter : 'none',
+              transition: 'color 0.2s ease',
+              textAlign: 'right'
+            }
+            return (
+              <div key={category.name} style={{ display: 'flex', flexDirection: 'column', gap: '0px', alignItems: 'flex-end' }}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={category.name}
+                  style={titleStyle}
+                  onClick={() => {
+                    setActiveMenuCategory(category.name)
+                    onNavigate(category.name, category.name)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setActiveMenuCategory(category.name)
+                      onNavigate(category.name, category.name)
+                    }
+                  }}
+                >
+                  {category.name}
+                </div>
+                <div style={{ height: '0px', borderBottom: '2px solid #000', width: lineWidth, margin: '2px 0 6px' }} />
+                <div style={{ display: 'flex', flexDirection: 'row', gap: '28px', paddingLeft: '0px', paddingRight: '0px', alignItems: 'flex-end', width: lineWidth, justifyContent: 'flex-end' }}>
+                  {category.subcategories.map((sub) => (
+                    <button
+                      key={sub}
+                      type="button"
+                      aria-label={`Open ${sub}`}
+                      onClick={() => onNavigate(sub, category.name)}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        padding: '0',
+                        fontSize: '16px',
+                        fontWeight: 400,
+                        textAlign: 'right',
+                        textTransform: 'lowercase',
+                        color: '#000',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {sub}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ height: '14px' }} />
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ConnectPage() {
   const selectedLetterKey = 'mim'
   const selectedLetter = { arabic: '\u0645', label: 'connect' }
@@ -85,6 +240,7 @@ export default function ConnectPage() {
   const [tooltip, setTooltip] = useState(null)
   const [showMoveHint, setShowMoveHint] = useState(false)
   const [pageOpacity, setPageOpacity] = useState(0)
+  const isMobile = useMediaQuery('(max-width: 768px)')
   const [glowDelaySeconds, setGlowDelaySeconds] = useState(0)
   const [hasMounted, setHasMounted] = useState(false)
   const [hoveredKnob, setHoveredKnob] = useState(false)
@@ -94,16 +250,25 @@ export default function ConnectPage() {
   const [letterSideSign, setLetterSideSign] = useState(1)
   const [controlPos, setControlPos] = useState(null)
   const [analyticsText, setAnalyticsText] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeMenuCategory, setActiveMenuCategory] = useState(null)
+  const [showSwipeHint, setShowSwipeHint] = useState(false)
+  const [swipeStart, setSwipeStart] = useState(null)
 
   const glowFilter = 'hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))'
   const expandTimerRef = useRef(null)
   const collapseTimerRef = useRef(null)
   const noticeTimerRef = useRef(null)
+  const mobileMenuTimerRef = useRef(null)
 
-  const letterSize = 200
-  const letterGlyphOffsetY = -8
+  const letterSize = isMobile ? 170 : 200
+  const letterGlyphOffsetY = isMobile ? -60 : -8
   const letterNormalOffset = 48
   const readingBodyStyle = { top: 120, right: 300, maxWidth: 250 }
+  const mobileSubnav = useMemo(() => ([
+    { label: 'curriculum vitae', href: '/connect/curriculum-vitae' },
+    { label: 'about me', href: '/connect/about-me' }
+  ]), [])
   const dwellMs = 250
   const targetSnapThreshold = 16
   const whiskerBase = 60
@@ -112,6 +277,9 @@ export default function ConnectPage() {
 
   const letterParam = useMemo(() => {
     if (typeof window === 'undefined') return null
+    if (isMobile) {
+      return { x: window.innerWidth / 2 - letterSize / 2, y: window.innerHeight / 2 - letterSize / 2 }
+    }
     const params = new URLSearchParams(window.location.search)
     const posX = params.get('letterX')
     const posY = params.get('letterY')
@@ -119,7 +287,7 @@ export default function ConnectPage() {
       return { x: parseFloat(posX), y: parseFloat(posY) }
     }
     return null
-  }, [])
+  }, [isMobile, letterSize])
 
   const pathPoints = useMemo(() => {
     if (typeof window === 'undefined') return []
@@ -271,7 +439,43 @@ export default function ConnectPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!isMobile || readingMode) return undefined
+    const key = 'swipeHintConnectShown'
+    const already = typeof window !== 'undefined' ? window.sessionStorage.getItem(key) : null
+    if (!already) {
+      window.sessionStorage.setItem(key, '1')
+      const showTimer = setTimeout(() => setShowSwipeHint(true), 300)
+      const hideTimer = setTimeout(() => setShowSwipeHint(false), 2300)
+      return () => {
+        clearTimeout(showTimer)
+        clearTimeout(hideTimer)
+      }
+    }
+    return undefined
+  }, [isMobile, readingMode])
+
+  useEffect(() => {
+    if (!isMobile) return undefined
+    if (mobileMenuTimerRef.current) {
+      clearTimeout(mobileMenuTimerRef.current)
+      mobileMenuTimerRef.current = null
+    }
+    if (mobileMenuOpen) {
+      mobileMenuTimerRef.current = setTimeout(() => {
+        setMobileMenuOpen(false)
+      }, 4000)
+    }
+    return () => {
+      if (mobileMenuTimerRef.current) {
+        clearTimeout(mobileMenuTimerRef.current)
+        mobileMenuTimerRef.current = null
+      }
+    }
+  }, [mobileMenuOpen, isMobile])
+
   const showTooltip = (text, event, placement = 'top') => {
+    if (isMobile) return
     const rect = event.currentTarget.getBoundingClientRect()
     if (placement === 'right') {
       setTooltip({ text, x: rect.right + 12, y: rect.top + rect.height / 2, placement })
@@ -360,6 +564,30 @@ export default function ConnectPage() {
     return () => window.removeEventListener('mouseup', handleUp)
   }, [])
 
+  const handleTouchStartDrag = (e) => {
+    const touch = e.touches[0]
+    if (!touch) return
+    setIsDragging(true)
+    e.stopPropagation()
+    e.preventDefault()
+    handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY })
+  }
+
+  const handleTouchMoveDrag = (e) => {
+    if (!isDragging) return
+    const touch = e.touches[0]
+    if (!touch) return
+    e.stopPropagation()
+    e.preventDefault()
+    handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY })
+  }
+
+  const handleTouchEndDrag = (e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
   const targets = useMemo(() => {
     if (!segments.length || !smoothPoints.length) return []
     const start = smoothPoints[0]
@@ -420,6 +648,43 @@ export default function ConnectPage() {
     setAnalyticsText(`X : ${x} / Y : ${y}`)
   }, [knobPos.x, knobPos.y])
 
+  const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
+    setMobileMenuOpen(false)
+    const target = path.startsWith('/') ? path : `/${path}`
+    if (typeof window !== 'undefined') {
+      if (target === '/' && !preserveHomeLayout) {
+        clearHomeLayout()
+      }
+      pushNavStack(window.location.pathname + window.location.search)
+    }
+    window.location.href = target
+  }
+
+  const handleSwipeTouchStart = (e) => {
+    if (readingMode) return
+    const touch = e.touches[0]
+    if (!touch) return
+    setSwipeStart({ x: touch.clientX, y: touch.clientY })
+  }
+
+  const handleSwipeTouchEnd = (e) => {
+    if (readingMode) return
+    if (!swipeStart) return
+    const touch = e.changedTouches[0]
+    if (!touch) return
+    const dx = touch.clientX - swipeStart.x
+    const dy = touch.clientY - swipeStart.y
+    const absX = Math.abs(dx)
+    const absY = Math.abs(dy)
+    setSwipeStart(null)
+    if (absX < 50 || absX < absY) return
+    if (dx > 50) {
+      navigateWithFade('/reflect')
+    } else if (dx < -50) {
+      navigateWithFade('/', { preserveHomeLayout: false })
+    }
+  }
+
   const knobActive = isDragging || hoveredKnob || (targetProximity && targetProximity.distance <= targetSnapThreshold)
 
   if (!hasMounted || !smoothPoints.length) return null
@@ -428,6 +693,8 @@ export default function ConnectPage() {
     <div
       onMouseMove={handleMouseMove}
       onMouseUp={() => { if (isDragging) setIsDragging(false) }}
+      onTouchStart={handleSwipeTouchStart}
+      onTouchEnd={handleSwipeTouchEnd}
       style={{
         backgroundColor: '#FFFDF3',
         position: 'fixed',
@@ -462,36 +729,160 @@ export default function ConnectPage() {
       <div className="glow-core-intersection" />
       <div className="glow-core-static" />
 
-      <TopBarTransform hoveredElement={hoveredElement} setHoveredElement={setHoveredElement} readingMode={readingMode} analyticsText={analyticsText} glowFilter={glowFilter} showTooltip={showTooltip} hideTooltip={hideTooltip} activePage="connect" />
-      <LeftPanelTransform readingMode={readingMode} toggleReadingMode={toggleReadingMode} showTooltip={showTooltip} hideTooltip={hideTooltip} label="CONNECT" labelTop={160} />
-      <RightPanelTransform hoveredElement={hoveredElement} setHoveredElement={setHoveredElement} expandedCategory={expandedCategory} setExpandedCategory={setExpandedCategory} readingMode={readingMode} showTooltip={showTooltip} hideTooltip={hideTooltip} glowFilter={glowFilter} activePage="connect" categories={[
-        { name: 'connect', subcategories: ['curriculum vitae', 'about me'] },
-        { name: 'reflect', subcategories: ['research', 'teaching'] },
-        { name: 'view', subcategories: ['speculations', 'images'] },
-        { name: 'make', subcategories: ['spaces', 'objects'] }
-      ]} onNavigate={(sub, category) => {
-        if (category === 'make' && (sub === 'spaces' || sub === 'objects')) {
-          window.location.href = `/make/${sub}`
-        } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
-          window.location.href = `/view/${sub}`
-        } else if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
+      {!isMobile && (
+        <>
+          <TopBarTransform hoveredElement={hoveredElement} setHoveredElement={setHoveredElement} readingMode={readingMode} analyticsText={analyticsText} glowFilter={glowFilter} showTooltip={showTooltip} hideTooltip={hideTooltip} activePage="connect" />
+          <LeftPanelTransform readingMode={readingMode} toggleReadingMode={toggleReadingMode} showTooltip={showTooltip} hideTooltip={hideTooltip} label="CONNECT" labelTop={160} />
+          <RightPanelTransform hoveredElement={hoveredElement} setHoveredElement={setHoveredElement} expandedCategory={expandedCategory} setExpandedCategory={setExpandedCategory} readingMode={readingMode} showTooltip={showTooltip} hideTooltip={hideTooltip} glowFilter={glowFilter} activePage="connect" categories={[
+            { name: 'connect', subcategories: ['curriculum vitae', 'about me'] },
+            { name: 'reflect', subcategories: ['research', 'teaching'] },
+            { name: 'view', subcategories: ['speculations', 'images'] },
+            { name: 'make', subcategories: ['spaces', 'objects'] }
+          ]} onNavigate={(sub, category) => {
+            if (category === 'make' && (sub === 'spaces' || sub === 'objects')) {
+              window.location.href = `/make/${sub}`
+            } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+              window.location.href = `/view/${sub}`
+            } else if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
 
-          const slug = sub === 'curriculum vitae' ? 'curriculum-vitae' : 'about-me'
+              const slug = sub === 'curriculum vitae' ? 'curriculum-vitae' : 'about-me'
 
-          window.location.href = `/connect/${slug}`
+              window.location.href = `/connect/${slug}`
 
-        } else {
-          window.location.href = `/${category}`
-        }
-      }} />
+            } else {
+              window.location.href = `/${category}`
+            }
+          }} />
+        </>
+      )}
 
-      {notice && (
+      {readingMode && isMobile && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            padding: '110px 18px 120px',
+            zIndex: 60,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px',
+            fontFamily: 'var(--font-karla)',
+            color: '#000',
+            overflowY: 'auto',
+            pointerEvents: 'auto',
+            alignItems: 'flex-end'
+          }}
+        >
+          <div
+            style={{
+              marginTop: '670px',
+              marginRight: '25px',
+              paddingBottom: '16px',
+              fontSize: '28px',
+              lineHeight: '26px',
+              fontWeight: 300,
+              maxWidth: '85%',
+              textAlign: 'right',
+              alignSelf: 'flex-end',
+              pointerEvents: 'auto'
+            }}
+          >
+            Biographical and curricular trajectories that situate practice across contexts.
+          </div>
+        </div>
+      )}
+
+      {isMobile && (
+        <MobileChrome
+          title="connect"
+          subnav={mobileSubnav}
+          activeDot="connect"
+          bottomLabel=""
+          readingMode={readingMode}
+          onPrimaryAction={toggleReadingMode}
+          primaryActive={readingMode}
+          onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
+          secondaryIcon="shuffle"
+          onNavigate={(key, href) => { navigateWithFade(href) }}
+          onBack={() => navigateWithFade('/')}
+          onMenuToggle={() => setMobileMenuOpen((prev) => !prev)}
+          menuExpanded={mobileMenuOpen}
+        />
+      )}
+
+      {!isMobile && notice && (
         <div className="fixed top-10 left-20" style={{ zIndex: 60, background: '#000', color: '#fff', padding: '8px 12px', borderRadius: '8px', fontFamily: 'var(--font-karla)', fontSize: '12px', letterSpacing: '0.02em' }}>
           {notice}
         </div>
       )}
 
-      {readingMode && (
+      {isMobile && readingMode && (
+        <div
+          className="fixed left-1/2 bottom-4"
+          style={{
+            zIndex: 70,
+            background: '#000',
+            color: '#FFFDF3',
+            padding: '6px 12px',
+            borderRadius: '999px',
+            fontFamily: 'var(--font-karla)',
+            fontSize: '12px',
+            letterSpacing: '0.02em',
+            pointerEvents: 'none',
+            transform: 'translateX(-50%)'
+          }}
+        >
+          reading mode
+        </div>
+      )}
+
+      {isMobile && !readingMode && showSwipeHint && (
+        <div
+          className="fixed left-1/2 bottom-16"
+          style={{
+            zIndex: 70,
+            width: '120px',
+            height: '60px',
+            pointerEvents: 'none',
+            transform: 'translateX(-50%)'
+          }}
+        >
+          <img src="/website_interaction/S_LR.png" alt="swipe hint" style={{ width: '120px', height: '60px', objectFit: 'contain' }} />
+        </div>
+      )}
+
+      {isMobile && (
+        <MobileMenuOverlay
+          categories={[
+            { name: 'make', subcategories: ['spaces', 'things'] },
+            { name: 'view', subcategories: ['speculations', 'images'] },
+            { name: 'reflect', subcategories: ['research', 'teaching'] },
+            { name: 'connect', subcategories: ['curriculum vitae', 'about me'] }
+          ]}
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          onNavigate={(sub, category) => {
+            setActiveMenuCategory(category)
+            if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
+              navigateWithFade(sub === 'things' ? 'make/things' : 'make/spaces')
+            } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+              navigateWithFade(`view/${sub}`)
+            } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
+              navigateWithFade(`reflect/${sub}`)
+            } else if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
+              const slug = sub === 'curriculum vitae' ? 'curriculum-vitae' : 'about-me'
+              navigateWithFade(`connect/${slug}`)
+            } else {
+              navigateWithFade(category)
+            }
+          }}
+          glowFilter="hue-rotate(var(--glow-rotation))"
+          activeMenuCategory={activeMenuCategory}
+          setActiveMenuCategory={setActiveMenuCategory}
+        />
+      )}
+
+      {readingMode && !isMobile && (
         <>
           <div className="fixed left-30 top-130 max-w-sm" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '40px', fontWeight: 200, lineHeight: '40px', maxWidth: '400px', color: '#000' }}>
            Biographical and curricular trajectories presented as translations, situating practice within its disciplinary, cultural, and geographic contexts.  
@@ -502,70 +893,114 @@ export default function ConnectPage() {
         </>
       )}
 
-      {targets.length > 0 && (
-        <>
-          <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 2, pointerEvents: 'none' }}>
-            <polyline
-              points={smoothPoints.map((p) => `${p.x},${p.y}`).join(' ')}
-              fill="none"
-              stroke="#FDABD3"
-              strokeWidth="2"
-              strokeDasharray="6,6"
-              style={{ filter: glowFilter, strokeLinecap: 'round' }}
-            />
-            {targets.map((t, idx) => (
-              <g key={idx}>
-                <circle cx={t.point.x} cy={t.point.y} r="8" fill="#FDABD3" className="pulse-dot" style={{ filter: glowFilter }} />
-              </g>
-            ))}
-          </svg>
+      {targets.length > 0 && (() => {
+        const labelSize = { width: 200, height: 32 }
+        const pad = 16
+        const placed = []
+        const clampBox = (box) => {
+          if (typeof window === 'undefined') return box
+          const maxX = window.innerWidth - pad
+          const maxY = window.innerHeight - pad
+          return {
+            x: Math.min(Math.max(box.x, pad), maxX - labelSize.width),
+            y: Math.min(Math.max(box.y, pad), maxY - labelSize.height)
+          }
+        }
+        const boxOverlap = (a, b) => !(a.x + labelSize.width < b.x || b.x + labelSize.width < a.x || a.y + labelSize.height < b.y || b.y + labelSize.height < a.y)
+        const letterBox = {
+          x: letterPos.x - letterSize / 2,
+          y: letterPos.y - letterSize / 2,
+          w: letterSize,
+          h: letterSize
+        }
+        const overlapsLetter = (box) => !(box.x + labelSize.width < letterBox.x || letterBox.x + letterBox.w < box.x || box.y + labelSize.height < letterBox.y || letterBox.y + letterBox.h < box.y)
 
-          {targets.map((t, idx) => {
-            const labelOffset = 70
-            const nextPoint = idx === 0 ? smoothPoints[1] : smoothPoints[smoothPoints.length - 2]
-            const angle = Math.atan2(nextPoint.y - t.point.y, nextPoint.x - t.point.x)
-            const lx = t.point.x + Math.cos(angle + Math.PI / 2) * labelOffset
-            const ly = t.point.y + Math.sin(angle + Math.PI / 2) * labelOffset
-            const labelText = `Open ${t.label}`
-            return (
-              <div
-                key={idx}
-                style={{
-                  position: 'absolute',
-                  left: `${lx}px`,
-                  top: `${ly}px`,
-                  transform: 'translate(-50%, -50%)',
-                  fontFamily: 'var(--font-karla)',
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  color: hoveredElement === labelText ? '#FDABD3' : '#000',
-                  textTransform: 'uppercase',
-                  pointerEvents: 'auto',
-                  cursor: 'pointer',
-                  filter: hoveredElement === labelText ? glowFilter : 'none',
-                  zIndex: 10
-                }}
-                role="button"
-                tabIndex={0}
-                aria-label={labelText}
-                onMouseEnter={(e) => { setHoveredElement(labelText); showTooltip(labelText, e) }}
-                onMouseLeave={() => { setHoveredElement(null); hideTooltip() }}
-                onFocus={(e) => { setHoveredElement(labelText); showTooltip(labelText, e) }}
-                onBlur={() => { setHoveredElement(null); hideTooltip() }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    setNavigatingTo(t.label)
-                  }
-                }}
-                onClick={() => setNavigatingTo(t.label)}
-              >
-                {t.label}
-              </div>
-            )
-          })}
-        </>
-      )}
+        const labels = targets.map((t, idx) => {
+          const nextPoint = idx === 0 ? smoothPoints[1] : smoothPoints[smoothPoints.length - 2]
+          const angle = Math.atan2(nextPoint.y - t.point.y, nextPoint.x - t.point.x)
+          const alongOffset = 8
+          const perpOffset = 32
+          const basePos = { x: t.point.x + Math.cos(angle) * alongOffset, y: t.point.y + Math.sin(angle) * alongOffset }
+          const perp = { x: -Math.sin(angle), y: Math.cos(angle) }
+          const candidates = [
+            { x: basePos.x + perp.x * perpOffset, y: basePos.y + perp.y * perpOffset },
+            { x: basePos.x - perp.x * perpOffset, y: basePos.y - perp.y * perpOffset }
+          ]
+          let chosen = null
+          candidates.forEach((cand, cIdx) => {
+            const rawBox = { x: cand.x - labelSize.width / 2, y: cand.y - labelSize.height / 2 }
+            const clamped = clampBox(rawBox)
+            const overlapLetter = overlapsLetter(clamped)
+            const overlapPlaced = placed.some((p) => boxOverlap(clamped, p))
+            const score = (overlapLetter ? 1000 : 0) + (overlapPlaced ? 500 : 0) + cIdx * 10
+            if (!chosen || score < chosen.score) {
+              chosen = { box: clamped, score }
+            }
+          })
+          placed.push(chosen.box)
+          return { target: t, box: chosen.box }
+        })
+
+        return (
+          <>
+            <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 2, pointerEvents: 'none' }}>
+              <polyline
+                points={smoothPoints.map((p) => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke="#FDABD3"
+                strokeWidth="2"
+                strokeDasharray="6,6"
+                style={{ filter: glowFilter, strokeLinecap: 'round' }}
+              />
+              {targets.map((t, idx) => (
+                <g key={idx}>
+                  <circle cx={t.point.x} cy={t.point.y} r="8" fill="#FDABD3" className="pulse-dot" style={{ filter: glowFilter }} />
+                </g>
+              ))}
+            </svg>
+
+            {labels.map((ln, idx) => {
+              const labelText = `Open ${ln.target.label}`
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    position: 'absolute',
+                    left: `${ln.box.x + labelSize.width / 2}px`,
+                    top: `${ln.box.y + labelSize.height / 2}px`,
+                    transform: 'translate(-50%, -50%)',
+                    fontFamily: 'var(--font-karla)',
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: hoveredElement === labelText ? '#FDABD3' : '#000',
+                    textTransform: 'uppercase',
+                    pointerEvents: 'auto',
+                    cursor: 'pointer',
+                    filter: hoveredElement === labelText ? glowFilter : 'none',
+                    zIndex: 10
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={labelText}
+                  onMouseEnter={(e) => { setHoveredElement(labelText); showTooltip(labelText, e) }}
+                  onMouseLeave={() => { setHoveredElement(null); hideTooltip() }}
+                  onFocus={(e) => { setHoveredElement(labelText); showTooltip(labelText, e) }}
+                  onBlur={() => { setHoveredElement(null); hideTooltip() }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setNavigatingTo(ln.target.label)
+                    }
+                  }}
+                  onClick={() => setNavigatingTo(ln.target.label)}
+                >
+                  {ln.target.label}
+                </div>
+              )
+            })}
+          </>
+        )
+      })()}
 
       <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 4, pointerEvents: 'auto' }}>
         <line
@@ -594,6 +1029,9 @@ export default function ConnectPage() {
           onMouseLeave={() => { setHoveredKnob(false); hideTooltip() }}
           onFocus={(e) => { setHoveredKnob(true); showTooltip('Drag to move', e) }}
           onBlur={() => { setHoveredKnob(false); hideTooltip() }}
+          onTouchStart={handleTouchStartDrag}
+          onTouchMove={handleTouchMoveDrag}
+          onTouchEnd={handleTouchEndDrag}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
@@ -613,6 +1051,9 @@ export default function ConnectPage() {
           onMouseLeave={() => { setHoveredKnob(false); hideTooltip() }}
           onFocus={(e) => { setHoveredKnob(true); showTooltip('Drag to move', e) }}
           onBlur={() => { setHoveredKnob(false); hideTooltip() }}
+          onTouchStart={handleTouchStartDrag}
+          onTouchMove={handleTouchMoveDrag}
+          onTouchEnd={handleTouchEndDrag}
         />
         <circle
           cx={controlKnobPos.x}
@@ -630,6 +1071,9 @@ export default function ConnectPage() {
           onMouseLeave={() => { setHoveredKnob(false); hideTooltip() }}
           onFocus={(e) => { setHoveredKnob(true); showTooltip('Drag to move', e) }}
           onBlur={() => { setHoveredKnob(false); hideTooltip() }}
+          onTouchStart={handleTouchStartDrag}
+          onTouchMove={handleTouchMoveDrag}
+          onTouchEnd={handleTouchEndDrag}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
@@ -644,7 +1088,7 @@ export default function ConnectPage() {
         style={{
           left: `${letterPos.x}px`,
           top: `${letterPos.y}px`,
-          fontSize: '100px',
+          fontSize: isMobile ? '85px' : '100px',
           fontFamily: 'var(--font-nastaliq)',
           fontWeight: 700,
           width: `${letterSize}px`,
@@ -664,7 +1108,7 @@ export default function ConnectPage() {
         {selectedLetter.arabic}
       </div>
 
-      {tooltip && (
+      {!isMobile && tooltip && (
         <div
           style={{
             position: 'fixed',
@@ -690,7 +1134,7 @@ export default function ConnectPage() {
         </div>
       )}
 
-      {showMoveHint && (
+      {!isMobile && showMoveHint && (
         <div
           style={{
             position: 'fixed',

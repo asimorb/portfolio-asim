@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from '../../components/TransformChrome'
+import { MobileChrome } from '../../components/MobileChrome'
+import { clearHomeLayout, pushNavStack } from '../../components/navState'
+import { useMediaQuery } from '../../components/useMediaQuery'
 
 const syncGlowOffset = () => {
   if (typeof window === 'undefined') return { delaySeconds: 0 }
@@ -461,13 +464,35 @@ export default function ReflectResearchPage() {
   const [tooltip, setTooltip] = useState(null)
   const [notice, setNotice] = useState(null)
   const [pageOpacity, setPageOpacity] = useState(0)
-  const [glowDelaySeconds] = useState(() => syncGlowOffset().delaySeconds)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [hydrated, setHydrated] = useState(false)
+  const mediaQueryMatch = useMediaQuery('(max-width: 768px)')
+  const isMobile = hydrated ? mediaQueryMatch : false
+  const [glowDelaySeconds, setGlowDelaySeconds] = useState(0)
   const [activeCategoryId, setActiveCategoryId] = useState('publications')
   const [activeIndexByCategory, setActiveIndexByCategory] = useState(() => (
     Object.fromEntries(categories.map((category) => [category.id, 0]))
   ))
   const [isExpanded, setIsExpanded] = useState(false)
   const [expandedImage, setExpandedImage] = useState(null)
+  useEffect(() => setHydrated(true), [])
+  useEffect(() => {
+    const { delaySeconds } = syncGlowOffset()
+    setGlowDelaySeconds(delaySeconds)
+  }, [])
+  const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
+    const target = path.startsWith('/') ? path : `/${path}`
+    setMobileMenuOpen(false)
+    if (typeof window !== 'undefined') {
+      if (target === '/' && !preserveHomeLayout) {
+        clearHomeLayout()
+      }
+    }
+    window.location.href = target
+  }
+  const handleBack = () => {
+    navigateWithFade('/reflect')
+  }
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => setPageOpacity(1), 30)
@@ -477,6 +502,7 @@ export default function ReflectResearchPage() {
   const glowFilter = 'hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))'
 
   const showTooltip = (text, event, placement = 'top') => {
+    if (isMobile) return
     const rect = event.currentTarget.getBoundingClientRect()
     if (placement === 'right') {
       setTooltip({ text, x: rect.right + 12, y: rect.top + rect.height / 2, placement })
@@ -502,6 +528,10 @@ export default function ReflectResearchPage() {
     { name: 'make', subcategories: ['spaces', 'things'] },
     { name: 'reflect', subcategories: ['research', 'teaching'] },
     { name: 'connect', subcategories: ['curriculum vitae', 'about me'] }
+  ]), [])
+  const mobileSubnav = useMemo(() => ([
+    { label: 'research', href: '/reflect/research' },
+    { label: 'teaching', href: '/reflect/teaching' }
   ]), [])
 
   const activeCategory = categories.find((category) => category.id === activeCategoryId) || categories[0]
@@ -553,7 +583,8 @@ export default function ReflectResearchPage() {
         animation: 'glowHue 60s linear infinite',
         animationDelay: `-${glowDelaySeconds}s`,
         opacity: pageOpacity,
-        transition: 'opacity 0.6s ease'
+        transition: 'opacity 0.6s ease',
+        padding: isMobile ? '120px 18px 160px' : 0
       }}
       className="glow-hue-driver"
     >
@@ -563,65 +594,91 @@ export default function ReflectResearchPage() {
         @keyframes glowHue { 0% { --glow-rotation: 0deg; } 100% { --glow-rotation: 360deg; } }
       `}</style>
 
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '90px',
-          background: '#FFFDF3',
-          zIndex: 4,
-          pointerEvents: 'none'
-        }}
-      />
+      {!isMobile && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '90px',
+            background: '#FFFDF3',
+            zIndex: 4,
+            pointerEvents: 'none'
+          }}
+        />
+      )}
 
-      <TopBarTransform
-        hoveredElement={hoveredElement}
-        setHoveredElement={setHoveredElement}
-        readingMode={readingMode}
-        analyticsText="RESEARCH OVERVIEW"
-        glowFilter={glowFilter}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        activePage="reflect"
-      />
+      {!isMobile && (
+        <>
+          <TopBarTransform
+            hoveredElement={hoveredElement}
+            setHoveredElement={setHoveredElement}
+            readingMode={readingMode}
+            analyticsText="RESEARCH OVERVIEW"
+            glowFilter={glowFilter}
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            activePage="reflect"
+            onNavigate={(category) => navigateWithFade(`/${category}`)}
+          />
 
-      <LeftPanelTransform
-        readingMode={readingMode}
-        toggleReadingMode={toggleReadingMode}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        label="RESEARCH"
-        labelTop={175}
-      />
+          <LeftPanelTransform
+            readingMode={readingMode}
+            toggleReadingMode={toggleReadingMode}
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            label="RESEARCH"
+            labelTop={175}
+            onBack={handleBack}
+            onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
+          />
 
-      <RightPanelTransform
-        hoveredElement={hoveredElement}
-        setHoveredElement={setHoveredElement}
-        expandedCategory={expandedCategory}
-        setExpandedCategory={setExpandedCategory}
-        readingMode={readingMode}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        glowFilter={glowFilter}
-        activePage="reflect"
-        activeSubcategory="research"
-        categories={navCategories}
-        onNavigate={(sub, category) => {
-          if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
-            window.location.href = sub === 'things' ? '/make/things' : '/make/spaces'
-          } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
-            window.location.href = `/view/${sub}`
-          } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
-            window.location.href = `/reflect/${sub}`
-          } else {
-            window.location.href = `/${category}`
-          }
-        }}
-      />
+          <RightPanelTransform
+            hoveredElement={hoveredElement}
+            setHoveredElement={setHoveredElement}
+            expandedCategory={expandedCategory}
+            setExpandedCategory={setExpandedCategory}
+            readingMode={readingMode}
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            glowFilter={glowFilter}
+            activePage="reflect"
+            activeSubcategory="research"
+            categories={navCategories}
+            onNavigate={(sub, category) => {
+              if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
+                navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
+              } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+                navigateWithFade(`/view/${sub}`)
+              } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
+                navigateWithFade(`/reflect/${sub}`)
+              } else {
+                navigateWithFade(`/${category}`)
+              }
+            }}
+          />
+        </>
+      )}
 
-      {notice && (
+      {isMobile && (
+        <MobileChrome
+          title="reflect"
+          subnav={mobileSubnav}
+          activeDot="reflect"
+          bottomLabel="research"
+          readingMode={readingMode}
+          onPrimaryAction={toggleReadingMode}
+          primaryActive={readingMode}
+          onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
+          secondaryIcon="shuffle"
+          onBack={handleBack}
+          onMenuToggle={() => setMobileMenuOpen((prev) => !prev)}
+          menuExpanded={mobileMenuOpen}
+        />
+      )}
+
+      {!isMobile && notice && (
         <div
           className="fixed top-10 left-20"
           style={{
@@ -643,24 +700,26 @@ export default function ReflectResearchPage() {
         style={{
           position: 'relative',
           zIndex: 1,
-          padding: '140px 240px 120px 140px',
+          padding: isMobile ? '0' : '140px 240px 120px 140px',
           display: 'grid',
-          gridTemplateColumns: '180px minmax(420px, 1fr)',
-          gap: '100px',
+          gridTemplateColumns: isMobile ? '1fr' : '180px minmax(420px, 1fr)',
+          gap: isMobile ? '24px' : '100px',
           alignItems: 'start'
         }}
       >
-        <div style={{ position: 'relative', width: '180px' }}>
+        <div style={{ position: 'relative', width: isMobile ? '100%' : '180px' }}>
           <div
             style={{
-              position: 'fixed',
-              left: '140px',
-              top: '380px',
+              position: isMobile ? 'relative' : 'fixed',
+              left: isMobile ? 'auto' : '140px',
+              top: isMobile ? 'auto' : '380px',
               display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
+              flexDirection: isMobile ? 'row' : 'column',
+              flexWrap: isMobile ? 'wrap' : 'nowrap',
+              gap: isMobile ? '16px' : '8px',
               fontFamily: 'var(--font-karla)',
-              fontSize: '24px'
+              fontSize: isMobile ? '16px' : '24px',
+              color: '#000'
             }}
           >
             {categories.map((category) => {
@@ -691,7 +750,7 @@ export default function ReflectResearchPage() {
           </div>
         </div>
 
-        <div style={{ maxWidth: '720px', fontFamily: 'var(--font-karla)', color: '#000', marginTop: '60px', marginLeft: '250px' }}>
+        <div style={{ maxWidth: isMobile ? '100%' : '720px', fontFamily: 'var(--font-karla)', color: '#000', marginTop: isMobile ? '8px' : '60px', marginLeft: isMobile ? 0 : '250px' }}>
           <div
             style={{
               display: 'flex',
@@ -856,7 +915,7 @@ export default function ReflectResearchPage() {
         </div>
       </div>
 
-      {readingMode && (
+      {readingMode && !isMobile && (
         <>
           <div
             className="fixed left-30 top-110 max-w-sm"
@@ -890,6 +949,28 @@ export default function ReflectResearchPage() {
             collapse the view.
           </div>
         </>
+      )}
+
+      {readingMode && isMobile && (
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 40,
+            margin: '0 auto 24px',
+            maxWidth: 520,
+            border: '1px solid #000',
+            padding: '16px',
+            fontFamily: 'var(--font-karla)',
+            color: '#000'
+          }}
+        >
+          <div style={{ fontSize: '20px', fontWeight: 300, lineHeight: '24px' }}>
+            Research highlights shift between publications, studies, projects, and proposals.
+          </div>
+          <div style={{ marginTop: '12px', fontSize: '12px', lineHeight: '16px' }}>
+            Use the arrows to browse items, then select more to expand the abstract and less to collapse the view.
+          </div>
+        </div>
       )}
 
       {expandedImage && (
@@ -926,7 +1007,7 @@ export default function ReflectResearchPage() {
         </div>
       )}
 
-      {tooltip && (
+      {!isMobile && tooltip && (
         <div
           style={{
             position: 'fixed',

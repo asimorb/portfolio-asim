@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useEffect, useRef, useState } from 'react'
+import { clearHomeLayout, getNavStackLength, popNavStack, pushNavStack } from './navState'
 
 export const TimeDisplay = memo(() => {
   const [currentTime, setCurrentTime] = useState('')
@@ -49,6 +50,23 @@ export const TimeDisplay = memo(() => {
 })
 TimeDisplay.displayName = 'TimeDisplay'
 
+const BackIcon = ({ size = 20 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M5 12h14" />
+    <path d="M10 7l-5 5 5 5" />
+  </svg>
+)
+
 export function TopBarTransform({
   hoveredElement,
   setHoveredElement,
@@ -59,7 +77,8 @@ export function TopBarTransform({
   hideTooltip,
   activePage,
   dotCategories = ['connect', 'reflect', 'view', 'make'],
-  glowActive = false
+  glowActive = false,
+  onNavigate = null
 }) {
   return (
     <div
@@ -84,9 +103,8 @@ export function TopBarTransform({
           {dotCategories.map((category) => {
             const isActivePage = category === activePage
             const isHovered = hoveredElement === category
-            const useGlow = glowActive && isActivePage
-            const bgColor = isActivePage ? (useGlow ? '#FDABD3' : '#ADADAD') : isHovered ? '#FDABD3' : '#000'
-            const filter = (isHovered || useGlow) ? glowFilter : 'none'
+            const bgColor = isActivePage ? '#ADADAD' : isHovered ? '#FDABD3' : '#000'
+            const filter = isHovered ? glowFilter : 'none'
             return (
               <div
                 key={category}
@@ -104,13 +122,29 @@ export function TopBarTransform({
                 tabIndex={isActivePage ? -1 : 0}
                 onClick={() => {
                   if (readingMode || isActivePage) return
-                  window.location.href = `/${category}`
+                  if (onNavigate) {
+                    pushNavStack(window.location.pathname + window.location.search)
+                    onNavigate(category)
+                  } else {
+                    if (typeof window !== 'undefined') {
+                      pushNavStack(window.location.pathname + window.location.search)
+                    }
+                    window.location.href = `/${category}`
+                  }
                 }}
                 onKeyDown={(e) => {
                   if (readingMode || isActivePage) return
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    window.location.href = `/${category}`
+                    if (onNavigate) {
+                      pushNavStack(window.location.pathname + window.location.search)
+                      onNavigate(category)
+                    } else {
+                      if (typeof window !== 'undefined') {
+                        pushNavStack(window.location.pathname + window.location.search)
+                      }
+                      window.location.href = `/${category}`
+                    }
                   }
                 }}
                 onMouseEnter={(e) => {
@@ -146,8 +180,23 @@ export function LeftPanelTransform({
   showTooltip,
   hideTooltip,
   label,
-  labelTop = 28
+  labelTop = 28,
+  onBack = null,
+  backDisabled = false,
+  onShuffle = () => {
+    if (typeof window !== 'undefined') {
+      clearHomeLayout()
+      window.location.replace('/')
+    }
+  },
+  shuffleDisabled = false,
+  hideBack = false
 }) {
+  const defaultBack = () => {
+    if (typeof window === 'undefined') return
+    window.location.href = '/'
+  }
+  const effectiveBack = onBack || defaultBack
   return (
     <>
       <div className="fixed left-16 top-10 bottom-10" style={{ width: '2px', background: 'repeating-linear-gradient(to bottom, #000 0px, #000 2px, transparent 3px, transparent 6px)', opacity: 0.8, zIndex: 5 }} />
@@ -171,13 +220,35 @@ export function LeftPanelTransform({
         {label}
       </div>
       <div className="fixed left-4 bottom-10 flex flex-col gap-4" style={{ zIndex: 6 }}>
+        {!hideBack && (
+          <button
+            onClick={() => { if (!readingMode && !backDisabled) effectiveBack() }}
+            aria-label="Back"
+            style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #000', backgroundColor: readingMode || backDisabled ? '#e5e5e5' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: readingMode || backDisabled ? 'default' : 'pointer', transition: 'all 0.3s ease', color: readingMode || backDisabled ? '#8f8f8f' : '#000' }}
+            onMouseEnter={(e) => {
+              if (readingMode || backDisabled) return
+              e.currentTarget.style.backgroundColor = '#000'
+              e.currentTarget.style.color = '#FFFDF3'
+              showTooltip('Back', e, 'right')
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = readingMode || backDisabled ? '#e5e5e5' : 'transparent'
+              e.currentTarget.style.color = readingMode || backDisabled ? '#8f8f8f' : '#000'
+              hideTooltip()
+            }}
+            onFocus={(e) => { if (!readingMode && !backDisabled) showTooltip('Back', e, 'right') }}
+            onBlur={hideTooltip}
+          >
+            <BackIcon size={18} />
+          </button>
+        )}
         <button
-          onClick={() => window.location.href = '/'}
-          aria-label="Home"
-          style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #000', backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s ease', color: '#000' }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#FFFDF3'; showTooltip('Home', e, 'right') }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000'; hideTooltip() }}
-          onFocus={(e) => showTooltip('Home', e, 'right')}
+          onClick={() => { if (!readingMode && !shuffleDisabled) onShuffle() }}
+          aria-label="Shuffle"
+          style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #000', backgroundColor: readingMode || shuffleDisabled ? '#e5e5e5' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: readingMode || shuffleDisabled ? 'default' : 'pointer', transition: 'all 0.3s ease', color: readingMode || shuffleDisabled ? '#8f8f8f' : '#000' }}
+          onMouseEnter={(e) => { if (readingMode || shuffleDisabled) return; e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#FFFDF3'; showTooltip('Shuffle', e, 'right') }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = readingMode || shuffleDisabled ? '#e5e5e5' : 'transparent'; e.currentTarget.style.color = readingMode || shuffleDisabled ? '#8f8f8f' : '#000'; hideTooltip() }}
+          onFocus={(e) => { if (!readingMode && !shuffleDisabled) showTooltip('Shuffle', e, 'right') }}
           onBlur={hideTooltip}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4 7.58 4 4 7.58 4 12s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08a6 6 0 1 1-5.65-8c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z" /></svg>
@@ -216,17 +287,29 @@ export function RightPanelTransform({
   const disabled = readingMode
   const handleNavigate = (sub, category) => {
     if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+      if (typeof window !== 'undefined') {
+        pushNavStack(window.location.pathname + window.location.search)
+      }
       window.location.href = `/view/${sub}`
       return
     }
     if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
       const slug = sub === 'curriculum vitae' ? 'curriculum-vitae' : 'about-me'
+      if (typeof window !== 'undefined') {
+        pushNavStack(window.location.pathname + window.location.search)
+      }
       window.location.href = `/connect/${slug}`
       return
     }
     if (onNavigate) {
+      if (typeof window !== 'undefined') {
+        pushNavStack(window.location.pathname + window.location.search)
+      }
       onNavigate(sub, category)
       return
+    }
+    if (typeof window !== 'undefined') {
+      pushNavStack(window.location.pathname + window.location.search)
     }
     window.location.href = `/${category}`
   }
@@ -286,7 +369,7 @@ export function RightPanelTransform({
         >
           <div className="flex flex-col items-end gap-3">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-              <div style={{ fontSize: '24px', fontWeight: 600, color: glowActive ? '#FDABD3' : '#ADADAD', filter: glowActive ? glowFilter : 'none', cursor: 'default', textAlign: 'right', lineHeight: 1 }}>
+              <div style={{ fontSize: '24px', fontWeight: 600, color: '#ADADAD', cursor: 'default', textAlign: 'right', lineHeight: 1 }}>
                 {activeCategory.name}
               </div>
               <div className="flex flex-col items-end gap-1 mt-1" style={{ fontSize: '18px', fontWeight: 400, color: '#000', paddingRight: '8px' }}>

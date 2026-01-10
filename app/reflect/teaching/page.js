@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from '../../components/TransformChrome'
+import { MobileChrome } from '../../components/MobileChrome'
+import { clearHomeLayout, pushNavStack } from '../../components/navState'
+import { useMediaQuery } from '../../components/useMediaQuery'
 
 const syncGlowOffset = () => {
   if (typeof window === 'undefined') return { delaySeconds: 0 }
@@ -25,6 +28,7 @@ export default function TeachingPage() {
   const [tooltip, setTooltip] = useState(null)
   const [notice, setNotice] = useState(null)
   const [pageOpacity, setPageOpacity] = useState(0)
+  const isMobile = useMediaQuery('(max-width: 768px)')
   const [glowDelaySeconds] = useState(() => syncGlowOffset().delaySeconds)
   const [activeIndex, setActiveIndex] = useState(0)
   const [selectedIndex, setSelectedIndex] = useState(null)
@@ -36,17 +40,44 @@ export default function TeachingPage() {
   const lastWheelTimeRef = useRef(0)
   const heroDragStartRef = useRef({ x: 0, y: 0 })
   const heroPanStartRef = useRef({ x: 0, y: 0 })
-  const carouselSettings = useMemo(() => ({
-    cardWidth: 260,
-    cardHeight: 260,
-    stackGap: 44,
-    stackOffsetX: 320,
-    tiltY: -18,
-    perspective: 760,
-    baseScaleStep: 0.05,
-    baseMaxScale: 0.92,
-    selectedScale: 1.16
-  }), [])
+  const handleBack = () => {
+    navigateWithFade('/reflect')
+  }
+  const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
+    const target = path.startsWith('/') ? path : `/${path}`
+    if (typeof window !== 'undefined') {
+      if (target === '/' && !preserveHomeLayout) {
+        clearHomeLayout()
+      }
+    }
+    window.location.href = target
+  }
+  const carouselSettings = useMemo(() => {
+    if (isMobile) {
+      return {
+        cardWidth: 200,
+        cardHeight: 200,
+        stackGap: 32,
+        stackOffsetX: 200,
+        tiltY: -12,
+        perspective: 520,
+        baseScaleStep: 0.06,
+        baseMaxScale: 0.95,
+        selectedScale: 1.08
+      }
+    }
+    return {
+      cardWidth: 260,
+      cardHeight: 260,
+      stackGap: 44,
+      stackOffsetX: 320,
+      tiltY: -18,
+      perspective: 760,
+      baseScaleStep: 0.05,
+      baseMaxScale: 0.92,
+      selectedScale: 1.16
+    }
+  }, [isMobile])
   const heroZoom = useMemo(() => ({
     min: 1,
     max: 3.5,
@@ -204,6 +235,7 @@ export default function TeachingPage() {
   const heroImage = heroGallery[heroGalleryIndex] || selectedItem?.image
 
   const showTooltip = (text, event, placement = 'top') => {
+    if (isMobile) return
     const rect = event.currentTarget.getBoundingClientRect()
     if (placement === 'right') {
       setTooltip({ text, x: rect.right + 12, y: rect.top + rect.height / 2, placement })
@@ -245,6 +277,10 @@ export default function TeachingPage() {
     { name: 'make', subcategories: ['spaces', 'things'] },
     { name: 'reflect', subcategories: ['research', 'teaching'] },
     { name: 'connect', subcategories: ['curriculum vitae', 'about me'] }
+  ]), [])
+  const mobileSubnav = useMemo(() => ([
+    { label: 'research', href: '/reflect/research' },
+    { label: 'teaching', href: '/reflect/teaching' }
   ]), [])
 
   const stepCarousel = (delta) => {
@@ -331,7 +367,8 @@ export default function TeachingPage() {
         animation: 'glowHue 60s linear infinite',
         animationDelay: `-${glowDelaySeconds}s`,
         opacity: pageOpacity,
-        transition: 'opacity 0.6s ease'
+        transition: 'opacity 0.6s ease',
+        padding: isMobile ? '120px 18px 160px' : 0
       }}
       className="glow-hue-driver"
     >
@@ -341,65 +378,111 @@ export default function TeachingPage() {
         @keyframes glowHue { 0% { --glow-rotation: 0deg; } 100% { --glow-rotation: 360deg; } }
       `}</style>
 
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '90px',
-          background: '#FFFDF3',
-          zIndex: 4,
-          pointerEvents: 'none'
-        }}
-      />
+      {!isMobile && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '90px',
+            background: '#FFFDF3',
+            zIndex: 4,
+            pointerEvents: 'none'
+          }}
+        />
+      )}
 
-      <TopBarTransform
-        hoveredElement={hoveredElement}
-        setHoveredElement={setHoveredElement}
-        readingMode={readingMode}
-        analyticsText="TEACHING OVERVIEW"
-        glowFilter={glowFilter}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        activePage="reflect"
-      />
+      {!isMobile && (
+        <>
+          <TopBarTransform
+            hoveredElement={hoveredElement}
+            setHoveredElement={setHoveredElement}
+            readingMode={readingMode}
+            analyticsText="TEACHING OVERVIEW"
+            glowFilter={glowFilter}
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            activePage="reflect"
+            onNavigate={(category) => navigateWithFade(`/${category}`)}
+          />
 
-      <LeftPanelTransform
-        readingMode={readingMode}
-        toggleReadingMode={toggleReadingMode}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        label="TEACHING"
-        labelTop={175}
-      />
+          <LeftPanelTransform
+            readingMode={readingMode}
+            toggleReadingMode={toggleReadingMode}
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            label="TEACHING"
+            labelTop={175}
+            onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
+            onBack={handleBack}
+          />
 
-      <RightPanelTransform
-        hoveredElement={hoveredElement}
-        setHoveredElement={setHoveredElement}
-        expandedCategory={expandedCategory}
-        setExpandedCategory={setExpandedCategory}
-        readingMode={readingMode}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        glowFilter={glowFilter}
-        activePage="reflect"
-        activeSubcategory="teaching"
-        categories={navCategories}
-        onNavigate={(sub, category) => {
-          if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
-            window.location.href = sub === 'things' ? '/make/things' : '/make/spaces'
-          } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
-            window.location.href = `/view/${sub}`
-          } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
-            window.location.href = `/reflect/${sub}`
-          } else {
-            window.location.href = `/${category}`
-          }
-        }}
-      />
+          <RightPanelTransform
+            hoveredElement={hoveredElement}
+            setHoveredElement={setHoveredElement}
+            expandedCategory={expandedCategory}
+            setExpandedCategory={setExpandedCategory}
+            readingMode={readingMode}
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            glowFilter={glowFilter}
+            activePage="reflect"
+            activeSubcategory="teaching"
+            categories={navCategories}
+            onNavigate={(sub, category) => {
+              if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
+                navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
+              } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+                navigateWithFade(`/view/${sub}`)
+              } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
+                navigateWithFade(`/reflect/${sub}`)
+              } else {
+                navigateWithFade(`/${category}`)
+              }
+            }}
+          />
+        </>
+      )}
 
-      {notice && (
+      {isMobile && (
+        <MobileChrome
+          title="reflect"
+          subnav={mobileSubnav}
+          activeDot="reflect"
+          bottomLabel="teaching"
+          readingMode={readingMode}
+          onPrimaryAction={toggleReadingMode}
+          primaryActive={readingMode}
+          onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
+          onBack={() => navigateWithFade('/reflect')}
+          onNavigate={(key, href) => { navigateWithFade(href) }}
+        />
+      )}
+
+      {readingMode && isMobile && (
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 40,
+            margin: '0 auto 24px',
+            maxWidth: 520,
+            border: '1px solid #000',
+            padding: '16px',
+            fontFamily: 'var(--font-karla)',
+            color: '#000'
+          }}
+        >
+          <div style={{ fontSize: '20px', fontWeight: 300, lineHeight: '24px' }}>
+            Teaching projects span studios and seminars across graduate and undergraduate levels.
+          </div>
+          <div style={{ marginTop: '12px', fontSize: '12px', lineHeight: '16px' }}>
+            Tap the active card to open the gallery, then use the arrows to move between projects.
+          </div>
+        </div>
+      )}
+
+      {!isMobile && notice && (
         <div
           className="fixed top-10 left-20"
           style={{
@@ -419,10 +502,12 @@ export default function TeachingPage() {
 
       <div
         style={{
-          position: 'fixed',
-          left: 140,
-          top: 250,
-          width: 350,
+          position: isMobile ? 'relative' : 'fixed',
+          left: isMobile ? 'auto' : 140,
+          top: isMobile ? 'auto' : 250,
+          width: isMobile ? '100%' : 350,
+          maxWidth: isMobile ? 520 : undefined,
+          margin: isMobile ? '0 auto 24px' : undefined,
           zIndex: 40,
           fontFamily: 'var(--font-karla)',
           color: '#000'
@@ -431,36 +516,37 @@ export default function TeachingPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div>
             <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-5px' }}>project</div>
-            <div style={{ fontSize: '24px', fontWeight: 200, letterSpacing: '-0.03em', marginBottom: '-1px' }}>{displayItem.title}</div>
+            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 200, letterSpacing: '-0.03em', marginBottom: '-1px' }}>{displayItem.title}</div>
           </div>
           <div>
             <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-5px' }}>type</div>
-            <div style={{ fontSize: '24px', fontWeight: 200, letterSpacing: '-0.03em', marginBottom: '-1px' }}>{displayItem.type}</div>
+            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 200, letterSpacing: '-0.03em', marginBottom: '-1px' }}>{displayItem.type}</div>
           </div>
           <div>
             <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-5px' }}>level</div>
-            <div style={{ fontSize: '24px', fontWeight: 200, letterSpacing: '-0.03em', marginBottom: '-1px' }}>{displayItem.level}</div>
+            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 200, letterSpacing: '-0.03em', marginBottom: '-1px' }}>{displayItem.level}</div>
           </div>
           <div>
             <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-5px' }}>role</div>
-            <div style={{ fontSize: '24px', fontWeight: 200, letterSpacing: '-0.03em', marginBottom: '-1px' }}>{displayItem.role}</div>
+            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 200, letterSpacing: '-0.03em', marginBottom: '-1px' }}>{displayItem.role}</div>
           </div>
           <div>
             <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '2px' }}>notes</div>
-            <div style={{ fontSize: '24px', fontWeight: 200, letterSpacing: '-0.03em', lineHeight: '24px', marginBottom: '-10px' }}>{displayItem.notes}</div>
+            <div style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: 200, letterSpacing: '-0.03em', lineHeight: isMobile ? '22px' : '24px', marginBottom: isMobile ? '0' : '-10px' }}>{displayItem.notes}</div>
           </div>
         </div>
       </div>
 
       <div
         style={{
-          position: 'fixed',
-          left: '48%',
-          top: 220,
-          width: 640,
-          height: 360,
+          position: isMobile ? 'relative' : 'fixed',
+          left: isMobile ? 'auto' : '48%',
+          top: isMobile ? 'auto' : 220,
+          width: isMobile ? '100%' : 640,
+          height: isMobile ? 280 : 360,
           zIndex: 40,
-          transform: 'translateX(-50%)'
+          transform: isMobile ? 'none' : 'translateX(-50%)',
+          margin: isMobile ? '0 auto 12px' : undefined
         }}
         onWheel={handleCarouselWheel}
       >
@@ -470,7 +556,7 @@ export default function TeachingPage() {
             width: '100%',
             height: '100%',
             perspective: `${carouselSettings.perspective}px`,
-            perspectiveOrigin: '80% 50%',
+            perspectiveOrigin: isMobile ? '50% 50%' : '80% 50%',
             transformStyle: 'preserve-3d',
             cursor: 'default'
           }}
@@ -545,7 +631,7 @@ export default function TeachingPage() {
           })}
 
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, padding: '0 40px', transform: 'translateX(100px)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, padding: isMobile ? '0 12px' : '0 40px', transform: isMobile ? 'none' : 'translateX(100px)' }}>
           <button
             type="button"
             onClick={(event) => {
@@ -569,7 +655,7 @@ export default function TeachingPage() {
             <img
               src="/teaching/arrow_left_alt_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png"
               alt="Previous"
-              style={{ width: 24, height: 24, display: 'block' }}
+              style={{ width: isMobile ? 28 : 24, height: isMobile ? 28 : 24, display: 'block' }}
             />
           </button>
           <button
@@ -595,7 +681,7 @@ export default function TeachingPage() {
             <img
               src="/teaching/arrow_right_alt_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png"
               alt="Next"
-              style={{ width: 24, height: 24, display: 'block' }}
+              style={{ width: isMobile ? 28 : 24, height: isMobile ? 28 : 24, display: 'block' }}
             />
           </button>
         </div>
@@ -666,8 +752,8 @@ export default function TeachingPage() {
             <div
               style={{
                 position: 'fixed',
-                top: 26,
-                right: 38,
+                top: isMobile ? 16 : 26,
+                right: isMobile ? 16 : 38,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0,
@@ -776,7 +862,7 @@ export default function TeachingPage() {
                 }}
                 style={{
                   position: 'absolute',
-                  left: -140,
+                  left: isMobile ? 16 : -140,
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'transparent',
@@ -789,7 +875,7 @@ export default function TeachingPage() {
                 <img
                   src="/teaching/arrow_left_alt_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png"
                   alt="Previous"
-                  style={{ width: 24, height: 24, display: 'block' }}
+                  style={{ width: isMobile ? 28 : 24, height: isMobile ? 28 : 24, display: 'block' }}
                 />
               </button>
             )}
@@ -823,7 +909,7 @@ export default function TeachingPage() {
                 }}
                 style={{
                   position: 'absolute',
-                  right: -140,
+                  right: isMobile ? 16 : -140,
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'transparent',
@@ -836,7 +922,7 @@ export default function TeachingPage() {
                 <img
                   src="/teaching/arrow_right_alt_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png"
                   alt="Next"
-                  style={{ width: 24, height: 24, display: 'block' }}
+                  style={{ width: isMobile ? 28 : 24, height: isMobile ? 28 : 24, display: 'block' }}
                 />
               </button>
             )}
@@ -844,7 +930,7 @@ export default function TeachingPage() {
         </div>
       )}
 
-      {tooltip && (
+      {!isMobile && tooltip && (
         <div
           style={{
             position: 'fixed',

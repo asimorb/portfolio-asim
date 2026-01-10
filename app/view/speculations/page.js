@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from '../../components/TransformChrome'
+import { MobileChrome } from '../../components/MobileChrome'
+import { clearHomeLayout, getNavStackLength, popNavStack, pushNavStack } from '../../components/navState'
+import { useMediaQuery } from '../../components/useMediaQuery'
 
 const syncGlowOffset = () => {
   if (typeof window === 'undefined') return { delaySeconds: 0 }
@@ -33,6 +36,130 @@ const resolveResponsive = (value, width) => {
   if (width && lg != null && width <= BREAKPOINTS.lg) return lg
   if (width && xl != null && width > BREAKPOINTS.lg) return xl
   return base ?? sm ?? md ?? lg ?? xl
+}
+
+const MobileMenuOverlay = ({
+  categories,
+  open,
+  onClose,
+  onNavigate,
+  glowFilter,
+  activeMenuCategory,
+  setActiveMenuCategory
+}) => {
+  const lineWidth = '200px'
+  const [visible, setVisible] = useState(false)
+  const [closing, setClosing] = useState(false)
+  const [animatingIn, setAnimatingIn] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true)
+      setClosing(false)
+      requestAnimationFrame(() => setAnimatingIn(true))
+      return
+    }
+    if (visible) {
+      setClosing(true)
+      setAnimatingIn(false)
+      const timer = setTimeout(() => setVisible(false), 220)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [open, visible])
+
+  if (!visible) return null
+
+  return (
+    <div
+      role="dialog"
+      aria-label="Mobile navigation menu"
+      onClick={() => onClose()}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 90,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        pointerEvents: 'auto'
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'relative',
+          marginRight: '24px',
+          marginBottom: '70px',
+          width: lineWidth,
+          background: 'rgba(0,0,0,0.02)',
+          borderRadius: '0px 0px 10px 10px',
+          padding: '14px 18px 18px',
+          boxShadow: '0 18px 45px rgba(0,0,0,0.12)',
+          backdropFilter: 'blur(2px)',
+          transform: animatingIn && !closing ? 'translateY(0)' : 'translateY(40px)',
+          opacity: animatingIn && !closing ? 1 : 0,
+          transition: 'transform 200ms ease, opacity 200ms ease'
+        }}
+      >
+        <div style={{ position: 'absolute', top: '-28px', right: '0', left: '0', display: 'flex', justifyContent: 'flex-end', paddingRight: '6px' }}>
+          <div style={{ borderLeft: '1px dashed #000', opacity: 0.4, height: '26px' }} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: 'var(--font-karla)', textTransform: 'lowercase' }}>
+          {categories.map((cat) => (
+            <div key={cat.name} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMenuCategory(cat.name)
+                  onNavigate(cat.name, cat.name)
+                }}
+                style={{
+                  alignSelf: 'flex-end',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                  color: activeMenuCategory === cat.name ? '#FDABD3' : '#000',
+                  filter: activeMenuCategory === cat.name ? glowFilter : 'none',
+                  textAlign: 'right'
+                }}
+              >
+                {cat.name}
+              </button>
+              <div style={{ height: '2px', width: lineWidth, background: '#000', opacity: 0.7 }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', justifyItems: 'end' }}>
+                {cat.subcategories.map((sub) => (
+                  <button
+                    key={`${cat.name}-${sub}`}
+                    type="button"
+                    onClick={() => {
+                      setActiveMenuCategory(cat.name)
+                      onNavigate(sub, cat.name)
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
+                      color: '#000',
+                      textAlign: 'right'
+                    }}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 const imageEntries = [
@@ -238,6 +365,10 @@ export default function SpeculationsPage() {
   const [glowDelaySeconds] = useState(() => syncGlowOffset().delaySeconds)
   const [hasMounted, setHasMounted] = useState(false)
   const [activeProjectId, setActiveProjectId] = useState(() => imageEntries[0]?.id || '')
+  const isMobile = useMediaQuery('(max-width: 768px)')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeMenuCategory, setActiveMenuCategory] = useState(null)
+  const [canGoBack, setCanGoBack] = useState(false)
   const expandTimerRef = useRef(null)
   const collapseTimerRef = useRef(null)
   const scrollAreaRef = useRef(null)
@@ -245,12 +376,34 @@ export default function SpeculationsPage() {
   const itemRefs = useRef({})
   const contentRefs = useRef({})
   const rafRef = useRef(0)
+  const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
+    const target = path.startsWith('/') ? path : `/${path}`
+    if (typeof window !== 'undefined') {
+      if (target === '/' && !preserveHomeLayout) {
+        clearHomeLayout()
+      }
+      pushNavStack(window.location.pathname + window.location.search)
+    }
+    window.location.href = target
+  }
+  const handleBack = () => {
+    const prev = getNavStackLength() > 0 ? popNavStack() : null
+    if (prev) {
+      window.location.href = prev
+      return
+    }
+    navigateWithFade('/view')
+  }
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => setPageOpacity(1), 30)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasMounted(true)
     return () => clearTimeout(fadeTimer)
+  }, [])
+
+  useEffect(() => {
+    setCanGoBack(getNavStackLength() > 0)
   }, [])
 
   useEffect(() => {
@@ -407,48 +560,109 @@ export default function SpeculationsPage() {
         }
       `}</style>
 
-      <TopBarTransform
-        hoveredElement={hoveredElement}
-        setHoveredElement={setHoveredElement}
-        readingMode={readingMode}
-        analyticsText={activeLabel.toUpperCase()}
-        glowFilter="hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))"
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        activePage="view"
-      />
+      {!isMobile && (
+        <>
+          <TopBarTransform
+            hoveredElement={hoveredElement}
+            setHoveredElement={setHoveredElement}
+            readingMode={readingMode}
+            analyticsText={activeLabel.toUpperCase()}
+            glowFilter="hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))"
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            activePage="view"
+            onNavigate={(category) => navigateWithFade(`/${category}`)}
+          />
 
-      <LeftPanelTransform
-        readingMode={readingMode}
-        toggleReadingMode={() => setReadingMode((prev) => !prev)}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        label="SPECULATIONS"
-        labelTop={225}
-      />
+          <LeftPanelTransform
+            readingMode={readingMode}
+            toggleReadingMode={() => setReadingMode((prev) => !prev)}
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            label="SPECULATIONS"
+            labelTop={225}
+            onBack={handleBack}
+            onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
+          />
 
-      <RightPanelTransform
-        hoveredElement={hoveredElement}
-        setHoveredElement={setHoveredElement}
-        expandedCategory={expandedCategory}
-        setExpandedCategory={setExpandedCategory}
-        readingMode={readingMode}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        glowFilter="hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))"
-        activePage="view"
-        activeSubcategory="speculations"
-        categories={categories}
-        onNavigate={(sub, category) => {
-          if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
-            window.location.href = sub === 'things' ? '/make/things' : '/make/spaces'
-          } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
-            window.location.href = `/view/${sub}`
-          } else {
-            window.location.href = `/${category}`
-          }
-        }}
-      />
+          <RightPanelTransform
+            hoveredElement={hoveredElement}
+            setHoveredElement={setHoveredElement}
+            expandedCategory={expandedCategory}
+            setExpandedCategory={setExpandedCategory}
+            readingMode={readingMode}
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            glowFilter="hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))"
+            activePage="view"
+            activeSubcategory="speculations"
+            categories={categories}
+            onNavigate={(sub, category) => {
+              if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
+                navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
+              } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+                navigateWithFade(`/view/${sub}`)
+              } else {
+                navigateWithFade(`/${category}`)
+              }
+            }}
+          />
+        </>
+      )}
+
+      {isMobile && (
+        <MobileChrome
+          title="speculations"
+          subnav={[]}
+          activeDot="view"
+          activeSubnav="speculations"
+          bottomLabel=""
+          readingMode={readingMode}
+          onPrimaryAction={() => setReadingMode((prev) => !prev)}
+          primaryActive={readingMode}
+          onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
+          secondaryIcon="shuffle"
+          onBack={handleBack}
+          backDisabled={!canGoBack}
+          onNavigate={(key, href) => navigateWithFade(href)}
+          onMenuToggle={() => setMobileMenuOpen((prev) => !prev)}
+          menuExpanded={mobileMenuOpen}
+          accentHueExpr="calc(var(--glow-rotation) + var(--glow-offset))"
+        />
+      )}
+
+      {isMobile && (
+        <MobileMenuOverlay
+          categories={categories}
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          onNavigate={(sub, category) => {
+            setActiveMenuCategory(category)
+            setMobileMenuOpen(false)
+            if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
+              navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
+              return
+            }
+            if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+              navigateWithFade(`/view/${sub}`)
+              return
+            }
+            if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
+              navigateWithFade(`/reflect/${sub}`)
+              return
+            }
+            if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
+              const slug = sub === 'curriculum vitae' ? 'curriculum-vitae' : 'about-me'
+              navigateWithFade(`/connect/${slug}`)
+              return
+            }
+            navigateWithFade(`/${category}`)
+          }}
+          glowFilter="hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))"
+          activeMenuCategory={activeMenuCategory}
+          setActiveMenuCategory={setActiveMenuCategory}
+        />
+      )}
 
       {tooltip && (
         <div
