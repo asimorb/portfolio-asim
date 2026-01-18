@@ -115,13 +115,13 @@ export function TopBarTransform({
                   backgroundColor: bgColor,
                   filter,
                   transition: 'background-color 0.3s ease',
-                  cursor: isActivePage ? 'default' : 'pointer'
+                  cursor: 'pointer'
                 }}
                 role="button"
                 aria-label={category}
-                tabIndex={isActivePage ? -1 : 0}
+                tabIndex={0}
                 onClick={() => {
-                  if (readingMode || isActivePage) return
+                  if (readingMode) return
                   if (onNavigate) {
                     pushNavStack(window.location.pathname + window.location.search)
                     onNavigate(category)
@@ -133,7 +133,7 @@ export function TopBarTransform({
                   }
                 }}
                 onKeyDown={(e) => {
-                  if (readingMode || isActivePage) return
+                  if (readingMode) return
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
                     if (onNavigate) {
@@ -148,7 +148,7 @@ export function TopBarTransform({
                   }
                 }}
                 onMouseEnter={(e) => {
-                  if (readingMode || isActivePage) return
+                  if (readingMode) return
                   setHoveredElement(category)
                   showTooltip(category, e)
                 }}
@@ -157,7 +157,7 @@ export function TopBarTransform({
                   hideTooltip()
                 }}
                 onFocus={(e) => {
-                  if (readingMode || isActivePage) return
+                  if (readingMode) return
                   setHoveredElement(category)
                   showTooltip(category, e)
                 }}
@@ -377,7 +377,27 @@ export function RightPanelTransform({
         >
           <div className="flex flex-col items-end gap-3">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-              <div style={{ fontSize: '24px', fontWeight: 600, color: '#ADADAD', cursor: 'default', textAlign: 'right', lineHeight: 1 }}>
+              <div
+                style={{ fontSize: '24px', fontWeight: 600, color: '#ADADAD', cursor: 'pointer', textAlign: 'right', lineHeight: 1 }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Go to ${activeCategory.name}`}
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    pushNavStack(window.location.pathname + window.location.search)
+                  }
+                  window.location.href = `/${activeCategory.name}`
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    if (typeof window !== 'undefined') {
+                      pushNavStack(window.location.pathname + window.location.search)
+                    }
+                    window.location.href = `/${activeCategory.name}`
+                  }
+                }}
+              >
                 {activeCategory.name}
               </div>
               <div className="flex flex-col items-end gap-1 mt-1" style={{ fontSize: '18px', fontWeight: 400, color: '#000', paddingRight: '8px' }}>

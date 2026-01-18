@@ -1039,6 +1039,7 @@ export default function TeachingPage() {
         position: 'fixed',
         inset: 0,
         overflow: 'auto',
+        overscrollBehavior: 'contain',
         animation: 'glowHue 60s linear infinite',
         animationDelay: `-${glowDelaySeconds}s`,
         opacity: pageOpacity,

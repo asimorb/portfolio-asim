@@ -649,6 +649,7 @@ export default function SpacesOverviewPage() {
         position: 'fixed',
         inset: 0,
         overflow: 'auto',
+        overscrollBehavior: 'contain',
         animation: 'glowHue 60s linear infinite',
         animationDelay: `-${glowDelaySeconds}s`,
         opacity: pageOpacity,
@@ -1341,13 +1342,13 @@ export default function SpacesOverviewPage() {
                 style={{
                   position: 'fixed',
                   top: '240px',
-                  right: '280px',
+                  right: '320px',
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, minmax(90px, 1fr))',
-                  gridAutoRows: '70px',
+                  gridTemplateColumns: 'repeat(2, minmax(68px, 1fr))',
+                  gridAutoRows: '52px',
                   gridAutoFlow: 'row dense',
-                  gap: '8px',
-                  width: '240px',
+                  gap: '6px',
+                  width: '180px',
                   zIndex: 212
                 }}
                 onClick={(e) => e.stopPropagation()}
@@ -1415,7 +1416,7 @@ export default function SpacesOverviewPage() {
               aria-label="Next project"
               style={{
                 position: 'fixed',
-                right: '270px',
+                right: '300px',
                 bottom: '120px',
                 background: 'none',
                 border: 'none',

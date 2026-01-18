@@ -425,6 +425,8 @@ export default function ThingsPage() {
   const scrollContainerRef = useRef(null)
   const mobileMenuTimerRef = useRef(null)
   const [mobileHintVisible, setMobileHintVisible] = useState(false)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const [canScrollRight, setCanScrollRight] = useState(true)
 
   const handleBack = () => {
     navigateWithFade('/make')
@@ -491,6 +493,8 @@ export default function ThingsPage() {
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollLeft = 0
+      setScrollProgress(0)
+      setCanScrollRight(true)
     }
   }, [activeCategoryId])
 
@@ -505,6 +509,28 @@ export default function ThingsPage() {
   const displayBlocks = useMemo(() => {
     return processGalleryItems(currentProject?.gallery || [])
   }, [currentProject])
+
+  // Track scroll position for indicators
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return undefined
+
+    const handleScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = container
+      const maxScroll = scrollWidth - clientWidth
+      if (maxScroll > 0) {
+        setScrollProgress(scrollLeft / maxScroll)
+        setCanScrollRight(scrollLeft < maxScroll - 10)
+      } else {
+        setScrollProgress(0)
+        setCanScrollRight(false)
+      }
+    }
+
+    handleScroll() // Initial check
+    container.addEventListener('scroll', handleScroll)
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [displayBlocks])
 
   // Category list for sidebar
   const categories = useMemo(() => (
@@ -998,6 +1024,7 @@ export default function ThingsPage() {
                 height: '100%',
                 overflowX: 'auto',
                 overflowY: 'hidden',
+                overscrollBehaviorX: 'contain',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 24,
@@ -1049,6 +1076,67 @@ export default function ThingsPage() {
                 }
               })}
             </div>
+
+            {/* Left edge fade gradient - appears when scrolled */}
+            {scrollProgress > 0.02 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 60,
+                  background: 'linear-gradient(to left, transparent, rgba(0,0,0,0.95))',
+                  pointerEvents: 'none',
+                  borderRadius: '16px 0 0 16px'
+                }}
+              />
+            )}
+
+            {/* Right edge fade gradient - scroll affordance */}
+            {canScrollRight && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 80,
+                  background: 'linear-gradient(to right, transparent, rgba(0,0,0,0.95))',
+                  pointerEvents: 'none',
+                  borderRadius: '0 16px 16px 0'
+                }}
+              />
+            )}
+          </div>
+
+          {/* Scroll indicator dots */}
+          <div
+            style={{
+              position: 'fixed',
+              left: 425,
+              right: 275,
+              top: `calc(45% + ${containerHeight / 2}px + 12px)`,
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 6,
+              zIndex: 31
+            }}
+          >
+            {[0, 0.25, 0.5, 0.75, 1].map((threshold, idx) => (
+              <div
+                key={idx}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  background: scrollProgress >= threshold - 0.125 && scrollProgress <= threshold + 0.125
+                    ? '#000'
+                    : '#ccc',
+                  transition: 'background 0.2s ease'
+                }}
+              />
+            ))}
           </div>
 
           {/* Location + Notes - under the black container */}
@@ -1056,7 +1144,7 @@ export default function ThingsPage() {
             style={{
               position: 'fixed',
               left: 425,
-              top: `calc(45% + ${containerHeight / 2}px + 30px)`,
+              top: `calc(45% + ${containerHeight / 2}px + 36px)`,
               display: 'flex',
               gap: 48,
               fontFamily: 'var(--font-karla)',
