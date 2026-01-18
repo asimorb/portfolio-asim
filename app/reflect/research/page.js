@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from '../../components/TransformChrome'
 import { MobileChrome } from '../../components/MobileChrome'
 import { clearHomeLayout, pushNavStack } from '../../components/navState'
@@ -19,6 +19,229 @@ const syncGlowOffset = () => {
   const delaySeconds = (elapsedMs / 1000) % 60
   document.documentElement.style.setProperty('--glow-offset', `${angle}deg`)
   return { delaySeconds }
+}
+
+const MobileMenuOverlay = ({
+  categories,
+  open,
+  onClose,
+  onNavigate,
+  glowFilter,
+  activeMenuCategory,
+  setActiveMenuCategory
+}) => {
+  const lineWidth = '200px'
+  const panelPaddingX = 18
+  const panelRef = useRef(null)
+  const [panelOffset, setPanelOffset] = useState({ left: 0, top: 0 })
+  const [visible, setVisible] = useState(false)
+  const [closing, setClosing] = useState(false)
+  const [animatingIn, setAnimatingIn] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true)
+      setClosing(false)
+      requestAnimationFrame(() => setAnimatingIn(true))
+      return
+    }
+    if (visible) {
+      setClosing(true)
+      setAnimatingIn(false)
+      const timer = setTimeout(() => setVisible(false), 220)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [open, visible])
+
+  useEffect(() => {
+    if (!visible) return undefined
+    const updateOffset = () => {
+      if (!panelRef.current) return
+      const rect = panelRef.current.getBoundingClientRect()
+      setPanelOffset({ left: rect.left, top: rect.top })
+    }
+    updateOffset()
+    window.addEventListener('resize', updateOffset)
+    return () => window.removeEventListener('resize', updateOffset)
+  }, [visible])
+
+  if (!visible) return null
+
+  return (
+    <div
+      role="dialog"
+      aria-label="Mobile navigation menu"
+      onClick={() => onClose()}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 90,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        pointerEvents: 'auto'
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
+        style={{
+          position: 'relative',
+          marginRight: '20px',
+          marginBottom: '70px',
+          width: lineWidth,
+          background: 'transparent',
+          borderRadius: '10px',
+          padding: `14px ${panelPaddingX}px 18px`,
+          boxShadow: 'none',
+          backdropFilter: 'none',
+          transform: animatingIn && !closing ? 'translateY(0)' : 'translateY(40px)',
+          opacity: animatingIn && !closing ? 1 : 0,
+          transition: 'transform 200ms ease, opacity 200ms ease'
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            background: 'rgba(255, 253, 243, 0.9)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              width: '500px',
+              height: '500px',
+              left: `calc(30vw - ${panelOffset.left}px)`,
+              top: `calc(58vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent)',
+              opacity: 0.9,
+              filter: 'blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '300px',
+              height: '300px',
+              left: `calc(26vw - ${panelOffset.left}px)`,
+              top: `calc(52vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent)',
+              opacity: 0.9,
+              filter: 'blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '160px',
+              height: '160px',
+              left: `calc(20vw - ${panelOffset.left}px)`,
+              top: `calc(36vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent)',
+              opacity: 0.9,
+              filter: 'blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))',
+              pointerEvents: 'none'
+            }}
+          />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            backgroundImage: 'url(\"data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22120%22%20height=%22120%22%20viewBox=%220%200%20120%20120%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22%20stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect%20width=%22120%22%20height=%22120%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E\")',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '120px 120px',
+            opacity: 0.4,
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            fontFamily: 'var(--font-karla)',
+            textTransform: 'lowercase',
+            position: 'relative',
+            zIndex: 2
+          }}
+        >
+          {categories.map((category) => (
+            <div key={category.name} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMenuCategory(category.name)
+                  onNavigate(category.name, category.name)
+                }}
+                style={{
+                  alignSelf: 'flex-end',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                  color: activeMenuCategory === category.name ? '#FDABD3' : '#000',
+                  filter: activeMenuCategory === category.name ? glowFilter : 'none',
+                  textAlign: 'right',
+                  transform: 'translateY(7px)'
+                }}
+              >
+                {category.name}
+              </button>
+              <div
+                style={{
+                  height: '2px',
+                  width: '100%',
+                  background: '#000',
+                  opacity: 0.7
+                }}
+              />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', justifyItems: 'end' }}>
+                {category.subcategories.map((sub) => (
+                  <button
+                    key={`${category.name}-${sub}`}
+                    type="button"
+                    onClick={() => {
+                      setActiveMenuCategory(category.name)
+                      onNavigate(sub, category.name)
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
+                      color: '#000',
+                      textAlign: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'left' : 'right',
+                      justifySelf: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'start' : 'end'
+                    }}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 const categories = [
@@ -172,7 +395,7 @@ const categories = [
     items: [
       {
         id: 'studies 1',
-        title: 'Hand-tracking vs. Controllers in VR',
+        title: 'Hand-tracking vs. Controllers in VR interactions',
         venue: 'study',
         year: '2021',
         experiment: 'QU Lab, Berlin',
@@ -197,13 +420,14 @@ const categories = [
           {
             label: 'Methods',
             body: [
-              { label: 'Design', text: '2x2 study (N=33): hand-tracking vs. controller x color vs. grayscale' },
+              { label: 'Design', text: '' },
+              { text: '2x2 within-sujbect study (N=33). \nHand-tracking vs. Controller X Color vs. Grayscale' },
               { label: 'Task', text: 'Reorganize 15 objects requiring six different grip types' },
               { label: 'Measures', text: '' },
               { text: 'Performance log: completion time, grab attempts', indent: '45px' },
-              { text: 'Behavioral: Video coding vis KINOVEA (measure use line and angles, track evolution)', indent: '45px' },
-              { text: 'Subjective: IPQ (presence), NASA-TLX (workload), AttrakDiff (usability)', indent: '45px' },
-              { label: 'Analysis', text: 'Two-way MANOVA with follow-up ANOVAs, Intraclass Correlation Coefficient (ICC), Root mean square error (RMSE)' }
+              { text: 'Behavioral: Video coding via KINOVEA (vectors, angles, tracking)', indent: '45px' },
+              { text: 'Subjective: IPQ (presence), NASA-TLX, AttrakDiff (usability)', indent: '45px' },
+              { label: 'Analysis', text: 'Two-way MANOVA with ANOVAs, Intraclass Correlation Coefficient (ICC), Root mean square error (RMSE)' }
             ],
             bodySpacing: '2px'
           },
@@ -252,12 +476,12 @@ const categories = [
             label: 'Methods',
             body: [
               { label: 'Design', text: 'Within-subject study (N=34): Passive walkthrough (PW) vs. Interactive walkthrough (IW) in identical virtual apartment' },
-              { label: 'Conditions', text: '' },
-              { text: 'PW: Navigation only (point-and-teleport)', indent: '45px' },
-              { text: 'IW: Navigation + 2 light toggles + 6 doors + 6 cabinets/drawers', indent: '45px' },
+             // { label: 'Conditions', text: '' },
+              //{ text: 'PW: Navigation only (point-and-teleport)', indent: '45px' },
+             // { text: 'IW: Navigation + 2 light toggles + 6 doors + 6 cabinets/drawers', indent: '45px' },
               { label: 'Measures', text: '' },
-              { text: 'Subjective: ITC-SOPI (spatial presence, engagement, naturalness, negative effects)', indent: '45px' },
-              { text: 'Behavioral: Video coding via BORIS software (still/stride states, click/turn/bend events)', indent: '45px' },
+              { text: 'Subjective: ITC-SOPI (presence, engagement, etc.)', indent: '45px' },
+              { text: 'Behavioral: Video coding via BORIS software (states and events)', indent: '45px' },
               { label: 'Analysis', text: 'MANCOVA controlling for active run-time.' }
             ],
             bodySpacing: '2px'
@@ -265,10 +489,11 @@ const categories = [
           {
             label: 'Tools',
             body: [
-              { label: 'Hardware', text: 'HTC Vive Pro HMD (6DOF, 1440x1600 per eye, 90Hz, 110deg FoV)' },
-              { label: 'PC', text: 'Windows 10 Pro, Intel i7 7700 3.6GHz, 32GB RAM, NVIDIA GTX 1060 3GB' },
-              { label: 'Software', text: 'SketchUp Pro, Unreal Engine 4.22, BORIS 7.9.19, IBM SPSS' },
-              { label: 'Input', text: 'HTC Vive handheld controllers' }
+              { label: 'Hardware', text:''},
+              { text: 'HTC Vive Pro HMD (6DOF, 1440x1600 per eye, 90Hz, 110deg FoV)  /  Input with HTC Vive handheld controllers', indent: '45px' },
+              { text: 'Windows 10 Pro, Intel i7 7700 3.6GHz, 32GB RAM, NVIDIA GTX 1060', indent: '45px' },
+              { label: 'Software', text: 'SketchUp Pro / Unreal Engine 4.22 / BORIS 7.9.19 / IBM SPSS' },
+              //{ label: 'Input', text: 'HTC Vive handheld controllers' }
             ],
             bodySpacing: '2px'
           }
@@ -281,14 +506,14 @@ const categories = [
       },
       {
         id: 'studies 3',
-        title: 'Location-based Storytelling Application in a Protected Natural Park',
+        title: 'Location-based Storytelling App in a Natural Park',
         venue: 'study',
         year: '2022',
         experiment: 'Rindal field study',
         details: [
           {
             label: 'Question',
-            body: 'Does the addition of 3D character available as Augmented Reality inside a location-based storytelling app improve user experience compared to text-and-narration only delivery in an outdoor environment?',
+            body: 'Does the addition of 3D character available as Augmented Reality (AR) inside a location-based storytelling app improve user experience compared to text-and-narration only delivery in an outdoor environment?',
             bodySpacing: '2px'
           },
           {
@@ -300,18 +525,18 @@ const categories = [
           {
             label: 'Why',
             body:
-              '3D characters made the experience more captivating and engaging compared to reading and listening on the text-and-narration version. The story-world was delivered more effectively with the 3D characters appearing through AR in the outdoor environment.',
+              '3D characters made the experience more engaging compared to the text-and-narration version. The story-world was delivered more effectively with the 3D characters appearing through AR in the outdoor environment.',
             bodySpacing: '2px'
           },
           {
             label: 'Methods',
             body: [
-              { label: 'Design', text: 'Between-subject field experiment (N=30) comparing two app versions along a 700m nature trail with 6 GPS-triggered story points' },
-              { label: 'Conditions', text: '' },
-              { text: 'TB (text-and-narration based): Information delivered as notifications (like digital signposts)', indent: '45px' },
-              { text: 'AR (augmented reality): Virtual troll characters with voice-overs, story narrative integrating geography, flora, and fauna', indent: '45px' },
+              { label: 'Design', text: 'Between-subject field experiment (N=30) comparing two app versions along a 700m nature trail within a protected nature area in the Rindal region. TB (text-and-narration based) vs. AR-based (troll characters with voice-overs)' },
+              //{ label: 'Conditions', text: '' },
+              //{ text: 'TB (text-and-narration based): Information delivered as notifications (like digital signposts)', indent: '45px' },
+              //{ text: 'AR (augmented reality): Virtual troll characters with voice-overs, story narrative integrating geography, flora, and fauna', indent: '45px' },
               { label: 'Measures', text: '' },
-              { text: 'Game Experience Questionnaire (GEQ): 9 dimensions including competence, immersion, flow, tension, challenge, positive/negative affect, tiredness, return-to-reality', indent: '45px' },
+              { text: 'Game Experience Questionnaire (GEQ): 9 dimensions including immersion, flow, challenge, etc.', indent: '45px' },
               { text: 'AttrakDiff: Pragmatic quality (PQ), hedonic quality (HQ-I, HQ-S), attractiveness (ATT)', indent: '45px' },
               { label: 'Analysis', text: 'MANOVA with follow-up ANOVAs' }
             ],
@@ -320,18 +545,21 @@ const categories = [
           {
             label: 'Tools',
             body: [
-              { label: 'Hardware', text: 'Apple iPad (5th gen, 9.7" screen, 2048x1536 resolution, 8MP camera)' },
-              { label: 'GPS', text: 'Bad Elf GPS (2.5m accuracy)' },
-              { label: 'Software', text: 'Unity (2019.3.4f1), Vuforia Engine (9.7.5), ZBrush (2021), Maya (2020), Substance Painter (2020), Photoshop (2021)' },
-              { label: 'Location', text: 'Protected nature area in Trollheimen, Norway (wetland trail, 6 GPS coordinates)' },
-              { label: 'Content', text: 'Norwegian folklore about trolls managing nature and seasons, voice-overs in Norwegian, static 3D character models' }
+              { label: 'Hardware', },
+              { text: 'Apple iPad, 5th gen, 9.7" screen, 2048x1536 resolution, 8MP camera  /  Bad Elf GPS (2.5m accuracy)' },
+              { label: 'Software', text: 'Unity (2019.3.4f1), Vuforia Engine (9.7.5) / ZBrush (2021), Maya (2020) / Substance Painter (2020) / Photoshop (2021)' },
+              //{ label: 'Location', text: 'Protected nature area in Trollheimen, Norway (wetland trail, 6 GPS coordinates)' },
+             // { label: 'Content', text: 'Norwegian folklore about trolls managing nature and seasons, voice-overs in Norwegian, static 3D character models' }
             ],
             bodySpacing: '2px'
           }
         ],
         images: [
-          '/research/Study 3 (1).webp',
-          '/research/Study 3 (2).webp'
+          '/research/Study 3 (1).jpg',
+          '/research/Study 3 (2).jpg',
+          '/research/Study 3 (3).jpg',
+          '/research/Study 3 (4).jpg',
+          '/research/Study 3 (5).webp'
         ]
       }
     ]
@@ -355,8 +583,7 @@ const categories = [
           '/research/project 1 (1).webp',
           '/research/project 1 (2).webp',
           '/research/project 1 (3).webp',
-          '/research/project 1 (4).webp',
-          '/research/project 1 (5).webp'
+          '/research/project 1 (4).avif'
         ]
             },
       {
@@ -375,6 +602,42 @@ const categories = [
           '/research/project 2 (2).webp',
           '/research/project 2 (3).webp'
         ]
+      },
+      {
+        id: 'easyux',
+        title: 'EasyUX',
+        fundingType: 'NTNU ELSYS',
+        year: '2022',
+        //links: [
+          //{ href: 'https://admire3d.brainstorm3d.com/' },
+          //{ href: 'https://cordis.europa.eu/project/id/952027' }
+        //],
+        abstract:
+          'This project developed the first prototype for a web-based application that aided empirical evaluations and user experience testing. The application served as a researcher-oriented one-stop shop to conduct experiments from a single platform and maintain a database. The tools and measures offered in the first prototype were limited to a : timer, video recorder, game analytics, and multiple subjective questionnaires.',
+        images: [
+          '/research/project 3 (1).webp',
+          '/research/project 3 (2).webp',
+          '/research/project 3 (3).webp'
+        ]
+      },
+      {
+        id: 'exerVR',
+        title: 'exerVR',
+        fundingType: 'NTNU - TU Berlin Collaboration',
+        year: '2018 - 2021',
+        //links: [
+          //{ href: 'https://admire3d.brainstorm3d.com/' },
+          //{ href: 'https://cordis.europa.eu/project/id/952027' }
+        //],
+        abstract:
+          'This pilot study transformed the training experience for rowers by transporting a stationary rowing machine into a virtual environment. The VR-based canoe received movement data from several sensors installed on the rowing machine and displayed that data in the form of immersive analytics inside the head-mounted display. In addition, metrics on technique are derived from the sensor data as well as physiological data. All this is used to investigate if, and to which extent, VR improves the technical skills of an athlete during the complex sport of rowing. Furthermore, subjective instruments are employed in conjunction to record athlete perceptions about their performance, and how they think this training simulation compares to a standard rowing workout without VR. Consecutive tests within this project indicated improved performance and an enhanced experience for the athletes.',
+        images: [
+          '/research/project 4 (1).jpg',
+          '/research/project 4 (2).jpg',
+          '/research/project 4 (3).jpg',
+          '/research/project 4 (4).jpg',
+          '/research/project 4 (5).jpg'
+        ]
       }
     ]
   },
@@ -388,16 +651,34 @@ const categories = [
         fundingType: 'Horizon Europe',
         year: '2018',
         abstract:
-          'The IMPACT project was proposed for the Research and Innovation action (CALL – ICT 25-2018). The project aim was to go beyond current state-of-the-art of multi-user interactive technology by providing a programme for research on increasing motivation for a healthy and active lifestyle with innovative immersive virtual reality technology. IMPACT will integrate personalised motivation and virtual reality by designing feedback mechanisms using various sensor technologies in three distinct areas: Fitness, elder care and environmental social awareness. \n\n I contributed as a Research Assistant to this proposal.'
+          'In a consortium with TU Berlin, I contributed to the IMPACT project that was proposed for the Research and Innovation action (CALL – ICT 25-2018). The project aim was to go beyond current state-of-the-art of multi-user interactive technology by providing a programme for research on increasing motivation for a healthy and active lifestyle with innovative immersive virtual reality technology. IMPACT will integrate personalised motivation and virtual reality by designing feedback mechanisms using various sensor technologies in three distinct areas: Fitness, elder care and environmental social awareness.',
+        images: [
+          '/research/proposal 1 (1).jpg',
+          '/research/proposal 1 (2).jpg'
+        ]
       },
       {
-        id: 'civic-signals',
-        title: 'Civic Signals',
-        fundingType: 'Council',
-        year: '2022',
+        id: 'idn4cci',
+        title: 'IDN4CCI',
+        fundingType: 'Horizon Europe',
+        year: '2021',
         abstract:
-          'A proposal aimed at mapping civic signals and translating them into actionable design interventions.'
-      }
+          'Working in a consortium of nine partners from around europe, I contributed to this proposal that addressed the Research & Innovation Action CL2-2021-HERITAGE-01-03 in Culture and Creative Industries (CCI). IDN4CCI was to create evidence of and develop solutions to support the innovation potential and competitiveness of the CCIs in Europe. Building computational systems for representations of everyday real-world narratives that may offer competitive perspectives, choices of action, and the possibility to view resulting consequences. This direction corresponded with the state-of-the-art research in Interactive Digital Narratives (IDN) that focused on representing complexity in phenomena such as global climate change and the covid-19.',
+        images: [
+          '/research/proposal 2 (1).webp',
+          '/research/proposal 2 (2).webp',
+          '/research/proposal 2 (3).webp',
+          '/research/proposal 2 (4).webp'
+        ]
+      },
+      {
+        id: 'metastory',
+        title: 'METASTORY',
+        fundingType: 'MARIE Skłodowska-Curie Actions',
+        year: '2024',
+        abstract:
+          'Contributed as a Creative Consultant to the METASTORIES project, which was proposed to fund 14 Doctoral Candidates (DCs) with state-of-the-art research training in investigating, analysing and designing community storytelling engagement processes, developing novel storytelling tools, and testing narrative co-creation practices that could contribute to transformative resilience. Such an understanding of resilience in which the system ‘bounces forward’, that is, recovery leads also to new possibilities after a crisis. Polycrises are entanglements of multiple, interconnected and overlapping crises.' 
+      },
     ]
   }
 ]
@@ -465,6 +746,7 @@ export default function ReflectResearchPage() {
   const [notice, setNotice] = useState(null)
   const [pageOpacity, setPageOpacity] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeMenuCategory, setActiveMenuCategory] = useState(null)
   const [hydrated, setHydrated] = useState(false)
   const mediaQueryMatch = useMediaQuery('(max-width: 768px)')
   const isMobile = hydrated ? mediaQueryMatch : false
@@ -473,8 +755,15 @@ export default function ReflectResearchPage() {
   const [activeIndexByCategory, setActiveIndexByCategory] = useState(() => (
     Object.fromEntries(categories.map((category) => [category.id, 0]))
   ))
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [expandedImage, setExpandedImage] = useState(null)
+  const mobileTextCardRef = useRef(null)
+  const mobileImagesRef = useRef(null)
+  const mobileNavRef = useRef(null)
+  const [mobileCardMaxHeight, setMobileCardMaxHeight] = useState(null)
+  const [mobileNavTop, setMobileNavTop] = useState(null)
+  const swipeStartRef = useRef(null)
+  const mobileMenuTimerRef = useRef(null)
   useEffect(() => setHydrated(true), [])
   useEffect(() => {
     const { delaySeconds } = syncGlowOffset()
@@ -498,6 +787,25 @@ export default function ReflectResearchPage() {
     const fadeTimer = setTimeout(() => setPageOpacity(1), 30)
     return () => clearTimeout(fadeTimer)
   }, [])
+
+  useEffect(() => {
+    if (!isMobile) return undefined
+    if (mobileMenuTimerRef.current) {
+      clearTimeout(mobileMenuTimerRef.current)
+      mobileMenuTimerRef.current = null
+    }
+    if (mobileMenuOpen) {
+      mobileMenuTimerRef.current = setTimeout(() => {
+        setMobileMenuOpen(false)
+      }, 4000)
+    }
+    return () => {
+      if (mobileMenuTimerRef.current) {
+        clearTimeout(mobileMenuTimerRef.current)
+        mobileMenuTimerRef.current = null
+      }
+    }
+  }, [mobileMenuOpen, isMobile])
 
   const glowFilter = 'hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))'
 
@@ -538,6 +846,14 @@ export default function ReflectResearchPage() {
   const activeIndex = activeIndexByCategory[activeCategory.id] || 0
   const activeItem = activeCategory.items[activeIndex]
   const metaItems = metaForItem(activeCategory.id, activeItem)
+  const showExpanded = isMobile || isExpanded
+  const hasImages = showExpanded && Array.isArray(activeItem?.images) && activeItem.images.length > 0
+  const totalItems = activeCategory.items.length
+  const currentItemIndex = activeIndex + 1
+  const mobileImagesGap = hasImages ? 14 : 0
+  const mobileNavGap = hasImages ? 10 : 14
+  const mobileThumbHeight = isMobile ? 82 : 110
+  const inlineStudyLabels = new Set(['Design', 'Task', 'Hardware', 'Software', 'Input'])
   const renderLinkCluster = (links) => {
     if (!links?.length) return ''
     return (
@@ -557,10 +873,60 @@ export default function ReflectResearchPage() {
       </span>
     )
   }
+  const renderStudyBody = (detail) => (
+    <div style={{ marginTop: detail.bodySpacing ?? detailBodySpacing, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {detail.body.map((line, index) => {
+        if (typeof line === 'string') {
+          return <div key={`${detail.label}-${index}`}>{line}</div>
+        }
+        const label = line.label ? String(line.label) : ''
+        const text = line.text ? String(line.text) : ''
+        const trimmedText = text.trim()
+        const isSubheading = label && !trimmedText
+
+        if (isSubheading) {
+          return (
+            <div
+              key={`${detail.label}-${index}`}
+              style={{ fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px' }}
+            >
+              {label}
+            </div>
+          )
+        }
+
+        if (label && inlineStudyLabels.has(label)) {
+          return (
+            <div key={`${detail.label}-${index}`} style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              <span style={{ fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px' }}>{label}</span>
+              <span>{trimmedText}</span>
+            </div>
+          )
+        }
+
+        let bulletLabel = label
+        let bulletText = trimmedText
+        if (!label && trimmedText.includes(':')) {
+          const [lead, rest] = trimmedText.split(/:(.+)/)
+          bulletLabel = lead
+          bulletText = rest ? rest.trim() : ''
+        }
+
+        return (
+          <div key={`${detail.label}-${index}`} style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
+            <span style={{ fontSize: '10px', lineHeight: '20px' }}>•</span>
+            <span>
+              {bulletLabel ? <span style={{ fontWeight: 600 }}>{bulletLabel}{bulletText ? ':' : ''} </span> : null}
+              {bulletText}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
 
   const selectCategory = (id) => {
     setActiveCategoryId(id)
-    setIsExpanded(false)
   }
 
   const moveItem = (delta) => {
@@ -570,8 +936,96 @@ export default function ReflectResearchPage() {
       const nextIndex = (current + delta + total) % total
       return { ...prev, [activeCategory.id]: nextIndex }
     })
-    setIsExpanded(false)
   }
+
+  const moveToCategoryStart = (categoryId) => {
+    setActiveCategoryId(categoryId)
+    setActiveIndexByCategory((prev) => ({ ...prev, [categoryId]: 0 }))
+  }
+
+  const handleSwipeNext = () => {
+    const total = activeCategory.items.length
+    if (activeIndex < total - 1) {
+      moveItem(1)
+      return
+    }
+    const currentCategoryIndex = categories.findIndex((category) => category.id === activeCategoryId)
+    if (currentCategoryIndex !== -1 && currentCategoryIndex < categories.length - 1) {
+      const nextCategoryId = categories[currentCategoryIndex + 1].id
+      moveToCategoryStart(nextCategoryId)
+    }
+  }
+
+  const handleSwipePrev = () => {
+    if (activeIndex > 0) {
+      moveItem(-1)
+      return
+    }
+    const currentCategoryIndex = categories.findIndex((category) => category.id === activeCategoryId)
+    const previousCategoryIndex = currentCategoryIndex > 0 ? currentCategoryIndex - 1 : categories.length - 1
+    const previousCategoryId = categories[previousCategoryIndex]?.id
+    if (!previousCategoryId) return
+    const previousCategoryItems = categories[previousCategoryIndex].items || []
+    const lastIndex = Math.max(0, previousCategoryItems.length - 1)
+    setActiveCategoryId(previousCategoryId)
+    setActiveIndexByCategory((prev) => ({ ...prev, [previousCategoryId]: lastIndex }))
+  }
+
+  const handleSwipeStart = (event) => {
+    if (!isMobile) return
+    if (!event.touches || event.touches.length !== 1) return
+    const touch = event.touches[0]
+    swipeStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  const handleSwipeEnd = (event) => {
+    if (!isMobile || !swipeStartRef.current) return
+    if (!event.changedTouches || event.changedTouches.length !== 1) return
+    const touch = event.changedTouches[0]
+    const dx = touch.clientX - swipeStartRef.current.x
+    const dy = touch.clientY - swipeStartRef.current.y
+    swipeStartRef.current = null
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    if (dx < 0) {
+      handleSwipeNext()
+    } else {
+      handleSwipePrev()
+    }
+  }
+
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileCardMaxHeight(null)
+      return undefined
+    }
+    const updateCardHeight = () => {
+      if (!mobileTextCardRef.current) return
+      const cardRect = mobileTextCardRef.current.getBoundingClientRect()
+      const imagesHeight = mobileImagesRef.current
+        ? mobileImagesRef.current.getBoundingClientRect().height
+        : 0
+      const navHeight = mobileNavRef.current
+        ? mobileNavRef.current.getBoundingClientRect().height
+        : 0
+      const bottomLine = document.querySelector('[data-mobile-chrome-bottom-line]')
+      const bottomBoundary = bottomLine ? bottomLine.getBoundingClientRect().top : window.innerHeight - 96
+      const available = bottomBoundary - cardRect.top - imagesHeight - navHeight - mobileImagesGap - mobileNavGap - 6
+      const nextHeight = Math.max(160, Math.floor(available))
+      setMobileCardMaxHeight(nextHeight)
+      if (navHeight) {
+        const nextNavTop = Math.max(0, Math.floor(bottomBoundary - navHeight - 6))
+        setMobileNavTop(nextNavTop)
+      }
+    }
+    const frame = requestAnimationFrame(updateCardHeight)
+    window.addEventListener('resize', updateCardHeight)
+    const timer = setTimeout(updateCardHeight, 200)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', updateCardHeight)
+      clearTimeout(timer)
+    }
+  }, [isMobile, activeCategoryId, activeIndex, hasImages, mobileImagesGap, mobileNavGap])
 
   return (
     <div
@@ -579,12 +1033,13 @@ export default function ReflectResearchPage() {
         backgroundColor: '#FFFDF3',
         position: 'fixed',
         inset: 0,
-        overflow: 'auto',
+        overflow: isMobile ? 'hidden' : 'auto',
+        overflowX: 'hidden',
         animation: 'glowHue 60s linear infinite',
         animationDelay: `-${glowDelaySeconds}s`,
         opacity: pageOpacity,
         transition: 'opacity 0.6s ease',
-        padding: isMobile ? '120px 18px 160px' : 0
+        padding: isMobile ? '120px 20px 160px' : 0
       }}
       className="glow-hue-driver"
     >
@@ -615,7 +1070,7 @@ export default function ReflectResearchPage() {
             hoveredElement={hoveredElement}
             setHoveredElement={setHoveredElement}
             readingMode={readingMode}
-            analyticsText="RESEARCH OVERVIEW"
+            analyticsText=""
             glowFilter={glowFilter}
             showTooltip={showTooltip}
             hideTooltip={hideTooltip}
@@ -633,6 +1088,50 @@ export default function ReflectResearchPage() {
             onBack={handleBack}
             onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
           />
+
+          <div
+            style={{
+              position: 'fixed',
+              top: 40,
+              left: 100,
+              zIndex: 6,
+              display: 'flex',
+              gap: '14px',
+              fontFamily: 'var(--font-karla)',
+              fontSize: '14px',
+              fontWeight: 500
+            }}
+          >
+            {categories.slice(0, 4).map((category, idx) => {
+              const isActive = category.id === activeCategoryId
+              return (
+                <button
+                  key={`research-index-${category.id}`}
+                  type="button"
+                  onClick={() => setActiveCategoryId(category.id)}
+                  style={{
+                    border: isActive ? '1px solid #000' : '1px solid transparent',
+                    background: isActive ? '#000' : 'none',
+                    padding: '4px 6px',
+                    cursor: isActive ? 'default' : 'pointer',
+                    fontFamily: 'inherit',
+                    fontSize: 'inherit',
+                    fontWeight: 600,
+                    color: isActive ? '#fff' : '#000',
+                    borderRadius: '999px',
+                    lineHeight: 1,
+                    minWidth: '24px',
+                    height: '20px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {idx + 1}
+                </button>
+              )
+            })}
+          </div>
 
           <RightPanelTransform
             hoveredElement={hoveredElement}
@@ -664,9 +1163,8 @@ export default function ReflectResearchPage() {
       {isMobile && (
         <MobileChrome
           title="reflect"
-          subnav={mobileSubnav}
           activeDot="reflect"
-          bottomLabel="research"
+          bottomLabel=""
           readingMode={readingMode}
           onPrimaryAction={toggleReadingMode}
           primaryActive={readingMode}
@@ -675,6 +1173,43 @@ export default function ReflectResearchPage() {
           onBack={handleBack}
           onMenuToggle={() => setMobileMenuOpen((prev) => !prev)}
           menuExpanded={mobileMenuOpen}
+        />
+      )}
+
+      {isMobile && (
+        <MobileMenuOverlay
+          categories={[
+            { name: 'make', subcategories: ['spaces', 'things'] },
+            { name: 'view', subcategories: ['speculations', 'images'] },
+            { name: 'reflect', subcategories: ['research', 'teaching'] },
+            { name: 'connect', subcategories: ['cv', 'about me'] }
+          ]}
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          onNavigate={(sub, category) => {
+            setActiveMenuCategory(category)
+            if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
+              navigateWithFade(sub === 'things' ? 'make/things' : 'make/spaces')
+              return
+            }
+            if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+              navigateWithFade(`view/${sub}`)
+              return
+            }
+            if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
+              navigateWithFade(`reflect/${sub}`)
+              return
+            }
+            if (category === 'connect' && (sub === 'cv' || sub === 'about me')) {
+              const slug = sub === 'cv' ? 'curriculum-vitae' : 'about-me'
+              navigateWithFade(`connect/${slug}`)
+              return
+            }
+            navigateWithFade(category)
+          }}
+          glowFilter="hue-rotate(var(--glow-rotation))"
+          activeMenuCategory={activeMenuCategory}
+          setActiveMenuCategory={setActiveMenuCategory}
         />
       )}
 
@@ -710,13 +1245,15 @@ export default function ReflectResearchPage() {
         <div style={{ position: 'relative', width: isMobile ? '100%' : '180px' }}>
           <div
             style={{
-              position: isMobile ? 'relative' : 'fixed',
-              left: isMobile ? 'auto' : '140px',
-              top: isMobile ? 'auto' : '380px',
+              position: isMobile ? 'fixed' : 'fixed',
+              left: isMobile ? 20 : '140px',
+              right: isMobile ? 20 : 'auto',
+              top: isMobile ? 'calc(env(safe-area-inset-top, 0px) + 60px)' : '380px',
+              zIndex: isMobile ? 82 : 'auto',
               display: 'flex',
               flexDirection: isMobile ? 'row' : 'column',
               flexWrap: isMobile ? 'wrap' : 'nowrap',
-              gap: isMobile ? '16px' : '8px',
+              gap: isMobile ? '18px' : '8px',
               fontFamily: 'var(--font-karla)',
               fontSize: isMobile ? '16px' : '24px',
               color: '#000'
@@ -750,82 +1287,173 @@ export default function ReflectResearchPage() {
           </div>
         </div>
 
-        <div style={{ maxWidth: isMobile ? '100%' : '720px', fontFamily: 'var(--font-karla)', color: '#000', marginTop: isMobile ? '8px' : '60px', marginLeft: isMobile ? 0 : '250px' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '12px',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              marginBottom: '8px'
-            }}
-          >
-            <div style={{ textAlign: 'left' }}>{metaItems.left}</div>
-            <div style={{ textAlign: 'right' }}>
-              {Array.isArray(metaItems.right) ? renderLinkCluster(metaItems.right) : metaItems.right}
+        <div style={{ position: 'relative', maxWidth: isMobile ? '100%' : '720px', width: isMobile ? '100%' : 'auto', boxSizing: 'border-box', fontFamily: 'var(--font-karla)', color: '#000', marginTop: isMobile ? '8px' : '60px', marginLeft: isMobile ? 0 : '250px' }}>
+          {!isMobile && activeCategory.id === 'studies' && hasImages && showExpanded && (
+            <div
+              style={{
+                position: 'absolute',
+                left: '-250px',
+                top: '500px',
+                display: 'grid',
+                gridTemplateColumns: '66px 66px',
+                gridTemplateRows: '66px 66px',
+                gap: '6px'
+              }}
+            >
+              {activeItem.images.slice(0, 4).map((src) => (
+                <button
+                  key={src}
+                  type="button"
+                  onClick={() => setExpandedImage(src)}
+                  aria-label="Enlarge image"
+                  style={{
+                    border: 'none',
+                    padding: 0,
+                    background: 'transparent',
+                    cursor: 'zoom-in',
+                    width: '66px',
+                    height: '66px'
+                  }}
+                >
+                  <img
+                    src={src}
+                    alt={`${activeItem?.title || 'Research item'} image`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '6px',
+                      display: 'block'
+                    }}
+                  />
+                </button>
+              ))}
             </div>
-          </div>
-
-          <div style={{ height: '1px', background: '#000', opacity: 0.35 }} />
-          <div style={{ marginTop: '16px', fontSize: '28px', fontWeight: 300, lineHeight: 1.3 }}>
-            {activeItem?.title}
-          </div>
-          {isExpanded && (
-            <>
-              <div style={{ marginTop: '18px', fontSize: '13px', lineHeight: 1.55, maxWidth: '600px' }}>
-                {activeItem?.details?.length ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {activeItem.details.map((detail) => (
-                      <div key={detail.label}>
-                        <div
-                          style={{
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.08em'
-                          }}
-                        >
-                          {detail.label}
-                        </div>
-                        {Array.isArray(detail.body) ? (
-                          <div style={{ marginTop: detail.bodySpacing ?? detailBodySpacing, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            {detail.body.map((line, index) => {
-                              if (typeof line === 'string') {
-                                return <div key={`${detail.label}-${index}`}>{line}</div>
-                              }
-                              const labelWeight = line.weight ?? 600
-                              const lineStyle = line.indent ? { marginLeft: line.indent } : undefined
-                              return (
-                                <div key={`${detail.label}-${index}`} style={{ display: 'flex', gap: '6px', ...lineStyle }}>
-                                  {line.label ? (
-                                    <span style={{ fontWeight: labelWeight }}>{line.label}{line.text ? ':' : ''}</span>
-                                  ) : null}
-                                  {line.text ? <span>{line.text}</span> : null}
-                                </div>
-                              )
-                            })}
-                          </div>
-                        ) : (
-                          <div style={{ marginTop: detail.bodySpacing ?? detailBodySpacing }}>{detail.body}</div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ whiteSpace: 'pre-line' }}>{activeItem?.abstract}</div>
-                )}
-              </div>
-              {activeItem?.images?.length ? (
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div onTouchStart={handleSwipeStart} onTouchEnd={handleSwipeEnd}>
+                <div
+                  ref={mobileTextCardRef}
+                  style={{
+                    background: isMobile ? '#F2F2F2' : 'transparent',
+                    borderRadius: isMobile ? '16px' : 0,
+                    padding: isMobile ? '16px 14px' : 0,
+                    boxSizing: 'border-box',
+                    width: '100%',
+                    maxWidth: '100%',
+                    overflowWrap: 'anywhere',
+                    wordBreak: 'break-word',
+                    maxHeight: isMobile && mobileCardMaxHeight ? `${mobileCardMaxHeight}px` : 'none',
+                    overflowY: isMobile ? 'auto' : 'visible',
+                    paddingRight: isMobile ? '10px' : undefined
+                  }}
+                >
                 <div
                   style={{
-                    marginTop: '18px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    marginBottom: '8px'
+                  }}
+                >
+                  <div style={{ textAlign: 'left' }}>{metaItems.left}</div>
+                  <div style={{ textAlign: 'right' }}>
+                    {Array.isArray(metaItems.right) ? renderLinkCluster(metaItems.right) : metaItems.right}
+                  </div>
+                </div>
+
+                <div style={{ height: '1px', background: '#000', opacity: 0.35 }} />
+                <div style={{ marginTop: '16px', fontSize: '28px', fontWeight: 300, lineHeight: 1.3 }}>
+                  {activeItem?.title}
+                </div>
+                {showExpanded ? (
+                  <div style={{ marginTop: '18px', fontSize: '13px', lineHeight: 1.55, maxWidth: activeCategory.id === 'studies' && !isMobile ? 'none' : '600px' }}>
+                    {activeItem?.details?.length ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                        {activeItem.details.map((detail) => (
+                          <div key={detail.label}>
+                            <div
+                              style={{
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.08em'
+                              }}
+                            >
+                              {detail.label}
+                            </div>
+                            {Array.isArray(detail.body)
+                              ? (activeCategory.id === 'studies' ? renderStudyBody(detail) : (
+                                <div style={{ marginTop: detail.bodySpacing ?? detailBodySpacing, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  {detail.body.map((line, index) => {
+                                    if (typeof line === 'string') {
+                                      return <div key={`${detail.label}-${index}`}>{line}</div>
+                                    }
+                                    const labelWeight = line.weight ?? 600
+                                    const lineStyle = line.indent ? { marginLeft: line.indent } : undefined
+                                    return (
+                                      <div key={`${detail.label}-${index}`} style={{ display: 'flex', gap: '6px', ...lineStyle }}>
+                                        {line.label ? (
+                                          <span style={{ fontWeight: labelWeight }}>{line.label}{line.text ? ':' : ''}</span>
+                                        ) : null}
+                                        {line.text ? <span>{line.text}</span> : null}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              ))
+                              : (
+                                <div style={{ marginTop: detail.bodySpacing ?? detailBodySpacing }}>{detail.body}</div>
+                              )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ whiteSpace: 'pre-line' }}>{activeItem?.abstract}</div>
+                    )}
+                  </div>
+                ) : null}
+                {!isMobile && (
+                  <div style={{ position: 'relative', marginTop: '18px' }}>
+                    <div style={{ height: '1px', background: '#000', opacity: 0.35 }} />
+                    <button
+                      type="button"
+                      onClick={() => setIsExpanded((prev) => !prev)}
+                      style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: '-20px',
+                        background: 'transparent',
+                        border: 'none',
+                        fontFamily: 'var(--font-karla)',
+                        fontSize: '12px', fontWeight: 500,
+                        textTransform: 'lowercase',
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                      aria-label={isExpanded ? 'Collapse item' : 'Expand item'}
+                    >
+                      {isExpanded ? 'less' : 'more'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {hasImages && (isMobile || !(activeCategory.id === 'studies' && showExpanded)) && (
+                <div
+                  ref={mobileImagesRef}
+                  style={{
+                    marginTop: `${mobileImagesGap}px`,
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                    gridTemplateColumns: isMobile ? 'repeat(auto-fit, minmax(90px, 1fr))' : 'repeat(auto-fill, 110px)',
                     gap: '10px',
-                    maxWidth: '560px'
+                    maxWidth: '100%',
+                    width: '100%',
+                    boxSizing: 'border-box'
                   }}
                 >
                   {activeItem.images.map((src) => (
@@ -838,7 +1466,9 @@ export default function ReflectResearchPage() {
                         border: 'none',
                         padding: 0,
                         background: 'transparent',
-                        cursor: 'zoom-in'
+                        cursor: 'zoom-in',
+                        width: '110px',
+                        height: '110px'
                       }}
                     >
                       <img
@@ -846,7 +1476,7 @@ export default function ReflectResearchPage() {
                         alt={`${activeItem?.title || 'Research item'} image`}
                         style={{
                           width: '100%',
-                          height: '110px',
+                          height: '100%',
                           objectFit: 'cover',
                           borderRadius: '6px',
                           display: 'block'
@@ -855,62 +1485,63 @@ export default function ReflectResearchPage() {
                     </button>
                   ))}
                 </div>
-              ) : null}
-            </>
-          )}
-          <div style={{ position: 'relative', marginTop: '18px' }}>
-            <div style={{ height: '1px', background: '#000', opacity: 0.35 }} />
-            <button
-              type="button"
-              onClick={() => setIsExpanded((prev) => !prev)}
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: '-20px',
-                background: 'transparent',
-                border: 'none',
-                fontFamily: 'var(--font-karla)',
-                fontSize: '12px', fontWeight: 500,
-                textTransform: 'lowercase',
-                cursor: 'pointer',
-                padding: 0
-              }}
-              aria-label={isExpanded ? 'Collapse item' : 'Expand item'}
-            >
-              {isExpanded ? 'less' : 'more'}
-            </button>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '18px' }}>
-            <button
-              type="button"
-              onClick={() => moveItem(-1)}
-              aria-label="Previous item"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                fontFamily: 'var(--font-karla)',
-                fontSize: '18px',
-                cursor: 'pointer',
-                padding: 0
+              )}
+            </div>
+
+              <div
+                ref={mobileNavRef}
+                style={isMobile ? {
+                position: 'fixed',
+                left: 20,
+                right: 20,
+                top: mobileNavTop ?? 'auto',
+                zIndex: 82,
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr auto',
+                alignItems: 'center',
+                columnGap: '12px',
+                opacity: mobileNavTop === null ? 0 : 1
+              } : {
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: `${mobileNavGap}px`
               }}
             >
-              {'<-'}
-            </button>
-            <button
-              type="button"
-              onClick={() => moveItem(1)}
-              aria-label="Next item"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                fontFamily: 'var(--font-karla)',
-                fontSize: '18px',
-                cursor: 'pointer',
-                padding: 0
-              }}
-            >
-              {'->'}
-            </button>
+              <button
+                type="button"
+                onClick={handleSwipePrev}
+                aria-label="Previous item"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  fontFamily: 'var(--font-karla)',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                {'<-'}
+              </button>
+              <div style={{ fontSize: '14px', fontWeight: 500, justifySelf: 'center' }}>
+                {currentItemIndex} / {totalItems}
+              </div>
+              <button
+                type="button"
+                onClick={handleSwipeNext}
+                aria-label="Next item"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  fontFamily: 'var(--font-karla)',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                {'->'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

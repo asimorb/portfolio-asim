@@ -60,7 +60,10 @@ const MobileMenuOverlay = ({
   activeMenuCategory,
   setActiveMenuCategory
 }) => {
-  const lineWidth = '220px'
+  const lineWidth = '200px'
+  const panelPaddingX = 18
+  const panelRef = useRef(null)
+  const [panelOffset, setPanelOffset] = useState({ left: 0, top: 0 })
   const [visible, setVisible] = useState(false)
   const [closing, setClosing] = useState(false)
   const [animatingIn, setAnimatingIn] = useState(false)
@@ -81,123 +84,193 @@ const MobileMenuOverlay = ({
     return undefined
   }, [open, visible])
 
+  useEffect(() => {
+    if (!visible) return undefined
+    const updateOffset = () => {
+      if (!panelRef.current) return
+      const rect = panelRef.current.getBoundingClientRect()
+      setPanelOffset({ left: rect.left, top: rect.top })
+    }
+    updateOffset()
+    window.addEventListener('resize', updateOffset)
+    return () => window.removeEventListener('resize', updateOffset)
+  }, [visible])
+
   if (!visible) return null
 
-  const panelScale = closing || !animatingIn ? 'scaleY(0.001)' : 'scaleY(1)'
-  const panelOpacity = closing ? 0 : 1
   return (
     <div
+      role="dialog"
+      aria-label="Mobile navigation menu"
+      onClick={() => onClose()}
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'transparent',
-        backdropFilter: 'none',
         zIndex: 90,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
-        pointerEvents: open ? 'auto' : 'none',
-        transition: 'opacity 200ms ease'
+        pointerEvents: 'auto'
       }}
-      onClick={onClose}
-      role="presentation"
     >
       <div
+        onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
         style={{
-          minWidth: lineWidth,
-          maxWidth: '80%',
-          background: 'transparent',
-          borderRadius: 0,
-          boxShadow: 'none',
-          padding: '12px 0px 18px',
-          fontFamily: 'var(--font-karla)',
-          color: '#000',
-          alignSelf: 'flex-end',
           position: 'relative',
-          right: '20px',
-          bottom: 'calc(65px + env(safe-area-inset-bottom, 0px))',
-          transformOrigin: 'bottom right',
-          transform: panelScale,
-          opacity: panelOpacity,
+          marginRight: '20px',
+          marginBottom: '70px',
+          width: lineWidth,
+          background: 'transparent',
+          borderRadius: '10px',
+          padding: `14px ${panelPaddingX}px 18px`,
+          boxShadow: 'none',
+          backdropFilter: 'none',
+          transform: animatingIn && !closing ? 'translateY(0)' : 'translateY(40px)',
+          opacity: animatingIn && !closing ? 1 : 0,
           transition: 'transform 200ms ease, opacity 200ms ease'
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div
           style={{
             position: 'absolute',
-            right: '10px',
-            top: 8,
-            height: '350px',
-            width: '0px',
-            background: 'repeating-linear-gradient(to bottom, #000 0px, #000 2px, transparent 3px, transparent 6px)',
-            opacity: 0.8,
-            pointerEvents: 'none'
+            inset: 0,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            background: 'rgba(255, 253, 243, 0.9)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              width: '500px',
+              height: '500px',
+              left: `calc(30vw - ${panelOffset.left}px)`,
+              top: `calc(58vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent)',
+              opacity: 0.9,
+              filter: 'blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '300px',
+              height: '300px',
+              left: `calc(26vw - ${panelOffset.left}px)`,
+              top: `calc(52vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent)',
+              opacity: 0.9,
+              filter: 'blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '160px',
+              height: '160px',
+              left: `calc(20vw - ${panelOffset.left}px)`,
+              top: `calc(36vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent)',
+              opacity: 0.9,
+              filter: 'blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))',
+              pointerEvents: 'none'
+            }}
+          />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22120%22%20height=%22120%22%20viewBox=%220%200%20120%20120%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22%20stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect%20width=%22120%22%20height=%22120%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E")',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '120px 120px',
+            opacity: 0.4,
+            pointerEvents: 'none',
+            zIndex: 1
           }}
         />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', alignItems: 'flex-end', paddingRight: '0px', minWidth: lineWidth }}>
-          {categories.map((category) => {
-            const isActive = activeMenuCategory === category.name
-            const titleStyle = {
-              fontSize: '20px',
-              fontWeight: 700,
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              fontFamily: 'var(--font-karla)',
               textTransform: 'lowercase',
-              cursor: 'default',
-              color: isActive ? '#FDABD3' : '#000',
-              filter: isActive ? glowFilter : 'none',
-              transition: 'color 0.2s ease',
-              textAlign: 'right'
-            }
-            return (
-              <div key={category.name} style={{ display: 'flex', flexDirection: 'column', gap: '0px', alignItems: 'flex-end' }}>
-                <div
-                  role="button"
-                  tabIndex={0}
-                  aria-label={category.name}
-                  style={titleStyle}
+              position: 'relative',
+              zIndex: 2
+            }}
+          >
+            {categories.map((category) => {
+              return (
+                <div key={category.name} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button
+                  type="button"
                   onClick={() => {
                     setActiveMenuCategory(category.name)
                     onNavigate(category.name, category.name)
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      setActiveMenuCategory(category.name)
-                      onNavigate(category.name, category.name)
-                    }
+                  style={{
+                    alignSelf: 'flex-end',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '18px',
+                    fontWeight: 600,
+                    letterSpacing: '-0.01em',
+                    cursor: 'pointer',
+                    color: activeMenuCategory === category.name ? '#FDABD3' : '#000',
+                    filter: activeMenuCategory === category.name ? glowFilter : 'none',
+                    textAlign: 'right',
+                    transform: 'translateY(7px)'
                   }}
                 >
                   {category.name}
-                </div>
-                <div style={{ height: '0px', borderBottom: '2px solid #000', width: lineWidth, margin: '2px 0 6px' }} />
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '28px', paddingLeft: '0px', paddingRight: '0px', alignItems: 'flex-end', width: lineWidth, justifyContent: 'flex-end' }}>
+                </button>
+                <div
+                  style={{
+                    height: '2px',
+                    width: '100%',
+                    background: '#000',
+                    opacity: 0.7
+                  }}
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', justifyItems: 'end' }}>
                   {category.subcategories.map((sub) => (
                     <button
-                      key={sub}
+                      key={`${category.name}-${sub}`}
                       type="button"
-                      aria-label={`Open ${sub}`}
-                      onClick={() => onNavigate(sub, category.name)}
+                      onClick={() => {
+                        setActiveMenuCategory(category.name)
+                        onNavigate(sub, category.name)
+                      }}
                       style={{
+                        background: 'none',
                         border: 'none',
-                        background: 'transparent',
-                        padding: '0',
-                        fontSize: '16px',
-                        fontWeight: 400,
-                        textAlign: 'right',
-                        textTransform: 'lowercase',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        letterSpacing: '-0.01em',
+                        cursor: 'pointer',
                         color: '#000',
-                        cursor: 'pointer'
+                        textAlign: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'left' : 'right',
+                        justifySelf: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'start' : 'end'
                       }}
                     >
                       {sub}
                     </button>
                   ))}
                 </div>
-                <div style={{ height: '14px' }} />
-              </div>
-            )
-          })}
-        </div>
+                </div>
+              )
+            })}
+          </div>
       </div>
     </div>
   )
@@ -255,6 +328,7 @@ export default function MakePage() {
   const noticeTimerRef = useRef(null)
   const hintShownRef = useRef(false)
   const mobileMenuTimerRef = useRef(null)
+  const letterRef = useRef(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -501,6 +575,48 @@ const toggleReadingMode = () => {
     })
     return transforms.length > 0 ? transforms.join(' ') : 'none'
   }
+
+  const getDragHintPosition = (knobX, knobY) => {
+    const fallback = { x: knobX + 12, y: knobY - 32 }
+    if (typeof window === 'undefined') return fallback
+    const hintWidth = isMobile ? 150 : 110
+    const hintHeight = 24
+    const padding = 8
+    const letterRect = letterRef.current ? letterRef.current.getBoundingClientRect() : null
+    const clamp = (x, y) => ({
+      x: Math.min(Math.max(x, padding), window.innerWidth - hintWidth - padding),
+      y: Math.min(Math.max(y, padding), window.innerHeight - hintHeight - padding)
+    })
+    const toRect = (x, y) => ({
+      left: x,
+      top: y,
+      right: x + hintWidth,
+      bottom: y + hintHeight
+    })
+    const overlaps = (a, b) => !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom)
+    const candidates = [
+      { x: knobX + 12, y: knobY - 32 },
+      { x: knobX - hintWidth - 12, y: knobY - 32 },
+      { x: knobX + 12, y: knobY + 12 },
+      { x: knobX - hintWidth - 12, y: knobY + 12 }
+    ]
+    for (const candidate of candidates) {
+      const clamped = clamp(candidate.x, candidate.y)
+      if (!letterRect || !overlaps(toRect(clamped.x, clamped.y), letterRect)) {
+        return clamped
+      }
+    }
+    if (letterRect) {
+      const aboveY = letterRect.top - hintHeight - padding
+      const belowY = letterRect.bottom + padding
+      const preferredY = aboveY >= padding ? aboveY : belowY
+      const clamped = clamp(knobX + 12, preferredY)
+      if (!overlaps(toRect(clamped.x, clamped.y), letterRect)) {
+        return clamped
+      }
+    }
+    return clamp(fallback.x, fallback.y)
+  }
   const getAxisName = (axisType) => axisType === 'horizontal' ? 'H' : axisType === 'vertical' ? 'V' : 'D'
   const analyticsText = axes.length > 0 ? axes.map((axis) => `${getAxisName(axis.type)} ${(axis.knobPosition * 100).toFixed(0)}%`).join(' / ') : ''
   const primaryHintPos = axes.length > 0 ? getPositionOnAxis(axes[0].knobPosition, axes[0]) : null
@@ -648,7 +764,7 @@ const toggleReadingMode = () => {
             { name: 'make', subcategories: ['spaces', 'things'] },
             { name: 'view', subcategories: ['speculations', 'images'] },
             { name: 'reflect', subcategories: ['research', 'teaching'] },
-            { name: 'connect', subcategories: ['curriculum vitae', 'about me'] }
+            { name: 'connect', subcategories: ['cv', 'about me'] }
           ]}
           open={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
@@ -666,8 +782,8 @@ const toggleReadingMode = () => {
               navigateWithFade(`reflect/${sub}`)
               return
             }
-            if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
-              const slug = sub === 'curriculum vitae' ? 'curriculum-vitae' : 'about-me'
+            if (category === 'connect' && (sub === 'cv' || sub === 'about me')) {
+              const slug = sub === 'cv' ? 'curriculum-vitae' : 'about-me'
               navigateWithFade(`connect/${slug}`)
               return
             }
@@ -859,6 +975,7 @@ const toggleReadingMode = () => {
 
       <div
         className="absolute select-none leading-none"
+        ref={letterRef}
         style={{
           left: `${letterPosition.x}px`,
           top: `${letterPosition.y}px`,
@@ -889,13 +1006,14 @@ const toggleReadingMode = () => {
 
       {showDragHint && axes.map((axis, index) => {
         const knobPos = getPositionOnAxis(axis.knobPosition, axis)
+        const hintPos = getDragHintPosition(knobPos.x, knobPos.y)
         return (
           <div
             key={`hint-${index}`}
             style={{
               position: 'fixed',
-              left: `${knobPos.x + 12}px`,
-              top: `${knobPos.y - 32}px`,
+              left: `${hintPos.x}px`,
+              top: `${hintPos.y}px`,
               pointerEvents: 'none',
               backgroundColor: '#000',
               border: '1px solid #000',
@@ -943,3 +1061,4 @@ const toggleReadingMode = () => {
     </div>
   )
 }
+

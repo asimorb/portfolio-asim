@@ -34,6 +34,9 @@ const MobileMenuOverlay = ({
   setActiveMenuCategory
 }) => {
   const lineWidth = '200px'
+  const panelPaddingX = 18
+  const panelRef = useRef(null)
+  const [panelOffset, setPanelOffset] = useState({ left: 0, top: 0 })
   const [visible, setVisible] = useState(false)
   const [closing, setClosing] = useState(false)
   const [animatingIn, setAnimatingIn] = useState(false)
@@ -54,6 +57,18 @@ const MobileMenuOverlay = ({
     return undefined
   }, [open, visible])
 
+  useEffect(() => {
+    if (!visible) return undefined
+    const updateOffset = () => {
+      if (!panelRef.current) return
+      const rect = panelRef.current.getBoundingClientRect()
+      setPanelOffset({ left: rect.left, top: rect.top })
+    }
+    updateOffset()
+    window.addEventListener('resize', updateOffset)
+    return () => window.removeEventListener('resize', updateOffset)
+  }, [visible])
+
   if (!visible) return null
 
   return (
@@ -73,25 +88,100 @@ const MobileMenuOverlay = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
         style={{
           position: 'relative',
-          marginRight: '24px',
+          marginRight: '20px',
           marginBottom: '70px',
           width: lineWidth,
-          background: 'rgba(0,0,0,0.02)',
-          borderRadius: '0px 0px 10px 10px',
-          padding: '14px 18px 18px',
-          boxShadow: '0 18px 45px rgba(0,0,0,0.12)',
-          backdropFilter: 'blur(2px)',
+          background: 'transparent',
+          borderRadius: '10px',
+          padding: `14px ${panelPaddingX}px 18px`,
+          boxShadow: 'none',
+          backdropFilter: 'none',
           transform: animatingIn && !closing ? 'translateY(0)' : 'translateY(40px)',
           opacity: animatingIn && !closing ? 1 : 0,
           transition: 'transform 200ms ease, opacity 200ms ease'
         }}
       >
-        <div style={{ position: 'absolute', top: '-28px', right: '0', left: '0', display: 'flex', justifyContent: 'flex-end', paddingRight: '6px' }}>
-          <div style={{ borderLeft: '1px dashed #000', opacity: 0.4, height: '26px' }} />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            background: 'rgba(255, 253, 243, 0.9)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              width: '500px',
+              height: '500px',
+              left: `calc(30vw - ${panelOffset.left}px)`,
+              top: `calc(58vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent)',
+              opacity: 0.9,
+              filter: 'blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '300px',
+              height: '300px',
+              left: `calc(26vw - ${panelOffset.left}px)`,
+              top: `calc(52vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent)',
+              opacity: 0.9,
+              filter: 'blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '160px',
+              height: '160px',
+              left: `calc(20vw - ${panelOffset.left}px)`,
+              top: `calc(36vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent)',
+              opacity: 0.9,
+              filter: 'blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))',
+              pointerEvents: 'none'
+            }}
+          />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: 'var(--font-karla)', textTransform: 'lowercase' }}>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22120%22%20height=%22120%22%20viewBox=%220%200%20120%20120%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22%20stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect%20width=%22120%22%20height=%22120%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E")',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '120px 120px',
+            opacity: 0.4,
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            fontFamily: 'var(--font-karla)',
+            textTransform: 'lowercase',
+            position: 'relative',
+            zIndex: 2
+          }}
+        >
           {categories.map((cat) => (
             <div key={cat.name} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button
@@ -110,12 +200,20 @@ const MobileMenuOverlay = ({
                   cursor: 'pointer',
                   color: activeMenuCategory === cat.name ? '#FDABD3' : '#000',
                   filter: activeMenuCategory === cat.name ? glowFilter : 'none',
-                  textAlign: 'right'
+                  textAlign: 'right',
+                  transform: 'translateY(7px)'
                 }}
               >
                 {cat.name}
               </button>
-              <div style={{ height: '2px', width: lineWidth, background: '#000', opacity: 0.7 }} />
+              <div
+                style={{
+                  height: '2px',
+                  width: '100%',
+                  background: '#000',
+                  opacity: 0.7
+                }}
+              />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', justifyItems: 'end' }}>
                 {cat.subcategories.map((sub) => (
                   <button
@@ -133,7 +231,8 @@ const MobileMenuOverlay = ({
                       letterSpacing: '-0.01em',
                       cursor: 'pointer',
                       color: '#000',
-                      textAlign: 'right'
+                      textAlign: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'left' : 'right',
+                      justifySelf: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'start' : 'end'
                     }}
                   >
                     {sub}
@@ -162,6 +261,7 @@ export default function SpacesOverviewPage() {
   const [overlayMetaVisible, setOverlayMetaVisible] = useState(false)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [overlayGallery, setOverlayGallery] = useState([])
+  const [overlayImageLoaded, setOverlayImageLoaded] = useState(true)
   const [navMode, setNavMode] = useState('gallery') // 'gallery' | 'project'
   const [projectGrid, setProjectGrid] = useState([])
   const cardRefs = useRef({})
@@ -172,6 +272,14 @@ export default function SpacesOverviewPage() {
   const [swipeStart, setSwipeStart] = useState(null)
   const mobileMenuTimerRef = useRef(null)
   const [canGoBack, setCanGoBack] = useState(false)
+  const [enlargedImage, setEnlargedImage] = useState(null)
+  const [enlargedZoomed, setEnlargedZoomed] = useState(false)
+  const [enlargedOffset, setEnlargedOffset] = useState({ x: 0, y: 0 })
+  const enlargedDragRef = useRef(null)
+  const overlaySwipeRef = useRef(null)
+  const overlayDragActiveRef = useRef(false)
+  const [overlayDragY, setOverlayDragY] = useState(0)
+  const [overlayDragTransition, setOverlayDragTransition] = useState('transform 200ms ease')
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => setPageOpacity(1), 30)
@@ -281,6 +389,102 @@ export default function SpacesOverviewPage() {
     }
   }
 
+  const handleOverlaySwipeStart = (e) => {
+    const touch = e.touches?.[0]
+    if (!touch) return
+    overlaySwipeRef.current = { x: touch.clientX, y: touch.clientY, t: Date.now() }
+    overlayDragActiveRef.current = true
+    setOverlayDragTransition('none')
+  }
+
+  const handleOverlaySwipeMove = (e) => {
+    if (!overlaySwipeRef.current || !overlayDragActiveRef.current) return
+    const touch = e.touches?.[0]
+    if (!touch) return
+    const dx = touch.clientX - overlaySwipeRef.current.x
+    const dy = touch.clientY - overlaySwipeRef.current.y
+    if (Math.abs(dy) < Math.abs(dx) + 10) return
+    const limited = Math.max(-140, Math.min(140, dy))
+    setOverlayDragY(limited)
+  }
+
+  const handleOverlaySwipeEnd = (e) => {
+    if (!overlaySwipeRef.current) return
+    const touch = e.changedTouches?.[0]
+    if (!touch) {
+      overlaySwipeRef.current = null
+      overlayDragActiveRef.current = false
+      setOverlayDragTransition('transform 200ms ease')
+      setOverlayDragY(0)
+      return
+    }
+    const startPt = overlaySwipeRef.current
+    const dx = touch.clientX - startPt.x
+    const dy = touch.clientY - startPt.y
+    const dt = Math.max(1, Date.now() - (startPt.t || Date.now()))
+    const velocityY = (dy / dt) * 1000
+    overlaySwipeRef.current = null
+    let handled = false
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 60) {
+      const fast = Math.abs(velocityY) > 900
+      setOverlayDragTransition(fast ? 'transform 160ms ease-out' : 'transform 260ms ease')
+      const direction = dy < 0 ? 1 : -1
+      const nextIdx = overlayProject
+        ? direction > 0
+          ? (overlayProject.idx + 1) % spacesProjects.length
+          : (overlayProject.idx - 1 + spacesProjects.length) % spacesProjects.length
+        : null
+      if (nextIdx !== null) {
+        const nextProject = spacesProjects[nextIdx]
+        setOverlayDragY(direction < 0 ? 30 : -30)
+        setTimeout(() => {
+          setOverlayDragY(0)
+          setOverlayDragTransition('transform 200ms ease')
+        }, fast ? 160 : 260)
+        handleOpenOverlay(nextProject, nextIdx, null, 'gallery', 0)
+        handled = true
+      }
+    }
+    if (!handled) {
+      setOverlayDragTransition('transform 200ms ease')
+      if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy) && overlayGallery.length) {
+        if (dx < -40) {
+          setActiveImageIndex((prev) => (prev + 1) % overlayGallery.length)
+        } else if (dx > 40) {
+          setActiveImageIndex((prev) => (prev - 1 + overlayGallery.length) % overlayGallery.length)
+        }
+      }
+      setOverlayDragY(0)
+    }
+    overlayDragActiveRef.current = false
+  }
+
+  const handleOverlayKeyDown = (e) => {
+    if (!overlayProject) return
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      handleCloseOverlay()
+      return
+    }
+    if (e.key === 'ArrowLeft' && overlayGallery.length) {
+      e.preventDefault()
+      setActiveImageIndex((prev) => (prev - 1 + overlayGallery.length) % overlayGallery.length)
+      return
+    }
+    if (e.key === 'ArrowRight' && overlayGallery.length) {
+      e.preventDefault()
+      setActiveImageIndex((prev) => (prev + 1) % overlayGallery.length)
+      return
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault()
+      const direction = e.key === 'ArrowUp' ? -1 : 1
+      const nextIdx = (overlayProject.idx + direction + spacesProjects.length) % spacesProjects.length
+      const nextProject = spacesProjects[nextIdx]
+      handleOpenOverlay(nextProject, nextIdx, null, 'gallery', 0)
+    }
+  }
+
   const handleBack = () => {
     if (overlayProject) {
       handleCloseOverlay()
@@ -297,6 +501,26 @@ export default function SpacesOverviewPage() {
   ]), [])
 
   const paletteForIndex = (idx) => fauxThumbPalette[idx % fauxThumbPalette.length]
+  const firstVisibleImage = (gallery = []) => gallery.find((img) => !img?.hideThumb)
+  const selectThumb = (project) => {
+    const gallery = project?.gallery || []
+    const withSrc = gallery.filter((img) => !img?.hideThumb && !img?.skipThumb && img?.src)
+    if (withSrc.length) return withSrc[Math.floor(Math.random() * withSrc.length)]
+    const fallback = gallery.find((img) => !img?.hideThumb && !img?.skipThumb)
+    return fallback || gallery[0] || null
+  }
+  const projectThumbs = useMemo(() => {
+    const map = {}
+    spacesProjects.forEach((proj) => {
+      map[proj.slug] = selectThumb(proj)
+    })
+    return map
+  }, [spacesProjects])
+  const getThumbFor = (project) => {
+    const cached = projectThumbs[project.slug]
+    if (cached && !cached?.skipThumb && !cached?.hideThumb) return cached
+    return selectThumb(project)
+  }
 
   const buildGallery = (project) => {
     if (project?.gallery?.length) return project.gallery
@@ -335,6 +559,10 @@ export default function SpacesOverviewPage() {
 
   const handleOpenOverlay = (project, idx, el, mode = 'gallery', imageIndex = 0) => {
     const rect = el?.getBoundingClientRect()
+    const heroSlideOffset = 80
+    const defaultOverlayWidth = Math.min(540, window.innerWidth * 0.55)
+    const defaultOverlayHeight = defaultOverlayWidth * 1.25
+    const heroLeftMargin = (window.innerWidth - defaultOverlayWidth) / 2 - 50 + heroSlideOffset
     const start = rect
       ? {
           width: rect.width,
@@ -344,23 +572,36 @@ export default function SpacesOverviewPage() {
           borderRadius: 8
         }
       : overlayStyle || {
-          width: Math.min(540, window.innerWidth * 0.55),
-          height: Math.min(540, window.innerWidth * 0.55) * 1.25,
+          width: defaultOverlayWidth,
+          height: defaultOverlayHeight,
           top: window.innerHeight * 0.2,
-          left: window.innerWidth * 0.25,
+          left: heroLeftMargin,
           borderRadius: 8
         }
+
+    const gallery = shuffle(buildGallery(project))
+    const firstAllowed = gallery.findIndex((img) => !img?.skipThumb && !img?.hideThumb && img?.src)
+    const fallbackAllowed = gallery.findIndex((img) => !img?.skipThumb && !img?.hideThumb)
+    const startIndex =
+      imageIndex > 0
+        ? imageIndex
+        : firstAllowed !== -1
+        ? firstAllowed
+        : fallbackAllowed !== -1
+        ? fallbackAllowed
+        : 0
+
     setOverlayProject({ ...project, idx })
-    setOverlayGallery(shuffle(buildGallery(project)))
-    setActiveImageIndex(imageIndex)
+    setOverlayGallery(gallery)
+    setActiveImageIndex(startIndex)
     setNavMode(mode)
     setOverlayStyle(start)
     setOverlayMetaVisible(false)
 
     requestAnimationFrame(() => {
-      const targetWidth = Math.min(540, window.innerWidth * 0.55)
-      const targetHeight = targetWidth * 1.25
-      const targetLeft = (window.innerWidth - targetWidth) / 2 - 50
+      const targetWidth = defaultOverlayWidth
+      const targetHeight = defaultOverlayHeight
+      const targetLeft = heroLeftMargin
       const targetTop = (window.innerHeight - targetHeight) / 2 + 40
       setOverlayStyle({
         width: targetWidth,
@@ -384,12 +625,20 @@ export default function SpacesOverviewPage() {
     setNavMode('gallery')
   }
 
+  useEffect(() => {
+    if (overlayGallery[activeImageIndex]?.src) {
+      setOverlayImageLoaded(false)
+    } else {
+      setOverlayImageLoaded(true)
+    }
+  }, [activeImageIndex, overlayGallery])
+
   if (!hasMounted) return null
 
   return (
     <div
       onTouchStart={handleSwipeTouchStart}
-      onTouchEndCapture={handleSwipeTouchEnd}
+      onTouchEnd={handleSwipeTouchEnd}
       style={{
         backgroundColor: '#FFFDF3',
         position: 'fixed',
@@ -535,7 +784,7 @@ export default function SpacesOverviewPage() {
             { name: 'make', subcategories: ['spaces', 'things'] },
             { name: 'view', subcategories: ['speculations', 'images'] },
             { name: 'reflect', subcategories: ['research', 'teaching'] },
-            { name: 'connect', subcategories: ['curriculum vitae', 'about me'] }
+            { name: 'connect', subcategories: ['cv', 'about me'] }
           ]}
           open={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
@@ -553,8 +802,8 @@ export default function SpacesOverviewPage() {
               navigateWithFade(`/reflect/${sub}`)
               return
             }
-            if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
-              const slug = sub === 'curriculum vitae' ? 'curriculum-vitae' : 'about-me'
+            if (category === 'connect' && (sub === 'cv' || sub === 'about me')) {
+              const slug = sub === 'cv' ? 'curriculum-vitae' : 'about-me'
               navigateWithFade(`/connect/${slug}`)
               return
             }
@@ -572,7 +821,7 @@ export default function SpacesOverviewPage() {
         </div>
       )}
 
-      {tooltip && (
+      {!isMobile && tooltip && (
         <div
           style={{
             position: 'fixed',
@@ -590,7 +839,7 @@ export default function SpacesOverviewPage() {
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
             fontFamily: 'var(--font-karla)',
-            zIndex: 120,
+            zIndex: 220,
             whiteSpace: 'nowrap'
           }}
         >
@@ -628,7 +877,7 @@ export default function SpacesOverviewPage() {
               style={{
                 display: 'grid',
                 gridTemplateColumns: isMobile ? 'repeat(3, minmax(70px, 1fr))' : 'repeat(4, minmax(160px, 1fr))',
-                gridAutoRows: isMobile ? '70px' : undefined,
+                gridAutoRows: isMobile ? '100px' : undefined,
                 gridAutoFlow: isMobile ? 'row dense' : undefined,
                 gap: isMobile ? '8px' : '74px 14px',
                 alignItems: isMobile ? 'stretch' : 'start',
@@ -648,6 +897,7 @@ export default function SpacesOverviewPage() {
                 const isActive = overlayProject?.slug === project.slug
                 const span = isMobile && entry.size === 'large' ? 2 : 1
                 const aspectRatio = isMobile ? null : (project.aspectRatio || (idx % 2 === 0 ? '4 / 3' : '3 / 4'))
+                const thumb = getThumbFor(project)
                 return (
                   <button
                     key={project.slug}
@@ -678,16 +928,30 @@ export default function SpacesOverviewPage() {
                         width: '100%',
                         height: isMobile ? '100%' : undefined,
                         aspectRatio: aspectRatio || undefined,
-                        background: `linear-gradient(135deg, ${paletteForIndex(idx)} 0%, #fffdf3 100%)`,
+                        background: thumb?.src
+                          ? '#f5f5f5'
+                          : `linear-gradient(135deg, ${paletteForIndex(idx)} 0%, #fffdf3 100%)`,
                         borderRadius: '6px',
-                        border: isActive ? '2px solid #FDABD3' : '1px solid rgba(0,0,0,0.1)',
-                        boxShadow: isActive ? '0 8px 20px rgba(253,171,211,0.25)' : 'none',
+                        border: isActive ? '2px solid #000' : '1px solid rgba(0,0,0,0.1)',
+                        boxShadow: 'none',
                         position: 'relative',
                         overflow: 'hidden'
                       }}
                     >
+                      {thumb?.src && (
+                        <img
+                          src={thumb.src}
+                          alt={project.title}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                        />
+                      )}
                       {isMobile && (
-                        <span style={{ position: 'absolute', left: '6px', top: '6px', fontSize: '10px', fontWeight: 700 }}>
+                        <span style={{ position: 'absolute', left: '6px', top: '6px', fontSize: '10px', fontWeight: 700, color: thumb?.src ? '#fff' : '#000', textShadow: thumb?.src ? '0 1px 3px rgba(0,0,0,0.5)' : 'none' }}>
                           {idx + 1}
                         </span>
                       )}
@@ -703,6 +967,9 @@ export default function SpacesOverviewPage() {
       {overlayProject && overlayStyle && (
         isMobile ? (
           <div
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
             style={{
               position: 'fixed',
               inset: 0,
@@ -713,102 +980,174 @@ export default function SpacesOverviewPage() {
               flexDirection: 'column'
             }}
             onClick={handleCloseOverlay}
+            onKeyDown={handleOverlayKeyDown}
             aria-label="Overlay backdrop, click to close"
           >
             <div
               style={{
-                flex: '0 0 66%',
-                position: 'relative',
-                background: overlayGallery[activeImageIndex]
-                ? `linear-gradient(135deg, ${paletteForIndex(activeImageIndex)} 0%, #fffdf3 100%)`
-                : `linear-gradient(135deg, ${paletteForIndex(overlayProject.idx)} 0%, #fffdf3 100%)`,
-                border: '1px solid rgba(0,0,0,0.08)',
-                borderRadius: '10px 10px 0 0',
-                overflow: 'hidden',
-                paddingLeft: '26px'
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0px',
+                flex: '1 1 auto',
+                transform: `translateY(${overlayDragY}px)`,
+                transition: overlayDragTransition
               }}
               onClick={(e) => e.stopPropagation()}
+              onTouchStart={(e) => { e.stopPropagation(); handleOverlaySwipeStart(e) }}
+              onTouchMove={(e) => { e.stopPropagation(); handleOverlaySwipeMove(e) }}
+              onTouchEnd={(e) => { e.stopPropagation(); handleOverlaySwipeEnd(e) }}
             >
-              <div style={{ position: 'absolute', top: '12px', left: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {overlayGallery.map((_, idx) => (
-                  <span
-                    key={`dot-${idx}`}
-                    style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                    background: idx === activeImageIndex ? '#000' : 'rgba(0,0,0,0.25)'
+              <div
+                style={{
+                flex: '0 0 66%',
+                position: 'relative',
+                background: overlayGallery[activeImageIndex]?.src
+                  ? '#f5f5f5'
+                  : overlayGallery[activeImageIndex]
+                  ? `linear-gradient(135deg, ${paletteForIndex(activeImageIndex)} 0%, #fffdf3 100%)`
+                  : `linear-gradient(135deg, ${paletteForIndex(overlayProject.idx)} 0%, #fffdf3 100%)`,
+                border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: '14px 14px 0 0',
+                overflow: 'hidden',
+                marginBottom: '0px',
+                cursor: overlayGallery[activeImageIndex]?.src ? 'zoom-in' : 'default'
+              }}
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (overlayGallery[activeImageIndex]?.src) {
+                  setEnlargedZoomed(false)
+                  setEnlargedOffset({ x: 0, y: 0 })
+                  setEnlargedImage(overlayGallery[activeImageIndex].src)
+                }
+              }}
+              onKeyDown={(e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && overlayGallery[activeImageIndex]?.src) {
+                  e.preventDefault()
+                  setEnlargedImage(overlayGallery[activeImageIndex].src)
+                }
+              }}
+            >
+              {overlayGallery[activeImageIndex]?.src && (
+                <img
+                  src={overlayGallery[activeImageIndex].src}
+                  alt={overlayGallery[activeImageIndex].label || `${overlayProject.title} image ${activeImageIndex + 1}`}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
                   }}
                 />
-              ))}
-            </div>
-            {overlayGallery.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  aria-label="Previous image"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setActiveImageIndex((prev) => (prev - 1 + overlayGallery.length) % overlayGallery.length)
-                  }}
+              )}
+              {overlayGallery.length > 0 && (
+                <div
                   style={{
                     position: 'absolute',
                     left: '10px',
-                    bottom: '12px',
-                    background: 'none',
-                    border: 'none',
-                    padding: '6px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#1f1f1f" aria-hidden="true">
-                    <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next image"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setActiveImageIndex((prev) => (prev + 1) % overlayGallery.length)
-                  }}
-                  style={{
-                    position: 'absolute',
                     right: '10px',
-                    bottom: '12px',
-                    background: 'none',
-                    border: 'none',
-                    padding: '6px',
-                    cursor: 'pointer',
+                    bottom: '10px',
+                    padding: '0px 4px',
+                    borderRadius: '999px',
+                    background: 'rgba(255, 253, 243, 0.94)',
+                    border: '1px solid rgba(0,0,0,0.08)',
+                    boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'space-between',
+                    gap: '10px'
                   }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#1f1f1f" aria-hidden="true">
-                    <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
-                  </svg>
-                </button>
-              </>
-            )}
+                  {overlayGallery.length > 1 && (
+                    <button
+                      type="button"
+                      aria-label="Previous image"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setActiveImageIndex((prev) => (prev - 1 + overlayGallery.length) % overlayGallery.length)
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="#1f1f1f" aria-hidden="true">
+                        <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                      </svg>
+                    </button>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0 auto' }} role="group" aria-label="Image selector">
+                    {overlayGallery.map((_, idx) => (
+                      <button
+                        key={`dot-${idx}`}
+                        type="button"
+                        aria-label={`Go to image ${idx + 1} of ${overlayGallery.length}`}
+                        onClick={(e) => { e.stopPropagation(); setActiveImageIndex(idx) }}
+                        onFocus={(e) => showTooltip(`Image ${idx + 1}`, e)}
+                        onBlur={hideTooltip}
+                        style={{
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          background: idx === activeImageIndex ? '#000' : 'rgba(0,0,0,0.25)',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer'
+                        }}
+                      />
+                    ))}
+                  </div>
+                  {overlayGallery.length > 1 && (
+                    <button
+                      type="button"
+                      aria-label="Next image"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setActiveImageIndex((prev) => (prev + 1) % overlayGallery.length)
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="#1f1f1f" aria-hidden="true">
+                        <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <div
               style={{
                 flex: '1 1 34%',
-                padding: '18px 18px 22px',
+                height: '34%',
+                maxHeight: '36%',
+                padding: '16px 16px 12px',
                 background: '#FFFDF3',
                 border: '1px solid rgba(0,0,0,0.08)',
-                borderTop: 'none',
-                borderRadius: '0 0 10px 10px',
+                borderRadius: '0 0 14px 14px',
                 fontFamily: 'var(--font-karla)',
                 color: '#000',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'flex-end',
-                gap: '10px'
+                justifyContent: 'flex-start',
+                gap: '10px',
+                overflow: 'hidden',
+                marginTop: '0px'
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -817,38 +1156,50 @@ export default function SpacesOverviewPage() {
                 const valueSize = 20
                 const letterSpacing = '-0.02em'
                 return (
-                  <>
-                    <div>
-                      <div style={{ fontSize: titleSize, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-4px' }}>project</div>
-                      <div style={{ fontSize: valueSize, fontWeight: 200, letterSpacing }}>{overlayProject.title}</div>
-                    </div>
-                    {!isMobile && (
-                      <div>
-                        <div style={{ fontSize: titleSize, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-4px' }}>client</div>
-                        <div style={{ fontSize: valueSize, fontWeight: 200, letterSpacing }}>{overlayProject.client}</div>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridAutoFlow: 'column',
+                      gridAutoColumns: '100%',
+                      gap: '12px',
+                      overflowX: 'auto',
+                      scrollSnapType: 'x mandatory',
+                      touchAction: 'pan-x',
+                      marginTop: '0px',
+                      paddingBottom: '4px'
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '16px',
+                        scrollSnapAlign: 'start',
+                        overflowY: 'auto',
+                        paddingRight: '4px',
+                        marginTop: '0px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <div style={{ fontSize: titleSize, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-2px' }}>project</div>
+                        <div style={{ fontSize: valueSize, fontWeight: 200, letterSpacing }}>{overlayProject.title}</div>
                       </div>
-                    )}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '10px' }}>
-                      <div>
-                        <div style={{ fontSize: titleSize, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-4px' }}>type</div>
-                        <div style={{ fontSize: valueSize, fontWeight: 200, letterSpacing }}>{overlayProject.type}</div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: titleSize, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-4px' }}>status</div>
-                        <div style={{ fontSize: valueSize, fontWeight: 200, letterSpacing }}>{overlayProject.status}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ fontSize: titleSize, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-2px' }}>notes</div>
+                        <div style={{ fontSize: valueSize, fontWeight: 200, letterSpacing, lineHeight: '22px' }}>{overlayProject.notes}</div>
                       </div>
                     </div>
-                    <div>
-                      <div style={{ fontSize: titleSize, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '2px' }}>notes</div>
-                      <div style={{ fontSize: valueSize, fontWeight: 200, letterSpacing, lineHeight: '22px' }}>{overlayProject.notes}</div>
-                    </div>
-                  </>
+                  </div>
                 )
               })()}
             </div>
           </div>
+            </div>
         ) : (
           <div
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
             style={{
               position: 'fixed',
               inset: 0,
@@ -858,6 +1209,7 @@ export default function SpacesOverviewPage() {
               transition: 'opacity 240ms ease'
             }}
             onClick={handleCloseOverlay}
+            onKeyDown={handleOverlayKeyDown}
             aria-label="Overlay backdrop, click to close"
           >
             <div
@@ -868,19 +1220,48 @@ export default function SpacesOverviewPage() {
                 width: overlayStyle.width,
                 height: overlayStyle.height,
                 borderRadius: overlayStyle.borderRadius,
-                background: overlayGallery[activeImageIndex]
+                background: overlayGallery[activeImageIndex]?.src
+                  ? '#f5f5f5'
+                  : overlayGallery[activeImageIndex]
                   ? `linear-gradient(135deg, ${paletteForIndex(activeImageIndex)} 0%, #fffdf3 100%)`
                   : `linear-gradient(135deg, ${paletteForIndex(overlayProject.idx)} 0%, #fffdf3 100%)`,
                 border: '1px solid rgba(0,0,0,0.15)',
                 boxShadow: overlayStyle.boxShadow || 'none',
                 transition: overlayStyle.transition,
                 overflow: 'hidden',
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
+                cursor: overlayGallery[activeImageIndex]?.src ? 'zoom-in' : 'default'
               }}
               aria-live="polite"
               aria-label={`Image ${activeImageIndex + 1} of ${overlayGallery.length || 1} for ${overlayProject.title}`}
-              onClick={(e) => e.stopPropagation()}
-            />
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (overlayGallery[activeImageIndex]?.src) {
+                  setEnlargedImage(overlayGallery[activeImageIndex].src)
+                }
+              }}
+              onKeyDown={(e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && overlayGallery[activeImageIndex]?.src) {
+                  e.preventDefault()
+                  setEnlargedImage(overlayGallery[activeImageIndex].src)
+                }
+              }}
+            >
+              {overlayGallery[activeImageIndex]?.src && (
+                <img
+                  src={overlayGallery[activeImageIndex].src}
+                  alt={overlayGallery[activeImageIndex].label || `${overlayProject.title} image ${activeImageIndex + 1}`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+              )}
+            </div>
 
             <div
               style={{
@@ -894,7 +1275,8 @@ export default function SpacesOverviewPage() {
                 color: '#000',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px'
+                gap: '12px',
+                pointerEvents: 'none'
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -926,9 +1308,10 @@ export default function SpacesOverviewPage() {
                     left: 0,
                     display: 'grid',
                     gridAutoFlow: 'column',
-                    gridAutoColumns: '30px',
-                    gap: '4px',
-                    maxWidth: '40%'
+                    gridAutoColumns: '50px',
+                    gap: '6px',
+                    maxWidth: '50%',
+                    pointerEvents: 'auto'
                   }}
                 >
                   {overlayGallery.map((img, idx) => (
@@ -936,21 +1319,36 @@ export default function SpacesOverviewPage() {
                       key={`meta-thumb-${idx}`}
                       type="button"
                       onClick={() => { setActiveImageIndex(idx); setNavMode('gallery') }}
-                      onMouseEnter={(e) => showTooltip(img.label || `Image ${idx + 1}`, e)}
+                      onMouseEnter={(e) => showTooltip(`Image ${idx + 1}`, e)}
                       onMouseLeave={hideTooltip}
                       style={{
                         position: 'relative',
                         width: '100%',
                         aspectRatio: '1 / 1',
-                        background: `linear-gradient(135deg, ${paletteForIndex(idx)} 0%, #fffdf3 100%)`,
+                        background: img.src ? '#f5f5f5' : `linear-gradient(135deg, ${paletteForIndex(idx)} 0%, #fffdf3 100%)`,
                         borderRadius: '6px',
-                        border: idx === activeImageIndex ? '2px solid #FDABD3' : '1px solid rgba(0,0,0,0.12)',
+                        border: idx === activeImageIndex ? '2px solid #000' : '1px solid rgba(0,0,0,0.12)',
                         cursor: 'pointer',
-                        padding: 0
+                        padding: 0,
+                        overflow: 'hidden'
                       }}
                       onMouseDown={(e) => e.stopPropagation()}
                     >
-                      <span style={{ position: 'absolute', left: '2px', top: '2px', fontSize: '8px', fontWeight: 700 }}>{img.label || idx + 1}</span>
+                      {img.src && (
+                        <img
+                          src={img.src}
+                          alt={img.label || `Image ${idx + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                        />
+                      )}
+                      {!img.src && (
+                        <span style={{ position: 'absolute', left: '2px', top: '2px', fontSize: '8px', fontWeight: 700, color: '#000' }}>{img.label || idx + 1}</span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -977,6 +1375,7 @@ export default function SpacesOverviewPage() {
                   const isActive = overlayProject?.slug === proj.slug
                   const projIdx = spacesProjects.findIndex((p) => p.slug === proj.slug)
                   const span = size === 'large' ? 2 : 1
+                  const thumb = getThumbFor(proj)
                   return (
                   <button
                     key={proj.slug}
@@ -993,15 +1392,28 @@ export default function SpacesOverviewPage() {
                       height: '100%',
                       aspectRatio: '1 / 1',
                       gridRow: `span ${span}`,
-                      background: `linear-gradient(135deg, ${paletteForIndex(idx)} 0%, #fffdf3 100%)`,
+                      background: thumb?.src ? '#f5f5f5' : `linear-gradient(135deg, ${paletteForIndex(idx)} 0%, #fffdf3 100%)`,
                       borderRadius: '6px',
-                      border: isActive ? '2px solid #FDABD3' : '1px solid rgba(0,0,0,0.12)',
-                      boxShadow: isActive ? '0 8px 20px rgba(253,171,211,0.25)' : 'none',
+                      border: isActive ? '2px solid #000' : '1px solid rgba(0,0,0,0.12)',
+                      boxShadow: 'none',
                       cursor: 'pointer',
-                      padding: 0
+                      padding: 0,
+                      overflow: 'hidden'
                     }}
                   >
-                    <span style={{ position: 'absolute', left: '6px', top: '6px', fontSize: '10px', fontWeight: 700 }}>{idx + 1}</span>
+                    {thumb?.src && (
+                      <img
+                        src={thumb.src}
+                        alt={proj.title}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                      />
+                    )}
+                    <span style={{ position: 'absolute', left: '6px', top: '6px', fontSize: '10px', fontWeight: 700, color: proj.gallery?.[0]?.src ? '#fff' : '#000', textShadow: proj.gallery?.[0]?.src ? '0 1px 2px rgba(0,0,0,0.5)' : 'none' }}>{idx + 1}</span>
                   </button>
                 )})}
               </div>
@@ -1025,7 +1437,8 @@ export default function SpacesOverviewPage() {
                   style={{
                     position: 'fixed',
                     left: overlayStyle.left - 64,
-                    top: overlayStyle.top + overlayStyle.height - 30,
+                    top: overlayStyle.top + overlayStyle.height - 48,
+                    transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
                     padding: '6px',
@@ -1057,7 +1470,8 @@ export default function SpacesOverviewPage() {
                   style={{
                     position: 'fixed',
                     left: overlayStyle.left + overlayStyle.width + 28,
-                    top: overlayStyle.top + overlayStyle.height - 30,
+                    top: overlayStyle.top + overlayStyle.height - 48,
+                    transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
                     padding: '6px',
@@ -1110,6 +1524,46 @@ export default function SpacesOverviewPage() {
           }}
         >
           <img src="/website_interaction/S_LR.png" alt="swipe hint" style={{ width: '120px', height: '60px', objectFit: 'contain' }} />
+        </div>
+      )}
+
+      {enlargedImage && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: isMobile ? '#000' : 'rgba(0, 0, 0, 0.9)',
+            zIndex: 300,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'zoom-out'
+          }}
+          onClick={() => { setEnlargedZoomed(false); setEnlargedOffset({ x: 0, y: 0 }); setEnlargedImage(null) }}
+          aria-label="Enlarged image view, click to close"
+        >
+          <img
+            src={enlargedImage}
+            alt="Enlarged view"
+            style={{
+              maxWidth: '90%',
+              maxHeight: '90%',
+              objectFit: 'contain',
+              borderRadius: '8px',
+              transform: `translate(${enlargedOffset.x}px, ${enlargedOffset.y}px) scale(${enlargedZoomed ? 1.8 : 1})`,
+              transition: enlargedDragRef.current ? 'none' : 'transform 160ms ease',
+              cursor: enlargedZoomed ? 'grab' : 'zoom-in',
+              touchAction: enlargedZoomed ? 'none' : 'auto'
+            }}
+            onClick={(e) => { e.stopPropagation(); setEnlargedZoomed((z) => { const next = !z; if (next) setEnlargedOffset({ x: 0, y: 0 }); return next }) }}
+            onMouseDown={(e) => { if (!enlargedZoomed) return; enlargedDragRef.current = { startX: e.clientX, startY: e.clientY, baseX: enlargedOffset.x, baseY: enlargedOffset.y }; e.preventDefault() }}
+            onMouseMove={(e) => { if (!enlargedZoomed || !enlargedDragRef.current) return; const dx = e.clientX - enlargedDragRef.current.startX; const dy = e.clientY - enlargedDragRef.current.startY; setEnlargedOffset({ x: enlargedDragRef.current.baseX + dx, y: enlargedDragRef.current.baseY + dy }) }}
+            onMouseUp={() => { enlargedDragRef.current = null }}
+            onMouseLeave={() => { enlargedDragRef.current = null }}
+            onTouchStart={(e) => { if (!enlargedZoomed) return; const t = e.touches?.[0]; if (!t) return; enlargedDragRef.current = { startX: t.clientX, startY: t.clientY, baseX: enlargedOffset.x, baseY: enlargedOffset.y }; }}
+            onTouchMove={(e) => { if (!enlargedZoomed || !enlargedDragRef.current) return; const t = e.touches?.[0]; if (!t) return; const dx = t.clientX - enlargedDragRef.current.startX; const dy = t.clientY - enlargedDragRef.current.startY; setEnlargedOffset({ x: enlargedDragRef.current.baseX + dx, y: enlargedDragRef.current.baseY + dy }); e.preventDefault() }}
+            onTouchEnd={() => { enlargedDragRef.current = null }}
+          />
         </div>
       )}
     </div>

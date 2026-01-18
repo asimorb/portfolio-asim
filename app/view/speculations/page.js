@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from '../../components/TransformChrome'
@@ -48,6 +48,9 @@ const MobileMenuOverlay = ({
   setActiveMenuCategory
 }) => {
   const lineWidth = '200px'
+  const panelPaddingX = 18
+  const panelRef = useRef(null)
+  const [panelOffset, setPanelOffset] = useState({ left: 0, top: 0 })
   const [visible, setVisible] = useState(false)
   const [closing, setClosing] = useState(false)
   const [animatingIn, setAnimatingIn] = useState(false)
@@ -68,6 +71,18 @@ const MobileMenuOverlay = ({
     return undefined
   }, [open, visible])
 
+  useEffect(() => {
+    if (!visible) return undefined
+    const updateOffset = () => {
+      if (!panelRef.current) return
+      const rect = panelRef.current.getBoundingClientRect()
+      setPanelOffset({ left: rect.left, top: rect.top })
+    }
+    updateOffset()
+    window.addEventListener('resize', updateOffset)
+    return () => window.removeEventListener('resize', updateOffset)
+  }, [visible])
+
   if (!visible) return null
 
   return (
@@ -87,25 +102,100 @@ const MobileMenuOverlay = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
         style={{
           position: 'relative',
-          marginRight: '24px',
+          marginRight: '20px',
           marginBottom: '70px',
           width: lineWidth,
-          background: 'rgba(0,0,0,0.02)',
-          borderRadius: '0px 0px 10px 10px',
-          padding: '14px 18px 18px',
-          boxShadow: '0 18px 45px rgba(0,0,0,0.12)',
-          backdropFilter: 'blur(2px)',
+          background: 'transparent',
+          borderRadius: '10px',
+          padding: `14px ${panelPaddingX}px 18px`,
+          boxShadow: 'none',
+          backdropFilter: 'none',
           transform: animatingIn && !closing ? 'translateY(0)' : 'translateY(40px)',
           opacity: animatingIn && !closing ? 1 : 0,
           transition: 'transform 200ms ease, opacity 200ms ease'
         }}
       >
-        <div style={{ position: 'absolute', top: '-28px', right: '0', left: '0', display: 'flex', justifyContent: 'flex-end', paddingRight: '6px' }}>
-          <div style={{ borderLeft: '1px dashed #000', opacity: 0.4, height: '26px' }} />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            background: 'rgba(255, 253, 243, 0.9)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              width: '500px',
+              height: '500px',
+              left: `calc(30vw - ${panelOffset.left}px)`,
+              top: `calc(58vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent)',
+              opacity: 0.9,
+              filter: 'blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '300px',
+              height: '300px',
+              left: `calc(26vw - ${panelOffset.left}px)`,
+              top: `calc(52vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent)',
+              opacity: 0.9,
+              filter: 'blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '160px',
+              height: '160px',
+              left: `calc(20vw - ${panelOffset.left}px)`,
+              top: `calc(36vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent)',
+              opacity: 0.9,
+              filter: 'blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))',
+              pointerEvents: 'none'
+            }}
+          />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: 'var(--font-karla)', textTransform: 'lowercase' }}>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22120%22%20height=%22120%22%20viewBox=%220%200%20120%20120%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22%20stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect%20width=%22120%22%20height=%22120%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E")',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '120px 120px',
+            opacity: 0.4,
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            fontFamily: 'var(--font-karla)',
+            textTransform: 'lowercase',
+            position: 'relative',
+            zIndex: 2
+          }}
+        >
           {categories.map((cat) => (
             <div key={cat.name} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button
@@ -124,12 +214,20 @@ const MobileMenuOverlay = ({
                   cursor: 'pointer',
                   color: activeMenuCategory === cat.name ? '#FDABD3' : '#000',
                   filter: activeMenuCategory === cat.name ? glowFilter : 'none',
-                  textAlign: 'right'
+                  textAlign: 'right',
+                  transform: 'translateY(7px)'
                 }}
               >
                 {cat.name}
               </button>
-              <div style={{ height: '2px', width: lineWidth, background: '#000', opacity: 0.7 }} />
+              <div
+                style={{
+                  height: '2px',
+                  width: '100%',
+                  background: '#000',
+                  opacity: 0.7
+                }}
+              />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', justifyItems: 'end' }}>
                 {cat.subcategories.map((sub) => (
                   <button
@@ -147,7 +245,8 @@ const MobileMenuOverlay = ({
                       letterSpacing: '-0.01em',
                       cursor: 'pointer',
                       color: '#000',
-                      textAlign: 'right'
+                      textAlign: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'left' : 'right',
+                      justifySelf: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'start' : 'end'
                     }}
                   >
                     {sub}
@@ -167,13 +266,13 @@ const imageEntries = [
     id: 'metastory',
     file: '/speculations/metastory.jpg',
     subtitle: '2024 _ 2025',
-    description: 'METASTORIES was a proposal seeking EU MSCA Doctoral Network funding for research training in investigating, analysing and designing community storytelling engagement processes, developing novel storytelling tools, and testing and evaluating narrative co-creation practices that contribute to transformative resilience to polycrises.',
+    description: 'METASTORIES was a proposal seeking EU MSCA Doctoral Network funding for research training in investigating, analysing and designing community storytelling engagement processes, developing novel storytelling tools, and testing co-creation practices that contribute to transformative resilience to polycrises.',
     notes: 'This logo board for METASTORIES presents nine adaptive iterations of a shared identity system, each tailored to distinct communicative contexts. The cube structure anchors the design in modular storytelling — a metaphor for narrative as architecture — while the planar typographic fragments suggest both disassembly and recomposition. Variations in color, texture, and orientation reflect the project’s commitment to contextual responsiveness: each version speaks to a different audience, platform, or phase of engagement. Together, the grid becomes a visual manifesto for co-creative resilience — stories as tools, spaces, and strategies for navigating polycrises through design-led transformation.',
     imgWidth: '90%',
     maxH: '600px',
     padding: '14px',
-    imgOffsetX: '-100px',
-    imgOffsetY: '30px',
+    imgOffsetX: '0px',
+    imgOffsetY: '0px',
     textColumns: 2, textGridTemplate: '1.5fr 4fr', textMarginTop: '-20px', textMarginLeft: '-400px', textAlignSelf: 'stretch', textOffsetX: '0px', textOffsetY: '0px',
     textMaxWidth: '900px',  
     textColumnGap: '28px',
@@ -182,10 +281,10 @@ const imageEntries = [
     subtitleColumn: 2, subtitleOffsetX: '-30px', subtitleOffsetY: '590px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
     subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
       
-    descriptionColumn: 2, descriptionOffsetX: '-30px', descriptionOffsetY: '-40px', descriptionMaxWidth: '990px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
+    descriptionColumn: 2, descriptionOffsetX: '-30px', descriptionOffsetY: '-40px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
     descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
       
-    notesColumn: 2, notesOffsetX: '-30px', notesOffsetY: '-40px', notesMaxWidth: '250px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
+    notesColumn: 2, notesOffsetX: '-30px', notesOffsetY: '-40px', notesMaxWidth: '300px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
     notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
     },
    {
@@ -197,20 +296,20 @@ const imageEntries = [
     imgWidth: '90%',
     maxH: '280px',
     padding: '14px',
-    imgOffsetX: '780px',
-    imgOffsetY: '105px',
+    imgOffsetX: '0px',
+    imgOffsetY: '0px',
     textColumns: 2, textGridTemplate: '3fr 3fr', textMarginTop: '0px', textMarginLeft: '-900px', textAlignSelf: 'stretch', textOffsetX: '0px', textOffsetY: '0px',
     textMaxWidth: '900px',  
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 1, subtitleOffsetX: '110px', subtitleOffsetY: '415px', subtitleTextAlign: 'right', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
+    subtitleColumn: 1, subtitleOffsetX: '110px', subtitleOffsetY: '415px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
     subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
       
-    descriptionColumn: 2, descriptionOffsetX: '100px', descriptionOffsetY: '230px', descriptionMaxWidth: '990px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
+    descriptionColumn: 2, descriptionOffsetX: '100px', descriptionOffsetY: '230px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
     descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
       
-    notesColumn: 1, notesOffsetX: '110px', notesOffsetY: '-10px', notesMaxWidth: '500px', notesTextAlign: 'right', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
+    notesColumn: 1, notesOffsetX: '110px', notesOffsetY: '-10px', notesMaxWidth: '400px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
     notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
     },
     {
@@ -222,8 +321,8 @@ const imageEntries = [
     imgWidth: '90%',
     maxH: '280px',
     padding: '14px',
-    imgOffsetX: '-90px',
-    imgOffsetY: '-90px',
+    imgOffsetX: '0px',
+    imgOffsetY: '0px',
     textColumns: 2, textGridTemplate: '3fr 3fr', textMarginTop: '120px', textMarginLeft: '-500px', textAlignSelf: 'stretch', textOffsetX: '0px', textOffsetY: '0px',
     textMaxWidth: '900px',  
     textColumnGap: '28px',
@@ -232,53 +331,63 @@ const imageEntries = [
     subtitleColumn: 2, subtitleOffsetX: '100px', subtitleOffsetY: '220px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
     subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
       
-    descriptionColumn: 2, descriptionOffsetX: '100px', descriptionOffsetY: '-84px', descriptionMaxWidth: '990px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
+    descriptionColumn: 2, descriptionOffsetX: '100px', descriptionOffsetY: '-84px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
     descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
       
-    notesColumn: 1, notesOffsetX: '340px', notesOffsetY: '-280px', notesMaxWidth: '210px', notesTextAlign: 'right', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
+    notesColumn: 1, notesOffsetX: '340px', notesOffsetY: '-280px', notesMaxWidth: '350px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
     notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
     },  
    
   {
     id: 'theyseeus',
+     imgWidthMobile: '85%',
+     maxHMobile: '400px',
+     imgHeightMobile: 'auto',
+     objectFitMobile: 'contain',
     images: [
-      { src: '/speculations/theyseeus 01.webp', imgOffsetX: '665px', imgOffsetY: '380px', imgWidth: '140%', maxH: '900px'},
-      { src: '/speculations/theyseeus 02.webp', imgOffsetX: '145px', imgOffsetY: '438px' },
-      { src: '/speculations/theyseeus 04.webp', imgOffsetX: '145px', imgOffsetY: '-280px' },
-      { src: '/speculations/theyseeus 05.webp', imgOffsetX: '-140px', imgOffsetY: '-642px' },
-      { src: '/speculations/theyseeus 06.webp', imgOffsetX: '-140px', imgOffsetY: '-648px' }
+      { src: '/speculations/theyseeus 01.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '95%', maxH: '400px'},
+      { src: '/speculations/theyseeus 02.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '100%', maxH: '500px'},
+      { pair: [
+        { src: '/speculations/theyseeus 04.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '95%', maxH: '500px' },
+        { src: '/speculations/theyseeus 05.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '95%', maxH: '500px' }
+      ] },
+      { src: '/speculations/theyseeus 06.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '100%', maxH: '500px' }
     ],
     subtitle: '2021',
-    description: 'They See Us is a visual identity built around visibility, heritage, and the quiet confidence of diasporic food culture. The name plays on “Desi Us,” folding self‑identification and external perception into a single phrase — a reminder that food is both personal expression and public encounter.',
-    notes: 'The identity system uses bold, conversational typography and vibrant, market‑inspired imagery to echo the energy of street food while foregrounding the brand’s cultural roots. Graphic elements such as the outlined bag motif and color‑blocked posters create a sense of movement and immediacy, mirroring the spontaneity of a food stall environment. Each piece in the campaign balances approachability with attitude: warm, direct, and unmistakably present.',
+    description: 'They See Us is a visual identity built around visibility, heritage, and the quiet confidence of diasporic food culture. The name plays on “Desi Us,” folding self-identification and external perception into a single phrase — a reminder that food is both personal expression and public encounter.',
+    notes: 'The identity system uses bold, conversational typography and vibrant, market-inspired imagery to echo the energy of street food while foregrounding the brand’s cultural roots. Graphic elements such as the outlined bag motif and color-blocked posters create a sense of movement and immediacy, mirroring the spontaneity of a food stall environment. Each piece in the campaign balances approachability with attitude: warm, direct, and unmistakably present.',
     imgWidth: '80%',
     maxH: '350px',
     padding: '0px',
     imageOverflow: 'visible',
-    imgOffsetX: '-30px',
-    imgOffsetY: '-350px',
+    imgOffsetX: '0px',
+    imgOffsetY: '0px',
     textColumns: 2, textGridTemplate: '1.5fr 4fr', textMarginTop: '0px', textMarginLeft: '-400px', textAlignSelf: 'stretch', textOffsetX: '0px', textOffsetY: '0px',
     textMaxWidth: '1000px',  
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 2, subtitleOffsetX: '12px', subtitleOffsetY: '410px', subtitleTextAlign: 'right', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
+    subtitleColumn: 2, subtitleOffsetX: '12px', subtitleOffsetY: '410px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
     subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
       
-    descriptionColumn: 2, descriptionOffsetX: '15px', descriptionOffsetY: '-75px', descriptionMaxWidth: '990px', descriptionTextAlign: 'right', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
+    descriptionColumn: 2, descriptionOffsetX: '15px', descriptionOffsetY: '-75px', descriptionMaxWidth: '550px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
     descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
       
-    notesColumn: 2, notesOffsetX: '310px', notesOffsetY: '-540px', notesMaxWidth: '410px', notesTextAlign: 'right', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
+    notesColumn: 2, notesOffsetX: '310px', notesOffsetY: '-540px', notesMaxWidth: '250px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
     notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
     },
 
       {
     id: 'artec',
     displayId: 'ARTEC',
+     imgWidthMobile: '90%',
+     maxHMobile: '420px',
+     imgHeightMobile: 'auto',
+     objectFitMobile: 'contain',
     images: [
-      { src: '/speculations/Poster 01.webp', imgOffsetX: '759px', imgOffsetY: '802px'}, //imgWidth: '140%', maxH: '300px'},
-      { src: '/speculations/Poster 02.webp', imgOffsetX: '-70px', imgOffsetY: '210px' },
-      { src: '/speculations/Poster 03.webp', imgOffsetX: '345px', imgOffsetY: '-382px' },
+      { src: '/speculations/Poster 01.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px'},
+      { src: '/speculations/Poster 02.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' },
+      { src: '/speculations/Poster 03.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' }
       ],
     subtitle: '2018 _ 2021',
     description: 'NTNU ARTEC, was a transdisciplinary entity that supporting research and artistic excellence through collaborations in the fields of art(s), humanities, and technology. It was formed by a heterogeneous group of researchers and artists working at different fields and departments at NTNU.',
@@ -287,20 +396,20 @@ const imageEntries = [
     maxH: '580px',
     padding: '0px',
     imageOverflow: 'visible',
-    imgOffsetX: '-40px',
-    imgOffsetY: '-430px',
+    imgOffsetX: '0px',
+    imgOffsetY: '0px',
     textColumns: 2, textGridTemplate: '2.5fr 1fr', textMarginTop: '0px', textMarginLeft: '-400px', textAlignSelf: 'stretch', textOffsetX: '0px', textOffsetY: '0px',
     textMaxWidth: '1000px',  
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 1, subtitleOffsetX: '-330px', subtitleOffsetY: '1160px', subtitleTextAlign: 'right', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
+    subtitleColumn: 1, subtitleOffsetX: '-330px', subtitleOffsetY: '1160px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
     subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
       
-    descriptionColumn: 1, descriptionOffsetX: '-330px', descriptionOffsetY: '175px', descriptionMaxWidth: '990px', descriptionTextAlign: 'right', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
+    descriptionColumn: 1, descriptionOffsetX: '-330px', descriptionOffsetY: '175px', descriptionMaxWidth: '520px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
     descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
       
-    notesColumn: 2, notesOffsetX: '-345px', notesOffsetY: '175px', notesMaxWidth: '910px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
+    notesColumn: 2, notesOffsetX: '-345px', notesOffsetY: '175px', notesMaxWidth: '250px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
     notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
     },
 
@@ -313,20 +422,20 @@ const imageEntries = [
     imgWidth: '88%',
     maxH: '250px',
     padding: '14px',
-    imgOffsetX: '-200px',
-    imgOffsetY: '950px',
+    imgOffsetX: '0px',
+    imgOffsetY: '0px',
     textColumns: 2, textGridTemplate: '1.5fr 4fr', textMarginTop: '-60px', textMarginLeft: '-400px', textAlignSelf: 'stretch', textOffsetX: '0px', textOffsetY: '0px',
     textMaxWidth: '990px',  
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 2, subtitleOffsetX: '-650px', subtitleOffsetY: '880px', subtitleTextAlign: 'right', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
+    subtitleColumn: 2, subtitleOffsetX: '-650px', subtitleOffsetY: '880px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
     subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
       
-    descriptionColumn: 2, descriptionOffsetX: '-650px', descriptionOffsetY: '850px', descriptionMaxWidth: '990px', descriptionTextAlign: 'right', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
+    descriptionColumn: 2, descriptionOffsetX: '-650px', descriptionOffsetY: '850px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
     descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
       
-    notesColumn: 2, notesOffsetX: '-260px', notesOffsetY: '840px', notesMaxWidth: '310px', notesTextAlign: 'right', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
+    notesColumn: 2, notesOffsetX: '-260px', notesOffsetY: '840px', notesMaxWidth: '310px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
     notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
          },
   {
@@ -338,8 +447,8 @@ const imageEntries = [
     imgWidth: '88%',
     maxH: '250px',
     padding: '14px',
-    imgOffsetX: '840px',
-    imgOffsetY: '450px',
+    imgOffsetX: '230px',
+    imgOffsetY: '-10px',
     textColumns: 2, textGridTemplate: '1.5fr 4fr', textMarginTop: '-10px', textMarginLeft: '-400px', textAlignSelf: 'stretch', textOffsetX: '0px', textOffsetY: '0px',
     textMaxWidth: '720px',  
     textColumnGap: '28px',
@@ -348,10 +457,10 @@ const imageEntries = [
     subtitleColumn: 2, subtitleOffsetX: '230px', subtitleOffsetY: '438px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
     subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
       
-    descriptionColumn: 2, descriptionOffsetX: '230px', descriptionOffsetY: '380px', descriptionMaxWidth: '790px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
+    descriptionColumn: 2, descriptionOffsetX: '230px', descriptionOffsetY: '380px', descriptionMaxWidth: '300px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
     descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
       
-    notesColumn: 2, notesOffsetX: '230px', notesOffsetY: '342px', notesMaxWidth: '210px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
+    notesColumn: 2, notesOffsetX: '230px', notesOffsetY: '342px', notesMaxWidth: '250px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
     notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
          }
   ]
@@ -365,6 +474,11 @@ export default function SpeculationsPage() {
   const [glowDelaySeconds] = useState(() => syncGlowOffset().delaySeconds)
   const [hasMounted, setHasMounted] = useState(false)
   const [activeProjectId, setActiveProjectId] = useState(() => imageEntries[0]?.id || '')
+  const [cardIndex, setCardIndex] = useState(0)
+  const [imageIndices, setImageIndices] = useState(() =>
+    Object.fromEntries(imageEntries.map((entry) => [entry.id, 0]))
+  )
+  const [mobileTextTab, setMobileTextTab] = useState('description')
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeMenuCategory, setActiveMenuCategory] = useState(null)
@@ -372,7 +486,11 @@ export default function SpeculationsPage() {
   const expandTimerRef = useRef(null)
   const collapseTimerRef = useRef(null)
   const scrollAreaRef = useRef(null)
+  const wheelCooldownRef = useRef(0)
+  const cardSwipeStartRef = useRef(null)
+  const textSwipeStartRef = useRef(null)
   const [viewportWidth, setViewportWidth] = useState(0)
+  const isMobileLayout = isMobile || viewportWidth <= 820
   const itemRefs = useRef({})
   const contentRefs = useRef({})
   const rafRef = useRef(0)
@@ -385,6 +503,20 @@ export default function SpeculationsPage() {
       pushNavStack(window.location.pathname + window.location.search)
     }
     window.location.href = target
+  }
+
+  const handleCardWheel = (e) => {
+    if (isMobileLayout) return
+    e.preventDefault()
+    const now = Date.now()
+    if (now - wheelCooldownRef.current < 260) return
+    wheelCooldownRef.current = now
+    const delta = e.deltaY
+    if (delta > 0) {
+      setCardIndex((prev) => (prev + 1) % imageEntries.length)
+    } else if (delta < 0) {
+      setCardIndex((prev) => (prev - 1 + imageEntries.length) % imageEntries.length)
+    }
   }
   const handleBack = () => {
     const prev = getNavStackLength() > 0 ? popNavStack() : null
@@ -401,6 +533,25 @@ export default function SpeculationsPage() {
     setHasMounted(true)
     return () => clearTimeout(fadeTimer)
   }, [])
+
+  useEffect(() => {
+    const id = imageEntries[cardIndex]?.id
+    if (id && id !== activeProjectId) {
+      setActiveProjectId(id)
+    }
+  }, [cardIndex])
+
+  useEffect(() => {
+    if (!activeProjectId) return
+    const idx = imageEntries.findIndex((entry) => entry.id === activeProjectId)
+    if (idx >= 0 && idx !== cardIndex) {
+      setCardIndex(idx)
+    }
+  }, [activeProjectId])
+
+  useEffect(() => {
+    setMobileTextTab('description')
+  }, [cardIndex])
 
   useEffect(() => {
     setCanGoBack(getNavStackLength() > 0)
@@ -511,7 +662,7 @@ export default function SpeculationsPage() {
     { name: 'view', subcategories: ['speculations', 'images'] },
     { name: 'make', subcategories: ['spaces', 'things'] },
     { name: 'reflect', subcategories: ['research', 'teaching'] },
-    { name: 'connect', subcategories: ['curriculum vitae', 'about me'] },
+    { name: 'connect', subcategories: ['cv', 'about me'] },
   ]), [])
 
   const handleScrollKey = (e) => {
@@ -523,30 +674,127 @@ export default function SpeculationsPage() {
     }
   }
 
-  const activeEntry = imageEntries.find((entry) => entry.id === activeProjectId)
+  const handleMobileTouchStart = (event) => {
+    if (!isMobileLayout) return
+    if (!event.touches || event.touches.length !== 1) return
+    const touch = event.touches[0]
+    cardSwipeStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  const handleMobileTouchEnd = (event) => {
+    if (!isMobileLayout) return
+    const start = cardSwipeStartRef.current
+    cardSwipeStartRef.current = null
+    if (!start || !event.changedTouches || event.changedTouches.length !== 1) return
+    const touch = event.changedTouches[0]
+    const deltaX = touch.clientX - start.x
+    const deltaY = touch.clientY - start.y
+    if (Math.abs(deltaY) < 50 || Math.abs(deltaY) <= Math.abs(deltaX)) return
+    if (deltaY < 0) {
+      setCardIndex((prev) => (prev + 1) % imageEntries.length)
+    } else {
+      setCardIndex((prev) => (prev - 1 + imageEntries.length) % imageEntries.length)
+    }
+  }
+
+  const handleTextTouchStart = (event) => {
+    event.stopPropagation()
+    if (!event.touches || event.touches.length !== 1) return
+    const touch = event.touches[0]
+    textSwipeStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  const handleTextTouchEnd = (event, canToggle) => {
+    event.stopPropagation()
+    const start = textSwipeStartRef.current
+    textSwipeStartRef.current = null
+    if (!start || !event.changedTouches || event.changedTouches.length !== 1) return
+    const touch = event.changedTouches[0]
+    const deltaX = touch.clientX - start.x
+    const deltaY = touch.clientY - start.y
+    if (Math.abs(deltaY) >= 50 && Math.abs(deltaY) > Math.abs(deltaX)) {
+      if (deltaY < 0) {
+        setCardIndex((prev) => (prev + 1) % imageEntries.length)
+      } else {
+        setCardIndex((prev) => (prev - 1 + imageEntries.length) % imageEntries.length)
+      }
+      return
+    }
+    if (!canToggle || Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return
+    if (deltaX < 0) {
+      setMobileTextTab('notes')
+    } else {
+      setMobileTextTab('description')
+    }
+  }
+
+  const activeEntry = imageEntries[cardIndex] || imageEntries[0] || null
   const activeLabel = activeEntry
     ? activeEntry.id === 'idn4cci' || activeEntry.id === 'in2media'
       ? 'IDN4CCI and IN2MEDIA'
       : (activeEntry.displayId ?? activeEntry.id)
     : 'VIEW'
+  const canToggleNotes = Boolean(activeEntry && activeEntry.description && activeEntry.notes)
+  const cardDotSize = 8
+  const cardDotGap = 10
+  const cardDotInset = 12
+  const cardDotTop = 10
+  const cardDotClusterTop = cardDotTop + cardDotSize + cardDotGap + 4
+  const cardDotPositions = [
+    { top: cardDotTop, left: cardDotInset },
+    { top: cardDotTop, left: cardDotInset + cardDotSize + cardDotGap },
+    { top: cardDotTop, right: cardDotInset },
+    { top: cardDotTop, right: cardDotInset + cardDotSize + cardDotGap },
+    { top: cardDotClusterTop, right: cardDotInset },
+    { bottom: cardDotInset + cardDotSize + cardDotGap, right: cardDotInset },
+    { bottom: cardDotInset, right: cardDotInset }
+  ]
+  const mobileTextBody = activeEntry
+    ? (mobileTextTab === 'notes' && activeEntry.notes ? activeEntry.notes : activeEntry.description || activeEntry.notes || '')
+    : ''
+  const handleMobileImageClick = (event) => {
+    if (!activeEntry) return
+    if (event?.target && event.target.closest && event.target.closest('button')) return
+    const imageList = Array.isArray(activeEntry.images) && activeEntry.images.length
+      ? activeEntry.images
+      : Array.isArray(activeEntry.files) && activeEntry.files.length
+        ? activeEntry.files
+        : Array.isArray(activeEntry.file)
+          ? activeEntry.file
+          : activeEntry.file
+            ? [activeEntry.file]
+            : []
+    const displayLength = imageList.length || 1
+    if (displayLength <= 1) return
+    setImageIndices((prev) => ({
+      ...prev,
+      [activeEntry.id]: ((prev[activeEntry.id] ?? 0) + 1) % displayLength
+    }))
+  }
+  const handleMobileTextClick = (event) => {
+    if (!canToggleNotes) return
+    if (event?.target && event.target.closest && event.target.closest('button')) return
+    setMobileTextTab((prev) => (prev === 'notes' ? 'description' : 'notes'))
+  }
 
   if (!hasMounted) return null
 
   return (
-    <div
-      style={{
-        backgroundColor: '#FFFDF3',
-        position: 'fixed',
-        inset: 0,
-        overflow: 'auto',
-        animation: 'glowHue 60s linear infinite',
-        animationDelay: `-${glowDelaySeconds}s`,
-        opacity: pageOpacity,
-        transition: 'opacity 0.6s ease',
-        fontFamily: 'var(--font-karla)'
-      }}
-      className="glow-hue-driver"
-    >
+      <div
+        style={{
+          '--page-bg': '#FFFDF3',
+          backgroundColor: '#FFFDF3',
+          position: 'fixed',
+          inset: 0,
+          overflow: 'hidden',
+          animation: 'glowHue 60s linear infinite',
+          animationDelay: `-${glowDelaySeconds}s`,
+          opacity: pageOpacity,
+          transition: 'opacity 0.6s ease',
+          fontFamily: 'var(--font-karla)'
+        }}
+        className="glow-hue-driver"
+      >
       <style jsx global>{`
         :root { --glow-offset: 0deg; }
         @property --glow-rotation { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
@@ -633,12 +881,16 @@ export default function SpeculationsPage() {
 
       {isMobile && (
         <MobileMenuOverlay
-          categories={categories}
+          categories={[
+            { name: 'make', subcategories: ['spaces', 'things'] },
+            { name: 'view', subcategories: ['speculations', 'images'] },
+            { name: 'reflect', subcategories: ['research', 'teaching'] },
+            { name: 'connect', subcategories: ['cv', 'about me'] }
+          ]}
           open={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
           onNavigate={(sub, category) => {
             setActiveMenuCategory(category)
-            setMobileMenuOpen(false)
             if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
               navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
               return
@@ -651,8 +903,8 @@ export default function SpeculationsPage() {
               navigateWithFade(`/reflect/${sub}`)
               return
             }
-            if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
-              const slug = sub === 'curriculum vitae' ? 'curriculum-vitae' : 'about-me'
+            if (category === 'connect' && (sub === 'cv' || sub === 'about me')) {
+              const slug = sub === 'cv' ? 'curriculum-vitae' : 'about-me'
               navigateWithFade(`/connect/${slug}`)
               return
             }
@@ -691,264 +943,629 @@ export default function SpeculationsPage() {
         </div>
       )}
 
-      <div style={{ padding: '130px 240px 420px 150px' }}>
+      <div style={{ padding: isMobile ? '70px 20px 240px 20px' : '130px 240px 420px 150px' }}>
         <div
           style={{
             background: '#0f0f0f',
-            borderRadius: '12px',
-            padding: '60px',
+            borderRadius: isMobile ? '16px' : '12px',
+            padding: isMobile ? '28px 24px 40px' : '30px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '48px',
-            minHeight: '520px',
+            gap: isMobile ? '16px' : '48px',
+            minHeight: isMobile ? '480px' : '520px',
             boxShadow: '0 32px 80px rgba(0,0,0,0.18)',
-            maxHeight: '76vh',
-            overflowY: 'auto',
+            maxHeight: isMobile ? 'calc(100vh - 220px)' : '76vh',
+            height: isMobile ? 'calc(100vh - 220px)' : '76vh',
+            width: isMobile ? '100%' : 'auto',
+            maxWidth: isMobile ? 'calc(100% - 10px)' : 'auto',
+            margin: isMobile ? '0 auto' : '0',
+            overflow: isMobile ? 'hidden' : 'auto',
             outline: 'none',
-            scrollbarWidth: 'none'
+            scrollbarWidth: 'none',
+            position: 'relative'
           }}
-          tabIndex={0}
-          ref={scrollAreaRef}
-          data-scroll-pane
-          onMouseEnter={() => scrollAreaRef.current && scrollAreaRef.current.focus()}
-          onMouseMove={(e) => {
-            if (!scrollAreaRef.current) return
-            const rect = scrollAreaRef.current.getBoundingClientRect()
-            const edgeZone = Math.min(80, rect.height / 4)
-            const offsetY = e.clientY - rect.top
-            if (offsetY < edgeZone) {
-              const intensity = 1 - offsetY / edgeZone
-              scrollAreaRef.current.scrollBy({ top: -12 * intensity, behavior: 'auto' })
-            } else if (offsetY > rect.height - edgeZone) {
-              const intensity = 1 - (rect.height - offsetY) / edgeZone
-              scrollAreaRef.current.scrollBy({ top: 12 * intensity, behavior: 'auto' })
-            }
-          }}
-          onKeyDown={handleScrollKey}
+          onWheel={handleCardWheel}
+          onTouchStart={handleMobileTouchStart}
+          onTouchEnd={handleMobileTouchEnd}
         >
-          {imageEntries.map((entry, idx) => {
-            const resolve = (value, fallback) => {
-              const resolved = resolveResponsive(value, viewportWidth)
-              return resolved ?? fallback
-            }
-            const isResponsiveValue = (value) => value && typeof value === 'object' && !Array.isArray(value)
-            const isCompact = viewportWidth && viewportWidth <= BREAKPOINTS.md
-            const scaleMode = resolve(entry.scaleMode, 'proportional')
-            const useProportionalScale = scaleMode === 'proportional'
-            const scaleBaseWidth = resolve(entry.scaleBaseWidth, BASE_LAYOUT_WIDTH)
-            const scaleMin = resolve(entry.scaleMin, 0.5)
-            const scaleMax = resolve(entry.scaleMax, 1)
-            const rawScale = viewportWidth && scaleBaseWidth ? viewportWidth / scaleBaseWidth : 1
-            const scaleValue = useProportionalScale
-              ? Math.min(scaleMax, Math.max(scaleMin, rawScale))
-              : 1
-            const layoutScale = useProportionalScale
-              ? 1
-              : viewportWidth
-                ? Math.min(1, viewportWidth / BASE_LAYOUT_WIDTH)
-                : 1
-            const resolveLayout = (value, fallback, compactFallback) => {
-              if (!useProportionalScale && isCompact && !isResponsiveValue(value) && compactFallback !== undefined) {
-                return compactFallback
-              }
-              return resolve(value, fallback)
-            }
-            const resolveLength = (value, fallback, compactFallback) => {
-              const resolved = resolveLayout(value, fallback, compactFallback)
-              const normalized = typeof resolved === 'number' ? `${resolved}px` : resolved
-              if (!isResponsiveValue(value) && layoutScale < 1 && typeof normalized === 'string' && normalized.endsWith('px')) {
-                const parsed = Number.parseFloat(normalized)
-                if (!Number.isNaN(parsed)) return `${Math.round(parsed * layoutScale)}px`
-              }
-              return normalized
-            }
-            const textColumnsValue = resolveLayout(entry.textColumns, 1, 1)
-            const isTwoCol = Number(textColumnsValue) === 2
-            const toGridColumn = (value, fallback) => {
-              if (!isTwoCol) return undefined
-              const resolved = resolve(value, fallback)
-              if (resolved === 'full') return '1 / -1'
-              if (resolved === '2 / 2' || resolved === '1 / 2' || resolved === '2 / 3' || resolved === '1 / 3') return resolved
-              if (resolved === 2 || resolved === '2') return '2 / 3'
-              if (resolved === 1 || resolved === '1') return '1 / 2'
-              return fallback || '1 / 2'
-            }
-            const subtitleGridColumn = toGridColumn(entry.subtitleColumn, '1 / -1')
-            const descriptionGridColumn = toGridColumn(entry.descriptionColumn, resolve(entry.descriptionGridColumn, '1 / 2'))
-            const notesGridColumn = toGridColumn(entry.notesColumn, resolve(entry.notesGridColumn, '2 / 3'))
-            const offsetTransform = (x, y) => {
-              const resolvedX = resolveLength(x, '0px', '0px')
-              const resolvedY = resolveLength(y, '0px', '0px')
-              return resolvedX !== '0px' || resolvedY !== '0px'
-                ? `translate(${resolvedX}, ${resolvedY})`
-                : undefined
-            }
-            const imageList = Array.isArray(entry.images) && entry.images.length
-              ? entry.images
-              : Array.isArray(entry.files) && entry.files.length
-                ? entry.files
-                : Array.isArray(entry.file)
-                  ? entry.file
-                  : entry.file
-                    ? [entry.file]
-                    : []
-            if (!contentRefs.current[entry.id]) {
-              contentRefs.current[entry.id] = { images: [], texts: [] }
-            }
-            const registerContentRef = (collection, index) => (el) => {
-              if (!el) return
-              const bucket = contentRefs.current[entry.id]
-              if (!bucket) return
-              bucket[collection][index] = el
-            }
-            return (
+          {isMobile ? (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateRows: '65% 35%',
+                rowGap: '0px',
+                height: '100%',
+                maxHeight: '100%'
+              }}
+            >
               <div
-                key={entry.id}
-                ref={(el) => {
-                  if (el) itemRefs.current[entry.id] = el
-                }}
+                ref={scrollAreaRef}
+                data-scroll-pane
+                tabIndex={0}
                 style={{
-                  position: 'relative',
-                  color: '#f5f5f5',
-                  minHeight: '420px',
-                  display: 'grid',
-                  gridTemplateColumns: '1.1fr 0.9fr',
-                  alignItems: 'center',
-                  gap: '24px',
-                  transform: useProportionalScale ? `scale(${scaleValue})` : undefined,
-                  transformOrigin: resolve(entry.scaleOrigin, 'top left')
+                  height: '100%',
+                  maxHeight: '100%',
+                  overflowY: 'hidden',
+                  padding: '4px 2px 8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  minHeight: '0',
+                  boxSizing: 'border-box'
                 }}
               >
-                <div
-                  style={{
-                    width: '100%',
-                    borderRadius: '12px',
-                    overflow: resolve(entry.imageOverflow, 'hidden'),
-                    boxShadow: 'none',
-                    background: 'transparent',
-                    display: 'flex',
-                    flexDirection: resolve(entry.imageDirection, 'column'),
-                    gap: resolveLength(entry.imageGap, '12px'),
-                    alignItems: resolve(entry.imageAlignItems, 'center'),
-                    justifyContent: resolve(entry.imageJustifyContent, 'center'),
-                    transform: offsetTransform(entry.imgOffsetX, entry.imgOffsetY)
-                  }}
-                >
-                  {imageList.map((image, imageIndex) => {
-                    const imageData = typeof image === 'string' ? { src: image } : image
-                    const imageOffsetX = imageData.imgOffsetX ?? imageData.offsetX
-                    const imageOffsetY = imageData.imgOffsetY ?? imageData.offsetY
-                    const imgWidth = resolveLength(imageData.imgWidth ?? entry.imgWidth, '100%')
-                    const imgMaxH = resolveLength(imageData.maxH ?? entry.maxH, '100%')
-                    const imgHeight = resolveLength(imageData.imgHeight ?? entry.imgHeight, '100%')
-                    const imgObjectFit = resolve(imageData.objectFit ?? entry.objectFit, 'contain')
-                    const imageTransform = offsetTransform(imageOffsetX, imageOffsetY)
-                    return (
-                      <img
-                        key={`${entry.id}-${imageIndex}`}
-                        ref={registerContentRef('images', imageIndex)}
-                        src={imageData.src}
-                        alt={imageData.alt || `${entry.id} ${imageIndex + 1}`}
+                {activeEntry && (
+                  <div
+                    key={activeEntry.id}
+                    ref={(el) => {
+                      if (el) itemRefs.current[activeEntry.id] = el
+                    }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0px',
+                      color: '#f5f5f5',
+                      height: '100%',
+                      maxHeight: '100%'
+                    }}
+                  >
+                    {(() => {
+                      const imageList = Array.isArray(activeEntry.images) && activeEntry.images.length
+                        ? activeEntry.images
+                        : Array.isArray(activeEntry.files) && activeEntry.files.length
+                          ? activeEntry.files
+                          : Array.isArray(activeEntry.file)
+                            ? activeEntry.file
+                            : activeEntry.file
+                              ? [activeEntry.file]
+                              : []
+                      if (!contentRefs.current[activeEntry.id]) {
+                        contentRefs.current[activeEntry.id] = { images: [], texts: [] }
+                      }
+                      const registerContentRef = (collection, index) => (el) => {
+                        if (!el) return
+                        const bucket = contentRefs.current[activeEntry.id]
+                        if (!bucket) return
+                        bucket[collection][index] = el
+                      }
+                      const displayLength = imageList.length || 1
+                      const currentIndex = (imageIndices[activeEntry.id] ?? 0) % displayLength
+                      const slot = imageList[currentIndex]
+                      const renderImg = (img, idxOverride) => {
+                        if (!img) return null
+                        const imageData = typeof img === 'string' ? { src: img } : img
+                        const resolveMobile = (value, fallback) => {
+                          const resolved = resolveResponsive(value, viewportWidth)
+                          return resolved ?? fallback
+                        }
+                        const normalizeLength = (value, fallback) => {
+                          const resolved = resolveMobile(value, fallback)
+                          return typeof resolved === 'number' ? `${resolved}px` : resolved
+                        }
+                        const imgWidth = normalizeLength(
+                          imageData.imgWidthMobile ?? activeEntry.imgWidthMobile ?? imageData.imgWidth ?? activeEntry.imgWidth,
+                          '100%'
+                        )
+                        const imgMaxH = normalizeLength(
+                          imageData.maxHMobile ?? activeEntry.maxHMobile ?? imageData.maxH ?? activeEntry.maxH,
+                          '100%'
+                        )
+                        const imgHeight = normalizeLength(
+                          imageData.imgHeightMobile ?? activeEntry.imgHeightMobile ?? imageData.imgHeight ?? activeEntry.imgHeight,
+                          'auto'
+                        )
+                        const imgObjectFit = resolveMobile(
+                          imageData.objectFitMobile ?? activeEntry.objectFitMobile ?? imageData.objectFit ?? activeEntry.objectFit,
+                          'contain'
+                        )
+                        return (
+                          <img
+                            key={`${activeEntry.id}-${idxOverride ?? currentIndex}`}
+                            ref={registerContentRef('images', idxOverride ?? currentIndex)}
+                            src={imageData.src}
+                            alt={imageData.alt || `${activeEntry.id} ${(idxOverride ?? currentIndex) + 1}`}
+                            style={{
+                              width: imgWidth,
+                              maxHeight: typeof imgMaxH === 'number' ? `${imgMaxH}px` : imgMaxH,
+                              height: imgHeight,
+                              objectFit: imgObjectFit,
+                              display: 'block'
+                            }}
+                          />
+                        )
+                      }
+                      return (
+                        <>
+                          <div
+                            onClick={handleMobileImageClick}
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '10px',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '100%',
+                              flex: '1 1 auto',
+                              minHeight: 0,
+                              height: '100%',
+                              maxHeight: '100%',
+                              cursor: displayLength > 1 ? 'pointer' : 'default'
+                            }}
+                          >
+                            {slot && slot.pair ? (
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', alignItems: 'center', width: '100%' }}>
+                                {slot.pair.map((img, idx) => renderImg(img, idx))}
+                              </div>
+                            ) : (
+                              renderImg(slot, currentIndex)
+                            )}
+                          </div>
+                          {displayLength > 1 && (
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', width: '100%', paddingBottom: '6px' }}>
+                              {imageList.map((_, idx) => (
+                                <button
+                                  key={`${activeEntry.id}-img-${idx}`}
+                                  type="button"
+                                  onClick={() =>
+                                    setImageIndices((prev) => ({
+                                      ...prev,
+                                      [activeEntry.id]: idx
+                                    }))}
+                                  aria-label={`Image ${idx + 1}`}
+                                  style={{
+                                    width: '28px',
+                                    height: '4px',
+                                    borderRadius: '999px',
+                                    border: 'none',
+                                    background: idx === currentIndex ? '#fff' : 'rgba(255,255,255,0.25)',
+                                    cursor: 'pointer',
+                                    padding: 0
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )
+                    })()}
+                    <div style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.14)' }} />
+                  </div>
+                )}
+              </div>
+              <div
+                style={{
+                  height: '100%',
+                  maxHeight: '100%',
+                  paddingTop: '8px',
+                  overflowY: 'hidden',
+                  color: '#f1f1f1',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  gap: '12px',
+                  minHeight: '0',
+                  boxSizing: 'border-box'
+                }}
+                onTouchStart={handleTextTouchStart}
+                onTouchEnd={(event) => handleTextTouchEnd(event, canToggleNotes)}
+              >
+                {activeEntry && (
+                  <>
+                    {activeEntry.subtitle && (
+                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#fff', lineHeight: '20px' }}>
+                        {activeEntry.subtitle}
+                      </div>
+                    )}
+                    {mobileTextBody && (
+                      <div
+                        onClick={handleMobileTextClick}
                         style={{
-                          width: imgWidth,
-                          maxHeight: imgMaxH,
-                          height: imgHeight,
-                          objectFit: imgObjectFit,
-                          display: 'block',
-                          transform: imageTransform
+                          fontSize: mobileTextTab === 'notes' && activeEntry.notes ? '14px' : '20px',
+                          fontWeight: 200,
+                          lineHeight: mobileTextTab === 'notes' && activeEntry.notes ? '18px' : '24px',
+                          color: '#f1f1f1',
+                          cursor: canToggleNotes ? 'pointer' : 'default'
                         }}
-                      />
-                    )
-                  })}
-                </div>
+                      >
+                        {mobileTextBody}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+              {canToggleNotes && (
                 <div
                   style={{
-                    maxWidth: resolveLength(entry.textMaxWidth, '520px', '100%'),
-                    color: '#f1f1f1',
-                    marginTop: resolveLength(entry.textMarginTop, '0px', '0px'),
-                    marginLeft: resolveLength(entry.textMarginLeft, '0px', '0px'),
-                    alignSelf: resolveLayout(entry.textAlignSelf, 'stretch'),
-                    transform: offsetTransform(entry.textOffsetX, entry.textOffsetY),
-                    display: isTwoCol ? 'grid' : 'block',
-                    gridTemplateColumns: isTwoCol ? resolveLayout(entry.textGridTemplate, '1fr 1fr') : undefined,
-                    columnGap: isTwoCol ? resolveLength(entry.textColumnGap, '24px') : undefined,
-                    rowGap: isTwoCol ? resolveLength(entry.textRowGap, '12px') : undefined,
-                    minWidth: 0
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    bottom: '10px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    zIndex: 6
                   }}
                 >
-                  {entry.subtitle && (
-                    <div
-                      ref={registerContentRef('texts', 0)}
+                  {['description', 'notes'].map((tab) => (
+                    <button
+                      key={`mobile-text-${tab}`}
+                      type="button"
+                      onClick={() => setMobileTextTab(tab)}
+                      aria-label={tab}
                       style={{
-                        fontSize: resolve(entry.subtitleFontSize, '20px'),
-                        fontWeight: resolve(entry.subtitleFontWeight, 400),
-                        marginBottom: isTwoCol
-                          ? resolveLength(entry.subtitleMarginBottomTwoCol, resolve(entry.subtitleMarginBottom, '10px'))
-                          : resolveLength(entry.subtitleMarginBottom, '14px'),
-                        marginTop: resolveLength(entry.subtitleMarginTop, '0px'),
-                        lineHeight: resolve(entry.subtitleLineHeight, '26px'),
-                        color: resolve(entry.subtitleColor, '#fff'),
-                        textTransform: resolve(entry.subtitleTextTransform, 'capitalize'),
-                        gridColumn: subtitleGridColumn,
-                        fontFamily: resolve(entry.subtitleFontFamily, undefined),
-                        textAlign: resolve(entry.subtitleTextAlign, undefined),
-                        transform: offsetTransform(entry.subtitleOffsetX, entry.subtitleOffsetY),
-                        overflowWrap: 'anywhere'
+                        width: '28px',
+                        height: '4px',
+                        borderRadius: '999px',
+                        border: 'none',
+                        background: mobileTextTab === tab ? '#fff' : 'rgba(255,255,255,0.25)',
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  pointerEvents: 'none',
+                  zIndex: 6
+                }}
+              >
+                {imageEntries.map((entry, idx) => {
+                  const position = cardDotPositions[idx] || {
+                    top: cardDotTop,
+                    left: cardDotInset + idx * (cardDotSize + cardDotGap)
+                  }
+                  return (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      onClick={() => setCardIndex(idx)}
+                      aria-label={`Card ${idx + 1}`}
+                      style={{
+                        position: 'absolute',
+                        width: `${cardDotSize}px`,
+                        height: `${cardDotSize}px`,
+                        borderRadius: '50%',
+                        border: 'none',
+                        background: idx === cardIndex ? '#fff' : '#555',
+                        opacity: idx === cardIndex ? 1 : 0.6,
+                        cursor: 'pointer',
+                        padding: 0,
+                        pointerEvents: 'auto',
+                        ...position
+                      }}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            <div
+              tabIndex={0}
+              ref={scrollAreaRef}
+              data-scroll-pane
+              onMouseEnter={() => scrollAreaRef.current && scrollAreaRef.current.focus()}
+              onMouseMove={(e) => {
+                if (!scrollAreaRef.current) return
+                const rect = scrollAreaRef.current.getBoundingClientRect()
+                const edgeZone = Math.min(80, rect.height / 4)
+                const offsetY = e.clientY - rect.top
+                if (offsetY < edgeZone) {
+                  const intensity = 1 - offsetY / edgeZone
+                  scrollAreaRef.current.scrollBy({ top: -12 * intensity, behavior: 'auto' })
+                } else if (offsetY > rect.height - edgeZone) {
+                  const intensity = 1 - (rect.height - offsetY) / edgeZone
+                  scrollAreaRef.current.scrollBy({ top: 12 * intensity, behavior: 'auto' })
+                }
+              }}
+              style={{
+                overflowY: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '48px',
+                outline: 'none'
+              }}
+            >
+              {activeEntry && (() => {
+                const entry = activeEntry
+                const resolve = (value, fallback) => {
+                  const resolved = resolveResponsive(value, viewportWidth)
+                  return resolved ?? fallback
+                }
+                const resolveLength = (value, fallback) => {
+                  const resolved = resolve(value, fallback)
+                  return typeof resolved === 'number' ? `${resolved}px` : resolved
+                }
+                const imageList = Array.isArray(entry.images) && entry.images.length
+                  ? entry.images
+                  : Array.isArray(entry.files) && entry.files.length
+                    ? entry.files
+                    : Array.isArray(entry.file)
+                      ? entry.file
+                      : entry.file
+                        ? [entry.file]
+                        : []
+                if (!contentRefs.current[entry.id]) {
+                  contentRefs.current[entry.id] = { images: [], texts: [] }
+                }
+                const registerContentRef = (collection, index) => (el) => {
+                  if (!el) return
+                  const bucket = contentRefs.current[entry.id]
+                  if (!bucket) return
+                  bucket[collection][index] = el
+                }
+                return (
+                  <div
+                    key={entry.id}
+                    ref={(el) => {
+                      if (el) itemRefs.current[entry.id] = el
+                    }}
+                    style={{
+                      position: 'relative',
+                      color: '#f5f5f5',
+                      minHeight: '560px',
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 0.9fr',
+                      gap: '24px',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {/* Left column: single image with arrows */}
+                    <div
+                      style={{
+                        position: 'relative',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '650px',
+                        height: '100%',
+                        width: '103.5%'
                       }}
                     >
-                      {entry.subtitle}
+                      {(() => {
+                        // Normalize image list, respecting inline pair entries for "theyseeus"
+                        const normalizedList =
+                          entry.id === 'theyseeus'
+                            ? imageList
+                            : imageList
+
+                        const displayLength = normalizedList.length || 1
+                        const currentIndex = (imageIndices[entry.id] ?? 0) % displayLength
+                        const slot = normalizedList[currentIndex]
+                        const imgDataRaw = slot && slot.pair ? slot.pair[0] : slot
+                        const imgData = imgDataRaw ? (typeof imgDataRaw === 'string' ? { src: imgDataRaw } : imgDataRaw) : null
+                        if (!imgData) return null
+
+                        const halfSize = entry.id === 'kreativ' || entry.id === 'niyf'
+                        const explicitWidth =
+                          entry.id === 'theyseeus' && currentIndex === 0
+                            ? imgData.imgWidth ?? '100%'
+                            : undefined
+                        const imgWidthValue = explicitWidth ?? (halfSize ? '50%' : '100%')
+                        const imgMaxHValue = imgData.maxH ?? entry.maxH ?? (halfSize ? '260px' : '520px')
+                        const imageOffsetX = resolveLength(imgData.imgOffsetX ?? imgData.offsetX ?? entry.imgOffsetX, '0px')
+                        const imageOffsetY = resolveLength(imgData.imgOffsetY ?? imgData.offsetY ?? entry.imgOffsetY, '0px')
+                        const imageTransform =
+                          imageOffsetX !== '0px' || imageOffsetY !== '0px'
+                            ? `translate(${imageOffsetX}, ${imageOffsetY})`
+                            : undefined
+                        const renderImg = (img, idxOverride) => {
+                          const w = resolveLength(
+                            img.imgWidth ?? entry.imgWidth ?? (halfSize ? '50%' : '100%'),
+                            halfSize ? '50%' : '100%'
+                          )
+                          const h = resolveLength(
+                            img.maxH ?? entry.maxH ?? (halfSize ? '260px' : '520px'),
+                            halfSize ? '260px' : '520px'
+                          )
+                          const offX = resolveLength(img.imgOffsetX ?? img.offsetX ?? entry.imgOffsetX, '0px')
+                          const offY = resolveLength(img.imgOffsetY ?? img.offsetY ?? entry.imgOffsetY, '0px')
+                          const tx = offX !== '0px' || offY !== '0px' ? `translate(${offX}, ${offY})` : undefined
+                          return (
+                            <img
+                              key={`${entry.id}-${idxOverride ?? currentIndex}`}
+                              ref={registerContentRef('images', idxOverride ?? currentIndex)}
+                              src={img.src}
+                              alt={img.alt || `${entry.id} ${(idxOverride ?? currentIndex) + 1}`}
+                              style={{
+                                width: w,
+                                maxWidth: w,
+                                maxHeight: h,
+                                height: 'auto',
+                                objectFit: 'contain',
+                                display: 'block',
+                                borderRadius: '12px',
+                                transform: tx
+                              }}
+                            />
+                          )
+                        }
+
+                        const imgElement = renderImg(imgData)
+                        const isPair = slot && slot.pair
+                        return (
+                          <>
+                            {isPair ? (
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', alignItems: 'center', justifyItems: 'center' }}>
+                                {slot.pair.map((img, idx) => renderImg(img, idx))}
+                              </div>
+                            ) : entry.id === 'theyseeus' ? (
+                              <div style={{ borderRadius: '12px', overflow: 'hidden', display: 'inline-block' }}>{imgElement}</div>
+                            ) : (
+                              imgElement
+                            )}
+                            {displayLength > 1 && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  bottom: '0',
+                                  left: 0,
+                                  right: 0,
+                                  display: 'flex',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  gap: '10px',
+                                  background: 'rgba(15,15,15,0.65)',
+                                  padding: '8px 12px',
+                                  borderRadius: '12px'
+                                }}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setImageIndices((prev) => ({
+                                      ...prev,
+                                      [entry.id]: (currentIndex - 1 + displayLength) % displayLength
+                                    }))
+                                  }
+                                  style={{ border: '1px solid #888', borderRadius: '20px', padding: '6px 12px', background: '#111', color: '#fff' }}
+                                >
+                                  {'<'}
+                                </button>
+                                <div style={{ color: '#fff', fontSize: '12px', fontWeight: 500 }}>
+                                  {currentIndex + 1} / {displayLength}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setImageIndices((prev) => ({
+                                      ...prev,
+                                      [entry.id]: (currentIndex + 1) % displayLength
+                                    }))
+                                  }
+                                  style={{ border: '1px solid #888', borderRadius: '20px', padding: '6px 12px', background: '#111', color: '#fff' }}
+                                >
+                                  {'>'}
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        )
+                      })()}
                     </div>
-                  )}
-                  {entry.description && (
+
+                    {/* Right column: two rows (subtitle+description, then notes) */}
                     <div
-                      ref={registerContentRef('texts', 1)}
                       style={{
-                      fontSize: resolve(entry.descriptionFontSize, '30px'),
-                      fontWeight: resolve(entry.descriptionFontWeight, 200),
-                      lineHeight: resolve(entry.descriptionLineHeight, '30px'),
-                      color: resolve(entry.descriptionColor, '#f1f1f1'),
-                      marginBottom: isTwoCol
-                        ? resolveLength(entry.descriptionMarginBottomTwoCol, resolve(entry.descriptionMarginBottom, '0px'))
-                        : resolveLength(entry.descriptionMarginBottom, '12px'),
-                      marginTop: resolveLength(entry.descriptionMarginTop, '0px'),
-                      maxWidth: resolveLength(entry.descriptionMaxWidth, undefined, '100%'),
-                      gridColumn: descriptionGridColumn,
-                      fontFamily: resolve(entry.descriptionFontFamily, undefined),
-                      textAlign: resolve(entry.descriptionTextAlign, undefined),
-                      transform: offsetTransform(entry.descriptionOffsetX, entry.descriptionOffsetY),
-                      overflowWrap: 'anywhere'
-                    }}
-                  >
-                    {entry.description}
+                        color: '#f1f1f1',
+                        display: 'block',
+                        maxWidth: resolveLength(entry.textMaxWidth, '520px', '100%'),
+                        minHeight: '100%',
+                        position: 'relative',
+                        padding: '8px',
+                        transform: 'translateX(10px)'
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          bottom: '50%',
+                          maxWidth: resolveLength(entry.descriptionMaxWidth, '700px', '700px')
+                        }}
+                      >
+                        {entry.subtitle && (
+                          <div
+                            ref={registerContentRef('texts', 0)}
+                            style={{
+                              fontSize: resolve(entry.subtitleFontSize, '20px'),
+                              fontWeight: resolve(entry.subtitleFontWeight, 400),
+                              lineHeight: resolve(entry.subtitleLineHeight, '26px'),
+                              color: resolve(entry.subtitleColor, '#fff'),
+                              textTransform: resolve(entry.subtitleTextTransform, 'capitalize'),
+                              fontFamily: resolve(entry.subtitleFontFamily, undefined),
+                              textAlign: resolve(entry.subtitleTextAlign, undefined),
+                              overflowWrap: 'anywhere'
+                            }}
+                          >
+                            {entry.subtitle}
+                          </div>
+                        )}
+                        {entry.description && (
+                          <div
+                            ref={registerContentRef('texts', 1)}
+                            style={{
+                              fontSize: resolve(entry.descriptionFontSize, '30px'),
+                              fontWeight: resolve(entry.descriptionFontWeight, 200),
+                              lineHeight: resolve(entry.descriptionLineHeight, '30px'),
+                              color: resolve(entry.descriptionColor, '#f1f1f1'),
+                              marginTop: '8px',
+                              maxWidth: resolveLength(entry.descriptionMaxWidth, undefined, '100%'),
+                              fontFamily: resolve(entry.descriptionFontFamily, undefined),
+                              textAlign: resolve(entry.descriptionTextAlign, undefined),
+                              overflowWrap: 'anywhere'
+                            }}
+                          >
+                            {entry.description}
+                          </div>
+                        )}
+                      </div>
+                      {entry.notes && (
+                        <div
+                          ref={registerContentRef('texts', 2)}
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: '50%',
+                            fontSize: resolve(entry.notesFontSize, '14px'),
+                            fontWeight: resolve(entry.notesFontWeight, 400),
+                            lineHeight: resolve(entry.notesLineHeight, '16px'),
+                            maxWidth: resolve(entry.notesMaxWidth, '260px'),
+                            color: resolve(entry.notesColor, '#d8d8d8'),
+                            paddingTop: '15px',
+                            marginTop: resolveLength(entry.notesMarginTop, '0px', '0px'),
+                            marginBottom: resolveLength(entry.notesMarginBottom, '0px', '0px'),
+                            fontFamily: resolve(entry.notesFontFamily, undefined),
+                            textAlign: resolve(entry.notesTextAlign, 'left'),
+                            overflowWrap: 'anywhere'
+                          }}
+                        >
+                          {entry.notes}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  )}
-                  {entry.notes && (
-                    <div
-                      ref={registerContentRef('texts', 2)}
-                      style={{
-                        fontSize: resolve(entry.notesFontSize, '14px'),
-                        fontWeight: resolve(entry.notesFontWeight, 400),
-                      lineHeight: resolve(entry.notesLineHeight, '14px'),
-                      maxWidth: resolveLength(entry.notesMaxWidth, '180px', '100%'),
-                      color: resolve(entry.notesColor, '#d8d8d8'),
-                      marginTop: resolveLength(entry.notesMarginTop, '0px'),
-                      marginBottom: resolveLength(entry.notesMarginBottom, '0px'),
-                      gridColumn: notesGridColumn,
-                      fontFamily: resolve(entry.notesFontFamily, undefined),
-                      textAlign: resolve(entry.notesTextAlign, undefined),
-                      transform: offsetTransform(entry.notesOffsetX, entry.notesOffsetY),
-                      overflowWrap: 'anywhere'
+                )
+              })()}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  right: '8px',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '8px',
+                  zIndex: 5
+                }}
+              >
+                {imageEntries.map((entry, idx) => (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    onClick={() => setCardIndex(idx)}
+                    aria-label={`Card ${idx + 1}`}
+                    style={{
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      background: idx === cardIndex ? '#fff' : '#555',
+                      opacity: idx === cardIndex ? 1 : 0.6,
+                      cursor: 'pointer'
                     }}
-                  >
-                    {entry.notes}
-                  </div>
-                  )}
-                </div>
+                  />
+                ))}
               </div>
-            )
-          })}
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
 }
+

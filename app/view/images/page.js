@@ -31,6 +31,9 @@ const MobileMenuOverlay = ({
   setActiveMenuCategory
 }) => {
   const lineWidth = '200px'
+  const panelPaddingX = 18
+  const panelRef = useRef(null)
+  const [panelOffset, setPanelOffset] = useState({ left: 0, top: 0 })
   const [visible, setVisible] = useState(false)
   const [closing, setClosing] = useState(false)
   const [animatingIn, setAnimatingIn] = useState(false)
@@ -51,6 +54,18 @@ const MobileMenuOverlay = ({
     return undefined
   }, [open, visible])
 
+  useEffect(() => {
+    if (!visible) return undefined
+    const updateOffset = () => {
+      if (!panelRef.current) return
+      const rect = panelRef.current.getBoundingClientRect()
+      setPanelOffset({ left: rect.left, top: rect.top })
+    }
+    updateOffset()
+    window.addEventListener('resize', updateOffset)
+    return () => window.removeEventListener('resize', updateOffset)
+  }, [visible])
+
   if (!visible) return null
 
   return (
@@ -70,25 +85,100 @@ const MobileMenuOverlay = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
         style={{
           position: 'relative',
-          marginRight: '24px',
+          marginRight: '20px',
           marginBottom: '70px',
           width: lineWidth,
-          background: 'rgba(0,0,0,0.02)',
-          borderRadius: '0px 0px 10px 10px',
-          padding: '14px 18px 18px',
-          boxShadow: '0 18px 45px rgba(0,0,0,0.12)',
-          backdropFilter: 'blur(2px)',
+          background: 'transparent',
+          borderRadius: '10px',
+          padding: `14px ${panelPaddingX}px 18px`,
+          boxShadow: 'none',
+          backdropFilter: 'none',
           transform: animatingIn && !closing ? 'translateY(0)' : 'translateY(40px)',
           opacity: animatingIn && !closing ? 1 : 0,
           transition: 'transform 200ms ease, opacity 200ms ease'
         }}
       >
-        <div style={{ position: 'absolute', top: '-28px', right: '0', left: '0', display: 'flex', justifyContent: 'flex-end', paddingRight: '6px' }}>
-          <div style={{ borderLeft: '1px dashed #000', opacity: 0.4, height: '26px' }} />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            background: 'rgba(255, 253, 243, 0.9)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              width: '500px',
+              height: '500px',
+              left: `calc(30vw - ${panelOffset.left}px)`,
+              top: `calc(58vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent)',
+              opacity: 0.9,
+              filter: 'blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '300px',
+              height: '300px',
+              left: `calc(26vw - ${panelOffset.left}px)`,
+              top: `calc(52vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent)',
+              opacity: 0.9,
+              filter: 'blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '160px',
+              height: '160px',
+              left: `calc(20vw - ${panelOffset.left}px)`,
+              top: `calc(36vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent)',
+              opacity: 0.9,
+              filter: 'blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))',
+              pointerEvents: 'none'
+            }}
+          />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: 'var(--font-karla)', textTransform: 'lowercase' }}>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22120%22%20height=%22120%22%20viewBox=%220%200%20120%20120%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22%20stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect%20width=%22120%22%20height=%22120%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E")',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '120px 120px',
+            opacity: 0.4,
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            fontFamily: 'var(--font-karla)',
+            textTransform: 'lowercase',
+            position: 'relative',
+            zIndex: 2
+          }}
+        >
           {categories.map((cat) => (
             <div key={cat.name} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button
@@ -107,12 +197,20 @@ const MobileMenuOverlay = ({
                   cursor: 'pointer',
                   color: activeMenuCategory === cat.name ? '#FDABD3' : '#000',
                   filter: activeMenuCategory === cat.name ? glowFilter : 'none',
-                  textAlign: 'right'
+                  textAlign: 'right',
+                  transform: 'translateY(7px)'
                 }}
               >
                 {cat.name}
               </button>
-              <div style={{ height: '2px', width: lineWidth, background: '#000', opacity: 0.7 }} />
+              <div
+                style={{
+                  height: '2px',
+                  width: '100%',
+                  background: '#000',
+                  opacity: 0.7
+                }}
+              />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', justifyItems: 'end' }}>
                 {cat.subcategories.map((sub) => (
                   <button
@@ -130,7 +228,8 @@ const MobileMenuOverlay = ({
                       letterSpacing: '-0.01em',
                       cursor: 'pointer',
                       color: '#000',
-                      textAlign: 'right'
+                      textAlign: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'left' : 'right',
+                      justifySelf: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'start' : 'end'
                     }}
                   >
                     {sub}
@@ -804,12 +903,16 @@ export default function ViewImages() {
 
       {isMobile && (
         <MobileMenuOverlay
-          categories={categories}
+          categories={[
+            { name: 'make', subcategories: ['spaces', 'things'] },
+            { name: 'view', subcategories: ['speculations', 'images'] },
+            { name: 'reflect', subcategories: ['research', 'teaching'] },
+            { name: 'connect', subcategories: ['cv', 'about me'] }
+          ]}
           open={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
           onNavigate={(sub, category) => {
             setActiveMenuCategory(category)
-            setMobileMenuOpen(false)
             if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
               navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
               return
@@ -822,8 +925,8 @@ export default function ViewImages() {
               navigateWithFade(`/reflect/${sub}`)
               return
             }
-            if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
-              const slug = sub === 'curriculum vitae' ? 'curriculum-vitae' : 'about-me'
+            if (category === 'connect' && (sub === 'cv' || sub === 'about me')) {
+              const slug = sub === 'cv' ? 'curriculum-vitae' : 'about-me'
               navigateWithFade(`/connect/${slug}`)
               return
             }
@@ -986,3 +1089,4 @@ export default function ViewImages() {
     </div>
   )
 }
+

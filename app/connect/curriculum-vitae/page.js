@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from '../../components/TransformChrome'
+import { MobileChrome } from '../../components/MobileChrome'
 import { clearHomeLayout, pushNavStack } from '../../components/navState'
+import { useMediaQuery } from '../../components/useMediaQuery'
 
 const syncGlowOffset = () => {
   if (typeof window === 'undefined') return { delaySeconds: 0 }
@@ -31,10 +33,10 @@ const cvCategories = [
         rows: [
           {
             leftText: 'Sep 2024 - Present\nNorway',
-            title: 'Independent Research & Consulting',
+            title: 'Independent Consultant',
             subtitle: 'Research Development, Design Practice',
             body:
-              'Developing postdoctoral research proposals on embodied climate adaptation, perceptual change, and XR-based environmental experience. Manuscript preparation and peer review activities. Architectural Design Consulting (2 completed projects).'
+              'Creative consultant on proposal targeting Marie Skłodowska-Curie grants. Reviewer at Virtual Reality Journal at Springer. Postdoctoral proposals on embodied climate adaptation, perceptual change, and XR-based environmental experience. Architectural Design Consulting (2 completed projects).'
           },
           {
             leftText: 'Mar 2018 - May 2024\nNTNU, Norway',
@@ -77,9 +79,9 @@ const cvCategories = [
       {
         leftText: 'Mar 2018 - May 2024',
         title: 'PhD in Electronics & Telecommunications',
-        subtitle: 'NTNU and TU Berlin (cotutelle)',
+        subtitle: 'NTNU and TU Berlin',
         body:
-          '(In) Authentic VR. Quality Assessments of Interactivity in Virtual Reality (cum laude). Supervised by Prof. Andrew Perkis (NTNU) and Prof. Sebastian Moller (TU Berlin).'
+          '(In) Authentic VR. Quality Assessments of Interactivity in Virtual Reality (cum laude). Cotutelle supervision by Prof. Andrew Perkis (NTNU) and Prof. Sebastian Moller (TU Berlin).'
       },
       {
         leftText: 'Sep 2015 - Jul 2017',
@@ -101,105 +103,6 @@ const cvCategories = [
     ]
   },
   {
-    id: 'academic-service-awards',
-    label: 'engagement',
-    //heading: 'engagement',
-    type: 'sections',
-    sections: [
-      {
-        heading: 'academic activities',
-        rows: [
-          {
-            leftText: 'Outreach',
-            leftColumnWidth: 120,
-            lines: [
-              'Task Force Leader | TF7: Immersive Media | 2019 - 2022 | QUALINET COST Action IC1003',
-              'Working Group Member | WG3: Evaluations | 2020 - 2023 | INDCOR COST Action CA18230'
-            ]
-          },
-          {
-            leftText: 'Proposals',
-            leftColumnWidth: 120,
-            lines: [
-              'Research Assistant | IMPACT | Horizon Europe 2018 | XR and Health',
-              'Research Assistant | IDN4CCI | Horizon Europe 2021 | Culture & Creative Industries',
-              'Research Assistant | METASTORIES | Horizon MSCA DN 2024 | Transformative Technologies'
-            ]
-          },
-          {
-            leftText: 'Coordination',
-            leftColumnWidth: 120,
-            lines: [
-              'Creative Facilitator | 2018 - 2021 | NTNU ARTEC'
-            ]
-          },
-          {
-            leftText: 'Reviews',
-            leftColumnWidth: 120,
-            lines: [
-              'Frontiers in Psychology | Springer Virtual Reality | IEEE VR | Springer IoT'
-            ]
-          }
-        ]
-      },
-      {
-        heading: 'teaching & mentoring',
-        rows: [
-          {
-            leftText: 'Elsys & Sense-IT,\nNTNU, NO.',
-            leftColumnWidth: 120,
-            lines: [
-              '2019 - 2022 | Mandated work duty during PhD, co-supervised master\'s students at the Sense-IT Lab. Presented lectures for the Course TT 8108.'
-            ]
-          },
-          {
-            leftText: 'Donau-Universitat,\nKrems, AT.',
-            leftColumnWidth: 120,
-            lines: [
-              '2022 | Invited Guest Lecture Series. Delivered two lectures within art and science methodologies, focusing on immersive media technologies and practices.'
-            ]
-          },
-          {
-            leftText: 'Universita di Genoa, Genova, IT.',
-            leftColumnWidth: 120,
-            lines: [
-              '2021 | Invited Guest Lectures. Delivered two lectures on human-centered design for VR, focusing on affordance-based approaches and performance evaluations.'
-            ]
-          },
-          {
-            leftText: 'COMSATS University,\nIslamabad, PK.',
-            leftColumnWidth: 120,
-            lines: [
-              '2011 - 2015 | Taught 1600+ hours of design studio courses and 600+ hours of theory courses at the undergraduate level.'
-            ]
-          }
-        ]
-      },
-      {
-        heading: 'awards',
-        rows: [
-          {
-            fullWidth: true,
-            inlineParts: ['Cum Laude, PhD Dissertation', '2024', 'NTNU & TU Berlin']
-          },
-          {
-            fullWidth: true,
-            inlineParts: ['Erasmus Mundus Full Scholarship', '2015', 'Aalborg University, Denmark']
-          },
-          {
-            fullWidth: true,
-            inlineParts: ['Winner, Architecture Design Competition', '2014', 'Comsats University + PCTAP, Pakistan']
-          },
-          {
-            fullWidth: true,
-            inlineParts: ['Distinction, Bachelor Thesis', '2008', 'National College of Arts, Pakistan']
-          }
-        ]
-      }
-    ]
-  },
-
-  {
     id: 'expertise',
     label: 'expertise',
     heading: 'Expertise',
@@ -210,6 +113,17 @@ const cvCategories = [
         rows: [
           {
             fullWidth: true,
+            mobileLines: [
+              { text: 'Mixed-Method UX Research | Interaction Design |', hasBreak: true },
+              { text: 'Spatial Storytelling', hasBreak: false },
+              { spacer: true, height: '18px' },
+              { text: 'Usability & User Research | Information Architecture |', hasBreak: true },
+              { text: 'Human-centered Evaluation', hasBreak: false },
+              { spacer: true, height: '18px' },
+              { text: '3D Content Creation & Visualization | Affordance Assessment |', hasBreak: true },
+              { text: 'Co-Creation and Participatory Design', hasBreak: false }
+            ],
+            mobileLinesGap: 3,
             columns: [
               [
                 'Mixed-Method UX Research',
@@ -244,8 +158,8 @@ const cvCategories = [
           {
             fullWidth: true,
             lines: [
-              { label: '3D/Spatial', text: 'Unreal Engine, Unity, AutoCAD, Rhino3D, Grasshopper, SketchUp, Revit, 3DsMax' },
-              { label: 'Digital/Interactive', text: 'Figma, Adobe Suite, Next.js, React, JavaScript, HTML/CSS' },
+              { label: '3D/Spatial', text: 'Unreal Engine, AutoCAD, Rhino3D, SketchUp,  3DsMax' },
+              { label: 'Digital/Interactive', text: 'Figma, Adobe Suite, Next.js, React' },
               { label: 'Accessibility', text: 'ARIA, Keyboard navigation, Focus management' },
               { label: 'Data', text: 'Tableau, Power BI, R, SPSS' }
             ]
@@ -262,9 +176,319 @@ const cvCategories = [
       }
     ]
   },
+  {
+    id: 'academic-service-awards',
+    label: 'engagement',
+    type: 'sections',
+    sections: [
+      {
+        sectionTitle: 'ACADEMIC ACTIVITIES',
+        subsections: [
+          {
+            heading: 'Outreach',
+            rows: [
+              {
+                fullWidth: true,
+                lines: [
+                  'Leader | TF7: Immersive Media | QUALINET COST Action IC1003',
+                  'Member | WG3: Evaluations | INDCOR COST Action CA18230'
+                ]
+              }
+            ]
+          },
+          {
+            heading: 'Proposals',
+            rows: [
+              {
+                fullWidth: true,
+                lines: [
+                  'IMPACT | Horizon Europe 2018 | XR and Health',
+                  'IDN4CCI | Horizon Europe 2021 | Culture and Creative Industries',
+                  'METASTORIES | Horizon MSCA 2024 | Transformative Technologies'
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        sectionTitle: 'TEACHING & MENTORING',
+        subsections: [
+          {
+            heading: 'Ntnu / 2109-2022',
+            rows: [
+              {
+                fullWidth: true,
+                lines: [
+                  'Mandated work duty during PhD, co-supervised master\'s students at the Sense-IT Lab.\n\nPresented lectures for the master\'s course TT8108.'
+                ],
+                linesGap: 3
+              }
+            ]
+          },
+          {
+            heading: 'Various / 2021-2025',
+            rows: [
+              {
+                fullWidth: true,
+                lines: [
+                  'Invited Guest Lectures on a range of topics related to design and science methodologies, with particular focus on immersive technologies and practices.'
+                ],
+                linesGap: 3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        heading: 'awards',
+        rows: [
+          {
+            fullWidth: true,
+            inlineParts: ['Cum Laude, PhD Dissertation', '2024', 'NTNU & TU Berlin']
+          },
+          {
+            fullWidth: true,
+            inlineParts: ['Erasmus Mundus Full Scholarship', '2015', 'Aalborg University']
+          },
+          {
+            fullWidth: true,
+            inlineParts: ['Winner, Architecture Design Competition', '2014', 'PCATP']
+          },
+          {
+            fullWidth: true,
+            inlineParts: ['Distinction, Bachelor Thesis', '2008', 'National College of Arts']
+          }
+        ]
+      }
+    ]
+  },
 ]
 
 const formatMetaLabel = (label) => label.replace('&', '&').toUpperCase()
+
+const MobileMenuOverlay = ({
+  categories,
+  open,
+  onClose,
+  onNavigate,
+  glowFilter,
+  activeMenuCategory,
+  setActiveMenuCategory
+}) => {
+  const lineWidth = '200px'
+  const panelPaddingX = 18
+  const panelRef = useRef(null)
+  const [panelOffset, setPanelOffset] = useState({ left: 0, top: 0 })
+  const [visible, setVisible] = useState(false)
+  const [closing, setClosing] = useState(false)
+  const [animatingIn, setAnimatingIn] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true)
+      setClosing(false)
+      requestAnimationFrame(() => setAnimatingIn(true))
+      return
+    }
+    if (visible) {
+      setClosing(true)
+      setAnimatingIn(false)
+      const timer = setTimeout(() => setVisible(false), 220)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [open, visible])
+
+  useEffect(() => {
+    if (!visible) return undefined
+    const updateOffset = () => {
+      if (!panelRef.current) return
+      const rect = panelRef.current.getBoundingClientRect()
+      setPanelOffset({ left: rect.left, top: rect.top })
+    }
+    updateOffset()
+    window.addEventListener('resize', updateOffset)
+    return () => window.removeEventListener('resize', updateOffset)
+  }, [visible])
+
+  if (!visible) return null
+
+  return (
+    <div
+      role="dialog"
+      aria-label="Mobile navigation menu"
+      onClick={() => onClose()}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 90,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        pointerEvents: 'auto'
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
+        style={{
+          position: 'relative',
+          marginRight: '20px',
+          marginBottom: '70px',
+          width: lineWidth,
+          background: 'transparent',
+          borderRadius: '10px',
+          padding: `14px ${panelPaddingX}px 18px`,
+          boxShadow: 'none',
+          backdropFilter: 'none',
+          transform: animatingIn && !closing ? 'translateY(0)' : 'translateY(40px)',
+          opacity: animatingIn && !closing ? 1 : 0,
+          transition: 'transform 200ms ease, opacity 200ms ease'
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            background: 'rgba(255, 253, 243, 0.9)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              width: '500px',
+              height: '500px',
+              left: `calc(30vw - ${panelOffset.left}px)`,
+              top: `calc(58vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent)',
+              opacity: 0.9,
+              filter: 'blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '300px',
+              height: '300px',
+              left: `calc(26vw - ${panelOffset.left}px)`,
+              top: `calc(52vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent)',
+              opacity: 0.9,
+              filter: 'blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg))',
+              pointerEvents: 'none'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '160px',
+              height: '160px',
+              left: `calc(20vw - ${panelOffset.left}px)`,
+              top: `calc(36vh - ${panelOffset.top}px)`,
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent)',
+              opacity: 0.9,
+              filter: 'blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))',
+              pointerEvents: 'none'
+            }}
+          />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22120%22%20height=%22120%22%20viewBox=%220%200%20120%20120%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22%20stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect%20width=%22120%22%20height=%22120%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E")',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '120px 120px',
+            opacity: 0.4,
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            fontFamily: 'var(--font-karla)',
+            textTransform: 'lowercase',
+            position: 'relative',
+            zIndex: 2
+          }}
+        >
+          {categories.map((category) => (
+            <div key={category.name} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMenuCategory(category.name)
+                  onNavigate(category.name, category.name)
+                }}
+                style={{
+                  alignSelf: 'flex-end',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                  color: activeMenuCategory === category.name ? '#FDABD3' : '#000',
+                  filter: activeMenuCategory === category.name ? glowFilter : 'none',
+                  textAlign: 'right',
+                  transform: 'translateY(7px)'
+                }}
+              >
+                {category.name}
+              </button>
+              <div
+                style={{
+                  height: '2px',
+                  width: '100%',
+                  background: '#000',
+                  opacity: 0.7
+                }}
+              />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', justifyItems: 'end' }}>
+                {category.subcategories.map((sub) => (
+                  <button
+                    key={`${category.name}-${sub}`}
+                    type="button"
+                    onClick={() => {
+                      setActiveMenuCategory(category.name)
+                      onNavigate(sub, category.name)
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
+                      color: '#000',
+                      textAlign: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'left' : 'right',
+                      justifySelf: ['speculations', 'spaces', 'research', 'cv'].includes(sub) ? 'start' : 'end'
+                    }}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function CurriculumVitaePage() {
   const [hoveredElement, setHoveredElement] = useState(null)
@@ -275,6 +499,20 @@ export default function CurriculumVitaePage() {
   const [pageOpacity, setPageOpacity] = useState(0)
   const [glowDelaySeconds] = useState(() => syncGlowOffset().delaySeconds)
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeMenuCategory, setActiveMenuCategory] = useState('connect')
+  const isMobile = useMediaQuery('(max-width: 768px)')
+
+  // Consolidated heading styles
+  const mainHeadingStyle = {
+    fontSize: isMobile ? '16px' : '22px',
+    fontWeight: 500,
+    marginTop: isMobile ? '24px' : '0',
+    marginBottom: '12px',
+    textTransform: isMobile ? 'uppercase' : 'lowercase'
+  }
+  const subsectionHeadingStyle = { fontWeight: 600, marginBottom: '4px' }
+
   const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
     const target = path.startsWith('/') ? path : `/${path}`
     if (typeof window !== 'undefined') {
@@ -321,12 +559,29 @@ export default function CurriculumVitaePage() {
     setTimeout(() => setNotice(null), 2000)
   }
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((prev) => !prev)
+  }
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false)
+  }
+
+  useEffect(() => {
+    if (!isMobile || !mobileMenuOpen) return undefined
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') closeMobileMenu()
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [mobileMenuOpen, isMobile])
+
   const navCategories = useMemo(() => ([
     { name: 'view', subcategories: ['speculations', 'images'] },
     { name: 'make', subcategories: ['spaces', 'things'] },
     { name: 'reflect', subcategories: ['research', 'teaching'] },
-    { name: 'connect', subcategories: ['curriculum vitae', 'about me'] }
-  ]), [])
+    { name: 'connect', subcategories: isMobile ? ['cv', 'about me'] : ['curriculum vitae', 'about me'] }
+  ]), [isMobile])
 
   const selectCategory = (id) => {
     const idx = cvCategories.findIndex((category) => category.id === id)
@@ -335,6 +590,23 @@ export default function CurriculumVitaePage() {
 
   const moveCategory = (delta) => {
     setActiveCategoryIndex((prev) => (prev + delta + cvCategories.length) % cvCategories.length)
+  }
+
+  const handleMobileNavigate = (sub, category) => {
+    closeMobileMenu()
+    if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
+      navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
+    } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+      navigateWithFade(`/view/${sub}`)
+    } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
+      navigateWithFade(`/reflect/${sub}`)
+    } else if (category === 'connect' && sub === 'about me') {
+      navigateWithFade('/connect/about-me')
+    } else if (category === 'connect' && sub === 'cv') {
+      navigateWithFade('/connect/curriculum-vitae')
+    } else {
+      navigateWithFade(`/${category}`)
+    }
   }
 
   const renderRow = (row, index) => {
@@ -347,6 +619,126 @@ export default function CurriculumVitaePage() {
         ? '1fr'
         : `${leftColumnValue} 1fr`
 
+    // Mobile: single column layout
+    if (isMobile) {
+      return (
+        <div
+          key={row.leftText || row.title || row.body || (row.lines && row.lines[0]) || index}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px'
+          }}
+        >
+          {row.leftText ? (
+            <div style={{ fontSize: '12px', color: '#000' }}>{row.leftText}</div>
+          ) : null}
+          {row.title && row.showTitle !== false ? (
+            <div style={{ fontWeight: 600 }}>
+              {row.title}
+              {row.subtitle ? <span> | {row.subtitle}</span> : null}
+            </div>
+          ) : null}
+          {row.body ? <div>{row.body}</div> : null}
+          {row.inlineParts ? (
+            <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap' }}>
+              {row.inlineParts.map((part, partIndex) => (
+                <span key={`${part}-${partIndex}`} style={{ whiteSpace: 'nowrap' }}>
+                  {part}
+                  {partIndex < row.inlineParts.length - 1 ? (
+                    <span style={{ margin: '0 16px' }}>|</span>
+                  ) : null}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {row.mobileLines ? (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {row.mobileLines.map((item, lineIndex) => {
+                if (typeof item === 'object' && item.spacer) {
+                  return <div key={`spacer-${lineIndex}`} style={{ height: item.height }} />
+                }
+                if (typeof item === 'object' && item.text) {
+                  const marginBottom = item.hasBreak ? `${row.mobileLinesGap ?? 3}px` : '0'
+                  if (item.text.includes('|')) {
+                    const parts = item.text.split('|').map((part) => part.trim()).filter(Boolean)
+                    return (
+                      <div key={`${item.text}-${lineIndex}`} style={{ marginBottom }}>
+                        {parts.map((part, partIndex) => (
+                          <span key={`${part}-${partIndex}`}>
+                            {partIndex > 0 ? <span style={{ margin: '0 16px' }}>|</span> : null}
+                            {part}
+                          </span>
+                        ))}
+                        {item.text.endsWith('|') ? <span style={{ margin: '0 16px' }}>|</span> : null}
+                      </div>
+                    )
+                  }
+                  return (
+                    <div
+                      key={`${item.text}-${lineIndex}`}
+                      style={{ marginBottom }}
+                    >
+                      {item.text}
+                    </div>
+                  )
+                }
+                // Fallback for old string format
+                if (typeof item === 'string') {
+                  if (item === '') {
+                    return <div key={`spacer-${lineIndex}`} style={{ height: '12px' }} />
+                  }
+                  const hasTrailingPipe = item.endsWith('|')
+                  const marginBottom = hasTrailingPipe ? `${row.mobileLinesGap ?? 3}px` : '0'
+                  return (
+                    <div
+                      key={`${item}-${lineIndex}`}
+                      style={{ marginBottom }}
+                    >
+                      {item}
+                    </div>
+                  )
+                }
+                return null
+              })}
+            </div>
+          ) : null}
+          {row.lines ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: row.linesGap ?? 4 }}>
+              {row.lines.map((line, lineIndex) => {
+                if (typeof line === 'string') {
+                  if (line.includes('|')) {
+                    const parts = line.split('|').map((part) => part.trim()).filter(Boolean)
+                    return (
+                      <div key={`${line}-${lineIndex}`}>
+                        {parts.map((part, partIndex) => (
+                          <span key={`${part}-${partIndex}`}>
+                            {partIndex > 0 ? <span style={{ margin: '0 16px' }}>|</span> : null}
+                            {part}
+                          </span>
+                        ))}
+                      </div>
+                    )
+                  }
+                  return <div key={`${line}-${lineIndex}`}>{line}</div>
+                }
+                const label = line?.label || ''
+                const text = line?.text || ''
+                return (
+                  <div key={`${label}-${lineIndex}`}>
+                    {label ? <span style={{ fontWeight: 600 }}>{label}</span> : null}
+                    {label && text ? ': ' : null}
+                    {text}
+                  </div>
+                )
+              })}
+            </div>
+          ) : null}
+        </div>
+      )
+    }
+
+    // Desktop: two-column grid layout
     return (
       <div
         key={row.leftText || row.title || row.body || (row.lines && row.lines[0]) || index}
@@ -358,20 +750,23 @@ export default function CurriculumVitaePage() {
         }}
       >
         {!isFullWidth ? (
-          <div style={{ fontSize: '12px', whiteSpace: 'pre-line' }}>{row.leftText}</div>
+          <div style={{ fontSize: '12px', whiteSpace: 'pre-line', fontWeight: 600 }}>{row.leftText}</div>
         ) : null}
         {row.rightText ? (
           <div style={{ textAlign: 'right' }}>{row.rightText}</div>
         ) : (
           <div>
             {row.title && row.showTitle !== false ? (
-              <div style={{ fontWeight: 600 }}>
-                {row.title}{row.subtitle ? ` | ${row.subtitle}` : ''}
+              <div style={{ fontWeight: 600, marginBottom: '6px' }}>
+                {row.title}
               </div>
             ) : null}
-            {row.body ? <div style={{ marginTop: '6px' }}>{row.body}</div> : null}
+            {row.subtitle ? (
+              <div style={{ marginBottom: '6px' }}>{row.subtitle}</div>
+            ) : null}
+            {row.body ? <div>{row.body}</div> : null}
             {row.inlineParts ? (
-              <div style={{ marginTop: '6px', display: 'flex', alignItems: 'baseline', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap' }}>
                 {row.inlineParts.map((part, partIndex) => (
                   <span key={`${part}-${partIndex}`} style={{ whiteSpace: 'nowrap' }}>
                     {part}
@@ -394,7 +789,7 @@ export default function CurriculumVitaePage() {
               </div>
             ) : null}
             {row.lines ? (
-              <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: row.linesGap ?? 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: row.linesGap ?? 4 }}>
                 {row.lines.map((line, lineIndex) => {
                   if (typeof line === 'string') {
                     if (line.includes('|')) {
@@ -457,75 +852,161 @@ export default function CurriculumVitaePage() {
       <div className="glow-core-intersection" />
       <div className="glow-core-static" />
 
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '90px',
-          background: '#FFFDF3',
-          zIndex: 4,
-          pointerEvents: 'none'
-        }}
-      />
+      {!isMobile && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '90px',
+            background: '#FFFDF3',
+            zIndex: 4,
+            pointerEvents: 'none'
+          }}
+        />
+      )}
 
-      <TopBarTransform
-        hoveredElement={hoveredElement}
-        setHoveredElement={setHoveredElement}
-        readingMode={readingMode}
-        analyticsText="CURRICULUM VITAE"
-        glowFilter={glowFilter}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        activePage="connect"
-        glowActive
-        onNavigate={(category) => navigateWithFade(`/${category}`)}
-      />
+      {!isMobile && (
+        <TopBarTransform
+          hoveredElement={hoveredElement}
+          setHoveredElement={setHoveredElement}
+          readingMode={readingMode}
+          analyticsText="CURRICULUM VITAE"
+          glowFilter={glowFilter}
+          showTooltip={showTooltip}
+          hideTooltip={hideTooltip}
+          activePage="connect"
+          glowActive
+          onNavigate={(category) => navigateWithFade(`/${category}`)}
+        />
+      )}
 
-      <LeftPanelTransform
-        readingMode={readingMode}
-        toggleReadingMode={toggleReadingMode}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        label="CV"
-        labelTop={85}
-        onBack={handleBack}
-        onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
-      />
+      {!isMobile && (
+        <LeftPanelTransform
+          readingMode={readingMode}
+          toggleReadingMode={toggleReadingMode}
+          showTooltip={showTooltip}
+          hideTooltip={hideTooltip}
+          label="CV"
+          labelTop={85}
+          onBack={handleBack}
+          onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
+        />
+      )}
 
-      <RightPanelTransform
-        hoveredElement={hoveredElement}
-        setHoveredElement={setHoveredElement}
-        expandedCategory={expandedCategory}
-        setExpandedCategory={setExpandedCategory}
-        readingMode={readingMode}
-        showTooltip={showTooltip}
-        hideTooltip={hideTooltip}
-        glowFilter={glowFilter}
-        activePage="connect"
-        activeSubcategory="curriculum vitae"
-        categories={navCategories}
-        glowActive
-        onNavigate={(sub, category) => {
-          if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
-            navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
-          } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
-            navigateWithFade(`/view/${sub}`)
-          } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
-            navigateWithFade(`/reflect/${sub}`)
-          } else if (category === 'connect' && sub === 'curriculum vitae') {
-            navigateWithFade('/connect/curriculum-vitae')
-          } else {
-            navigateWithFade(`/${category}`)
-          }
-        }}
-      />
+      {!isMobile && (
+        <RightPanelTransform
+          hoveredElement={hoveredElement}
+          setHoveredElement={setHoveredElement}
+          expandedCategory={expandedCategory}
+          setExpandedCategory={setExpandedCategory}
+          readingMode={readingMode}
+          showTooltip={showTooltip}
+          hideTooltip={hideTooltip}
+          glowFilter={glowFilter}
+          activePage="connect"
+          activeSubcategory="curriculum vitae"
+          categories={navCategories}
+          glowActive
+          onNavigate={(sub, category) => {
+            if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
+              navigateWithFade(sub === 'things' ? '/make/things' : '/make/spaces')
+            } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+              navigateWithFade(`/view/${sub}`)
+            } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
+              navigateWithFade(`/reflect/${sub}`)
+            } else if (category === 'connect' && sub === 'curriculum vitae') {
+              navigateWithFade('/connect/curriculum-vitae')
+            } else {
+              navigateWithFade(`/${category}`)
+            }
+          }}
+        />
+      )}
 
-      {notice && (
+      {isMobile && (
+        <MobileChrome
+          title="curriculum vitae"
+          activeDot="connect"
+          bottomLabel=""
+          readingMode={readingMode}
+          primaryActive={readingMode}
+          onPrimaryAction={toggleReadingMode}
+          onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
+          secondaryIcon="shuffle"
+          onBack={handleBack}
+          onNavigate={(key) => navigateWithFade(`/${key}`)}
+          onMenuToggle={toggleMobileMenu}
+          menuExpanded={mobileMenuOpen}
+        />
+      )}
+
+      {isMobile && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 'calc(env(safe-area-inset-top, 0px) + 60px)',
+            left: 20,
+            right: 20,
+            zIndex: 82,
+            display: 'flex',
+            gap: '18px',
+            fontFamily: 'var(--font-karla)',
+            fontSize: '16px'
+          }}
+        >
+          {cvCategories.map((category) => {
+            const isActive = category.id === activeCategory?.id
+            return (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => selectCategory(category.id)}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  padding: 0,
+                  fontFamily: 'inherit',
+                  fontSize: 'inherit',
+                  fontWeight: isActive ? 600 : 300,
+                  color: '#000',
+                  cursor: 'pointer',
+                  textTransform: 'lowercase'
+                }}
+              >
+                {category.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {!isMobile && notice && (
         <div
           className="fixed top-10 left-20"
           style={{
+            zIndex: 60,
+            background: '#000',
+            color: '#fff',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            fontFamily: 'var(--font-karla)',
+            fontSize: '12px',
+            letterSpacing: '0.02em'
+          }}
+        >
+          {notice}
+        </div>
+      )}
+
+      {isMobile && readingMode && notice && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 'calc(env(safe-area-inset-top, 0px) + 80px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
             zIndex: 60,
             background: '#000',
             color: '#fff',
@@ -544,79 +1025,59 @@ export default function CurriculumVitaePage() {
         style={{
           position: 'relative',
           zIndex: 1,
-          padding: '140px 240px 120px 140px',
-          display: 'grid',
-          gridTemplateColumns: '200px minmax(420px, 1fr)',
-          gap: '100px',
+          padding: isMobile ? '120px 18px 180px' : '140px 240px 120px 140px',
+          display: isMobile ? 'block' : 'grid',
+          gridTemplateColumns: isMobile ? undefined : '200px minmax(420px, 1fr)',
+          gap: isMobile ? undefined : '100px',
           alignItems: 'start'
         }}
       >
-        <div style={{ position: 'relative', width: '200px' }}>
-          <div
-            style={{
-              position: 'fixed',
-              left: '140px',
-              top: '380px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              fontFamily: 'var(--font-karla)',
-              fontSize: '24px'
-            }}
-          >
-            {cvCategories.map((category) => {
-              const isActive = category.id === activeCategory?.id
-              return (
-                <div
-                  key={category.id}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Show ${category.label}`}
-                  onClick={() => selectCategory(category.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      selectCategory(category.id)
-                    }
-                  }}
-                  style={{
-                    fontWeight: isActive ? 500 : 200,
-                    cursor: 'pointer',
-                    textTransform: 'lowercase'
-                  }}
-                >
-                  {category.label}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        <div style={{ maxWidth: '820px', fontFamily: 'var(--font-karla)', color: '#000', marginTop: '60px', marginLeft: '220px' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '12px',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              marginBottom: '8px'
-            }}
-          >
-            <div style={{ textAlign: 'left' }}>{formatMetaLabel(activeCategory.label)}</div>
-            <div />
-          </div>
-
-          <div style={{ height: '1px', background: '#000', opacity: 0.35 }} />
-          {!isExpertiseCategory && activeCategory.heading ? (
-            <div style={{ marginTop: '16px', fontSize: '22px', fontWeight: 500 }}>
-              {activeCategory.heading}
+        {!isMobile && (
+          <div style={{ position: 'relative', width: '200px' }}>
+            <div
+              style={{
+                position: 'fixed',
+                left: '140px',
+                top: '380px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                fontFamily: 'var(--font-karla)',
+                fontSize: '24px'
+              }}
+            >
+              {cvCategories.map((category) => {
+                const isActive = category.id === activeCategory?.id
+                return (
+                  <div
+                    key={category.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Show ${category.label}`}
+                    onClick={() => selectCategory(category.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        selectCategory(category.id)
+                      }
+                    }}
+                    style={{
+                      fontWeight: isActive ? 500 : 200,
+                      cursor: 'pointer',
+                      textTransform: 'lowercase'
+                    }}
+                  >
+                    {category.label}
+                  </div>
+                )
+              })}
             </div>
-          ) : null}
+          </div>
+        )}
 
-          <div style={{ marginTop: '18px', fontSize: '13px', lineHeight: 1.55, maxWidth: '760px' }}>
+        <div style={{ maxWidth: isMobile ? '100%' : '820px', fontFamily: 'var(--font-karla)', color: '#000', marginTop: isMobile ? '24px' : '60px', marginLeft: isMobile ? 0 : '220px' }}>
+
+          <div style={{ fontSize: '13px', lineHeight: 1.55, maxWidth: '760px' }}>
             {activeCategory.type === 'grid' ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '24px' }}>
                 {activeCategory.columns.map((column, idx) => (
@@ -630,76 +1091,95 @@ export default function CurriculumVitaePage() {
             ) : null}
 
             {activeCategory.type === 'rows' ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: isMobile ? '28px' : '18px',
+                marginTop: isMobile && activeCategory.id === 'education' ? '70px' : '0'
+              }}>
+                {!isMobile && <div style={{ height: '1px', backgroundColor: '#000', width: '100%', marginBottom: '18px' }} />}
                 {activeCategory.rows.map((row, index) => renderRow(row, index))}
+                {!isMobile && <div style={{ height: '1px', backgroundColor: '#000', width: '100%', marginTop: '18px' }} />}
               </div>
             ) : null}
 
             {activeCategory.type === 'sections' ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {activeCategory.sections.map((section) => {
+                {activeCategory.sections.map((section, sectionIndex) => {
+                  // New structure with sectionTitle and subsections
+                  if (section.sectionTitle && section.subsections) {
+                    return (
+                      <div key={`${activeCategory.id}-${section.sectionTitle}-${sectionIndex}`}>
+                        <div style={mainHeadingStyle}>
+                          {section.sectionTitle}
+                        </div>
+                        {!isMobile && <div style={{ height: '1px', backgroundColor: '#000', width: '100%', marginBottom: '20px' }} />}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                          {section.subsections.map((subsection, subsectionIndex) => (
+                            <div key={`${section.sectionTitle}-${subsection.heading}-${subsectionIndex}`}>
+                              {subsection.heading ? (
+                                <div style={subsectionHeadingStyle}>{subsection.heading}</div>
+                              ) : null}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '28px' : '16px' }}>
+                                {subsection.rows.map((row, index) => renderRow(row, index))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  // Old structure (for awards section and experience without sectionTitle)
                   const sectionHeading = section.heading
                   const sectionTitle = section.title
-                  const headingStyle = usePrimarySectionHeadings
-                    ? { fontSize: '22px', fontWeight: 500, marginBottom: '12px' }
-                    : { fontWeight: 600, marginBottom: '8px' }
+                  const isAwardsSection = sectionHeading === 'awards'
+                  const isCompetenciesSection = sectionHeading === 'competencies'
+                  const isExperienceSection = activeCategory.id === 'experience' && !sectionHeading && !sectionTitle
+                  const rowGap = isAwardsSection ? (isMobile ? '10px' : '6px') : (isMobile ? '28px' : '16px')
                   return (
-                    <div key={`${activeCategory.id}-${sectionHeading || sectionTitle || 'section'}`}>
+                    <div key={`${activeCategory.id}-${sectionHeading || sectionTitle || 'section'}-${sectionIndex}`}>
+                      {isExperienceSection && !isMobile && sectionIndex === 0 && (
+                        <div style={{ height: '1px', backgroundColor: '#000', width: '100%', marginBottom: '18px' }} />
+                      )}
                       {sectionHeading ? (
-                        <div style={headingStyle}>{sectionHeading}</div>
+                        <>
+                          <div style={{...mainHeadingStyle, marginTop: isCompetenciesSection && !isMobile ? '40px' : mainHeadingStyle.marginTop}}>
+                            {sectionHeading}
+                          </div>
+                          {!isMobile && <div style={{ height: '1px', backgroundColor: '#000', width: '100%', marginBottom: '16px' }} />}
+                        </>
                       ) : sectionTitle ? (
-                        <div style={{ fontWeight: 600, marginBottom: '8px' }}>{sectionTitle}</div>
+                        <div style={subsectionHeadingStyle}>{sectionTitle}</div>
                       ) : null}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: rowGap }}>
                         {section.rows.map((row, index) => renderRow(row, index))}
                       </div>
+                      {isExperienceSection && !isMobile && sectionIndex === activeCategory.sections.length - 1 && (
+                        <div style={{ height: '1px', backgroundColor: '#000', width: '100%', marginTop: '18px' }} />
+                      )}
                     </div>
                   )
                 })}
               </div>
             ) : null}
           </div>
-
-          <div style={{ position: 'relative', marginTop: '18px' }}>
-            <div style={{ height: '1px', background: '#000', opacity: 0.35 }} />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '18px' }}>
-            <button
-              type="button"
-              onClick={() => moveCategory(-1)}
-              aria-label="Previous category"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                fontFamily: 'var(--font-karla)',
-                fontSize: '18px',
-                cursor: 'pointer',
-                padding: 0
-              }}
-            >
-              {'<-'}
-            </button>
-            <button
-              type="button"
-              onClick={() => moveCategory(1)}
-              aria-label="Next category"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                fontFamily: 'var(--font-karla)',
-                fontSize: '18px',
-                cursor: 'pointer',
-                padding: 0
-              }}
-            >
-              {'->'}
-            </button>
-          </div>
         </div>
       </div>
 
-      {tooltip && (
+      {isMobile && (
+        <MobileMenuOverlay
+          categories={navCategories}
+          open={mobileMenuOpen}
+          onClose={closeMobileMenu}
+          onNavigate={handleMobileNavigate}
+          glowFilter={glowFilter}
+          activeMenuCategory={activeMenuCategory}
+          setActiveMenuCategory={setActiveMenuCategory}
+        />
+      )}
+
+      {!isMobile && tooltip && (
         <div
           style={{
             position: 'fixed',

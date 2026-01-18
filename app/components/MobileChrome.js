@@ -228,6 +228,7 @@ const defaultBack = () => {
         }}
       >
         <div
+          data-mobile-chrome-bottom-line="true"
           style={{
             position: 'absolute',
             left: 20,
@@ -326,7 +327,7 @@ const defaultBack = () => {
             height: 40,
             borderRadius: '50%',
             border: '1.5px solid #000',
-            background: readingMode ? '#e5e5e5' : (isMenuOpen ? '#000' : '#FFFDF3'),
+            background: readingMode ? '#e5e5e5' : (isMenuOpen ? '#000' : 'transparent'),
             color: readingMode ? '#8f8f8f' : (isMenuOpen ? '#FFFDF3' : '#000'),
             display: 'flex',
             alignItems: 'center',

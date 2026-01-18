@@ -301,6 +301,13 @@ export function RightPanelTransform({
       window.location.href = `/connect/${slug}`
       return
     }
+    if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
+      if (typeof window !== 'undefined') {
+        pushNavStack(window.location.pathname + window.location.search)
+      }
+      window.location.href = `/reflect/${sub}`
+      return
+    }
     if (onNavigate) {
       if (typeof window !== 'undefined') {
         pushNavStack(window.location.pathname + window.location.search)
@@ -410,7 +417,27 @@ export function RightPanelTransform({
                 onMouseLeave={() => setHoveredElement(null)}
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', transition: 'transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), color 0.25s ease' }}
               >
-                <div style={{ fontSize: '24px', fontWeight: 600, color: '#FDABD3', filter: glowFilter, cursor: 'default', textAlign: 'right', lineHeight: 1 }}>
+                <div
+                  style={{ fontSize: '24px', fontWeight: 600, color: '#FDABD3', filter: glowFilter, cursor: 'pointer', textAlign: 'right', lineHeight: 1 }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Go to ${expandedInactive.name}`}
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      pushNavStack(window.location.pathname + window.location.search)
+                    }
+                    window.location.href = `/${expandedInactive.name}`
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      if (typeof window !== 'undefined') {
+                        pushNavStack(window.location.pathname + window.location.search)
+                      }
+                      window.location.href = `/${expandedInactive.name}`
+                    }
+                  }}
+                >
                   {expandedInactive.name}
                 </div>
                 <div className="flex flex-col items-end gap-1 mt-1" style={{ fontSize: '18px', fontWeight: 400, color: '#000', paddingRight: '8px' }}>
@@ -453,10 +480,25 @@ export function RightPanelTransform({
                   style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', transform: isHovered ? 'translateY(-6px)' : 'translateY(0)', transition: 'transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), color 0.25s ease' }}
                 >
                   <div
-                    style={{ fontSize: '24px', fontWeight: 600, color: isHovered ? '#FDABD3' : '#000', filter: isHovered ? glowFilter : 'none', cursor: 'default', textAlign: 'right', lineHeight: 1 }}
+                    style={{ fontSize: '24px', fontWeight: 600, color: isHovered ? '#FDABD3' : '#000', filter: isHovered ? glowFilter : 'none', cursor: 'pointer', textAlign: 'right', lineHeight: 1 }}
                     role="button"
                     tabIndex={0}
                     aria-label={`Go to ${category.name}`}
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        pushNavStack(window.location.pathname + window.location.search)
+                      }
+                      window.location.href = `/${category.name}`
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        if (typeof window !== 'undefined') {
+                          pushNavStack(window.location.pathname + window.location.search)
+                        }
+                        window.location.href = `/${category.name}`
+                      }
+                    }}
                   >
                     {category.name}
                   </div>
