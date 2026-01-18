@@ -555,11 +555,11 @@ const categories = [
           }
         ],
         images: [
-          '/research/Study 3 (1).jpg',
-          '/research/Study 3 (2).jpg',
-          '/research/Study 3 (3).jpg',
-          '/research/Study 3 (4).jpg',
-          '/research/Study 3 (5).webp'
+          '/research/study 3 (1).jpg',
+          '/research/study 3 (2).jpg',
+          '/research/study 3 (3).jpg',
+          '/research/study 3 (4).jpg',
+          '/research/study 3 (5).webp'
         ]
       }
     ]

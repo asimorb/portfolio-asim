@@ -264,6 +264,7 @@ export default function SpacesOverviewPage() {
   const [overlayImageLoaded, setOverlayImageLoaded] = useState(true)
   const [navMode, setNavMode] = useState('gallery') // 'gallery' | 'project'
   const [projectGrid, setProjectGrid] = useState([])
+  const [galleryGrid, setGalleryGrid] = useState([])
   const cardRefs = useRef({})
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -546,20 +547,22 @@ export default function SpacesOverviewPage() {
       size: Math.random() < 0.38 ? 'large' : 'small'
     }))
 
+  const buildGalleryGrid = (gallery) =>
+    shuffle(gallery).map((img) => ({
+      image: img,
+      originalIndex: gallery.indexOf(img),
+      size: Math.random() < 0.38 ? 'large' : 'small'
+    }))
+
   useEffect(() => {
     if (!projectGrid.length) {
       setProjectGrid(buildProjectGrid())
     }
   }, [projectGrid.length])
 
-  useEffect(() => {
-    if (!overlayProject || navMode !== 'project') return
-    setProjectGrid(buildProjectGrid())
-  }, [overlayProject?.slug, navMode])
-
   const handleOpenOverlay = (project, idx, el, mode = 'gallery', imageIndex = 0) => {
     const rect = el?.getBoundingClientRect()
-    const heroSlideOffset = 80
+    const heroSlideOffset = 70
     const defaultOverlayWidth = Math.min(540, window.innerWidth * 0.55)
     const defaultOverlayHeight = defaultOverlayWidth * 1.25
     const heroLeftMargin = (window.innerWidth - defaultOverlayWidth) / 2 - 50 + heroSlideOffset
@@ -593,6 +596,7 @@ export default function SpacesOverviewPage() {
 
     setOverlayProject({ ...project, idx })
     setOverlayGallery(gallery)
+    setGalleryGrid(buildGalleryGrid(gallery))
     setActiveImageIndex(startIndex)
     setNavMode(mode)
     setOverlayStyle(start)
@@ -621,6 +625,7 @@ export default function SpacesOverviewPage() {
     setOverlayProject(null)
     setOverlayStyle(null)
     setOverlayGallery([])
+    setGalleryGrid([])
     setActiveImageIndex(0)
     setNavMode('gallery')
   }
@@ -879,7 +884,7 @@ export default function SpacesOverviewPage() {
               style={{
                 display: 'grid',
                 gridTemplateColumns: isMobile ? 'repeat(3, minmax(70px, 1fr))' : 'repeat(4, minmax(160px, 1fr))',
-                gridAutoRows: isMobile ? '100px' : undefined,
+                gridAutoRows: isMobile ? '70px' : undefined,
                 gridAutoFlow: isMobile ? 'row dense' : undefined,
                 gap: isMobile ? '8px' : '74px 14px',
                 alignItems: isMobile ? 'stretch' : 'start',
@@ -1265,11 +1270,38 @@ export default function SpacesOverviewPage() {
               )}
             </div>
 
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleCloseOverlay()
+              }}
+              onMouseEnter={(e) => showTooltip('Back to spaces', e)}
+              onMouseLeave={hideTooltip}
+              aria-label="Back to spaces"
+              style={{
+                position: 'fixed',
+                left: '110px',
+                top: '180px',
+                background: 'none',
+                border: 'none',
+                padding: '8px 0',
+                cursor: 'pointer',
+                opacity: overlayMetaVisible ? 1 : 0,
+                transition: 'opacity 240ms ease 180ms',
+                zIndex: 215
+              }}
+            >
+              <svg width="100" height="14" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 6L6 1M0 6L6 11M0 6H60" stroke="#000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
             <div
               style={{
                 position: 'fixed',
                 left: '120px',
-                top: '280px',
+                top: '300px',
                 position: 'relative',
                 opacity: overlayMetaVisible ? 1 : 0,
                 transition: 'opacity 240ms ease 180ms',
@@ -1302,91 +1334,36 @@ export default function SpacesOverviewPage() {
                 <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', opacity: 1, marginBottom: '2px' }}>notes</div>
                 <div style={{ fontSize: '24px', fontWeight: 200, letterSpacing: '-0.03em', lineHeight: '24px', maxWidth: '400px', marginBottom: '-10px' }}>{overlayProject.notes}</div>
               </div>
-              {overlayGallery.length > 0 && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '500px',
-                    left: 0,
-                    display: 'grid',
-                    gridAutoFlow: 'column',
-                    gridAutoColumns: '50px',
-                    gap: '6px',
-                    maxWidth: '50%',
-                    pointerEvents: 'auto'
-                  }}
-                >
-                  {overlayGallery.map((img, idx) => (
-                    <button
-                      key={`meta-thumb-${idx}`}
-                      type="button"
-                      onClick={() => { setActiveImageIndex(idx); setNavMode('gallery') }}
-                      onMouseEnter={(e) => showTooltip(`Image ${idx + 1}`, e)}
-                      onMouseLeave={hideTooltip}
-                      style={{
-                        position: 'relative',
-                        width: '100%',
-                        aspectRatio: '1 / 1',
-                        background: img.src ? '#f5f5f5' : `linear-gradient(135deg, ${paletteForIndex(idx)} 0%, #fffdf3 100%)`,
-                        borderRadius: '6px',
-                        border: idx === activeImageIndex ? '2px solid #000' : '1px solid rgba(0,0,0,0.12)',
-                        cursor: 'pointer',
-                        padding: 0,
-                        overflow: 'hidden'
-                      }}
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      {img.src && (
-                        <img
-                          src={img.src}
-                          alt={img.label || `Image ${idx + 1}`}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            display: 'block'
-                          }}
-                        />
-                      )}
-                      {!img.src && (
-                        <span style={{ position: 'absolute', left: '2px', top: '2px', fontSize: '8px', fontWeight: 700, color: '#000' }}>{img.label || idx + 1}</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {projectGrid.length > 0 && (
+            {galleryGrid.length > 0 && (
               <div
                 style={{
                   position: 'fixed',
-                  top: '180px',
+                  top: '240px',
                   right: '280px',
                   display: 'grid',
                   gridTemplateColumns: 'repeat(2, minmax(90px, 1fr))',
-                  gridAutoRows: '88px',
+                  gridAutoRows: '70px',
                   gridAutoFlow: 'row dense',
-                  gap: '12px',
+                  gap: '8px',
                   width: '240px',
                   zIndex: 212
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                {projectGrid.map(({ project: proj, size }, idx) => {
-                  const isActive = overlayProject?.slug === proj.slug
-                  const projIdx = spacesProjects.findIndex((p) => p.slug === proj.slug)
+                {galleryGrid.map(({ image: img, originalIndex, size }, idx) => {
+                  const isActive = activeImageIndex === originalIndex
                   const span = size === 'large' ? 2 : 1
-                  const thumb = getThumbFor(proj)
                   return (
                   <button
-                    key={proj.slug}
+                    key={`gallery-thumb-${idx}`}
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation()
-                      handleOpenOverlay(proj, projIdx, null, 'project', 0)
+                      setActiveImageIndex(originalIndex)
                     }}
-                    onMouseEnter={(e) => showTooltip(proj.title, e)}
+                    onMouseEnter={(e) => showTooltip(img.label || `Image ${originalIndex + 1}`, e)}
                     onMouseLeave={hideTooltip}
                     style={{
                       position: 'relative',
@@ -1394,7 +1371,7 @@ export default function SpacesOverviewPage() {
                       height: '100%',
                       aspectRatio: '1 / 1',
                       gridRow: `span ${span}`,
-                      background: thumb?.src ? '#f5f5f5' : `linear-gradient(135deg, ${paletteForIndex(idx)} 0%, #fffdf3 100%)`,
+                      background: img?.src ? '#f5f5f5' : `linear-gradient(135deg, ${paletteForIndex(idx)} 0%, #fffdf3 100%)`,
                       borderRadius: '6px',
                       border: isActive ? '2px solid #000' : '1px solid rgba(0,0,0,0.12)',
                       boxShadow: 'none',
@@ -1403,10 +1380,10 @@ export default function SpacesOverviewPage() {
                       overflow: 'hidden'
                     }}
                   >
-                    {thumb?.src && (
+                    {img?.src && (
                       <img
-                        src={thumb.src}
-                        alt={proj.title}
+                        src={img.src}
+                        alt={img.label || `Image ${originalIndex + 1}`}
                         style={{
                           width: '100%',
                           height: '100%',
@@ -1415,11 +1392,44 @@ export default function SpacesOverviewPage() {
                         }}
                       />
                     )}
-                    <span style={{ position: 'absolute', left: '6px', top: '6px', fontSize: '10px', fontWeight: 700, color: proj.gallery?.[0]?.src ? '#fff' : '#000', textShadow: proj.gallery?.[0]?.src ? '0 1px 2px rgba(0,0,0,0.5)' : 'none' }}>{idx + 1}</span>
+                    <span style={{ position: 'absolute', left: '6px', top: '6px', fontSize: '10px', fontWeight: 700, color: img?.src ? '#fff' : '#000', textShadow: img?.src ? '0 1px 2px rgba(0,0,0,0.5)' : 'none' }}>{idx + 1}</span>
                   </button>
                 )})}
               </div>
             )}
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                const nextIdx = (overlayProject.idx + 1) % spacesProjects.length
+                const nextProject = spacesProjects[nextIdx]
+                handleOpenOverlay(nextProject, nextIdx, null, 'gallery', 0)
+              }}
+              onMouseEnter={(e) => {
+                const nextIdx = (overlayProject.idx + 1) % spacesProjects.length
+                const nextProject = spacesProjects[nextIdx]
+                showTooltip(`Next: ${nextProject.title}`, e)
+              }}
+              onMouseLeave={hideTooltip}
+              aria-label="Next project"
+              style={{
+                position: 'fixed',
+                right: '270px',
+                bottom: '120px',
+                background: 'none',
+                border: 'none',
+                padding: '8px 0',
+                cursor: 'pointer',
+                opacity: overlayMetaVisible ? 1 : 0,
+                transition: 'opacity 240ms ease 180ms',
+                zIndex: 215
+              }}
+            >
+              <svg width="100" height="14" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M60 6L54 1M60 6L54 11M60 6H0" stroke="#000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
             {overlayStyle && (
               <>
                 <button
