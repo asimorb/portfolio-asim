@@ -981,7 +981,7 @@ export default function SpeculationsPage() {
         </div>
       )}
 
-      <div style={{ padding: isMobile ? '70px 20px 240px 20px' : '130px 240px 420px 150px' }}>
+      <div style={{ padding: isMobile ? 'calc(env(safe-area-inset-top, 0px) + 80px) 16px calc(env(safe-area-inset-bottom, 0px) + 80px) 16px' : '130px 240px 420px 150px' }}>
         <div
           style={{
             background: '#0f0f0f',
@@ -992,15 +992,16 @@ export default function SpeculationsPage() {
             gap: isMobile ? '16px' : '48px',
             minHeight: isMobile ? '480px' : '520px',
             boxShadow: '0 32px 80px rgba(0,0,0,0.18)',
-            maxHeight: isMobile ? 'calc(100vh - 220px)' : '76vh',
-            height: isMobile ? 'calc(100vh - 220px)' : '76vh',
+            maxHeight: isMobile ? 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 160px)' : '76vh',
+            height: isMobile ? 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 160px)' : '76vh',
             width: isMobile ? '100%' : 'auto',
             maxWidth: isMobile ? 'calc(100% - 10px)' : 'auto',
             margin: isMobile ? '0 auto' : '0',
             overflow: isMobile ? 'hidden' : 'auto',
             outline: 'none',
             scrollbarWidth: 'none',
-            position: 'relative'
+            position: 'relative',
+            boxSizing: 'border-box'
           }}
           onWheel={handleCardWheel}
           onTouchStart={handleMobileTouchStart}

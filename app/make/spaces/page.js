@@ -981,11 +981,13 @@ export default function SpacesOverviewPage() {
             style={{
               position: 'fixed',
               inset: 0,
-              padding: '60px 24px 72px',
+              padding: 'calc(env(safe-area-inset-top, 0px) + 80px) 16px calc(env(safe-area-inset-bottom, 0px) + 80px)',
               background: 'rgba(0,0,0,0.08)',
               zIndex: 200,
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              height: '100dvh',
+              boxSizing: 'border-box'
             }}
             onClick={handleCloseOverlay}
             onKeyDown={handleOverlayKeyDown}

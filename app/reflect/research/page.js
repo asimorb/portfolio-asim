@@ -1451,7 +1451,7 @@ export default function ReflectResearchPage() {
                   style={{
                     marginTop: `${mobileImagesGap}px`,
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? 'repeat(auto-fit, minmax(90px, 1fr))' : 'repeat(auto-fill, 110px)',
+                    gridTemplateColumns: isMobile ? 'repeat(auto-fill, 80px)' : 'repeat(auto-fill, 110px)',
                     gap: '10px',
                     maxWidth: '100%',
                     width: '100%',
@@ -1469,8 +1469,8 @@ export default function ReflectResearchPage() {
                         padding: 0,
                         background: 'transparent',
                         cursor: 'zoom-in',
-                        width: '110px',
-                        height: '110px'
+                        width: isMobile ? '80px' : '110px',
+                        height: isMobile ? '80px' : '110px'
                       }}
                     >
                       <img

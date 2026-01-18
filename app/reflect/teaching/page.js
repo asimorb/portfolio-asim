@@ -268,6 +268,7 @@ export default function TeachingPage() {
   const [mobileNotesExpanded, setMobileNotesExpanded] = useState(false)
   const [showLectureToast, setShowLectureToast] = useState(false)
   const [carouselSwipeOffset, setCarouselSwipeOffset] = useState(0)
+  const [heroPage, setHeroPage] = useState(0)
   const mobileMenuTimerRef = useRef(null)
   const lastWheelTimeRef = useRef(0)
   const heroDragStartRef = useRef({ x: 0, y: 0 })
@@ -760,6 +761,11 @@ export default function TeachingPage() {
   const descriptionLabel = selectedItem?.category === 'mentor'
     ? 'description'
     : 'description'
+
+  // Determine if hero needs pagination (for items with long content)
+  const hasGoalsOrAims = !isSeminar && (heroGoalsList.length > 0 || heroGoalsTextBlocks.length > 0 || heroAimsBlocks.length > 0)
+  const heroTotalPages = hasGoalsOrAims ? 2 : 1
+
   const heroCardHeight = isMobile ? '70vh' : '72vh'
   const totalItems = filteredTeachingItems.length || 1
   const dynamicStackGap = isMobile
@@ -853,6 +859,7 @@ export default function TeachingPage() {
     setSelectedIndex(index)
     setHeroLightboxIndex(null)
     setHeroGalleryIndex(0)
+    setHeroPage(0)
   }
 
   const moveHeroGallery = (delta) => {
@@ -1808,81 +1815,140 @@ export default function TeachingPage() {
                   justifyContent: isMobile ? 'flex-end' : undefined
                 }}
               >
-                {heroDescriptionBlocks.length > 0 && (
-                  <div
-                    style={(isSeminar && seminarTopics.length === 0) || isMentor ? {
-                      gridColumn: '1 / -1',
-                      display: useMentorColumns ? 'flex' : undefined,
-                      flexDirection: useMentorColumns ? 'column' : undefined,
-                      minHeight: useMentorColumns ? 0 : undefined
-                    } : undefined}
-                  >
-                  <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'lowercase' }}>
-                      {descriptionLabel}
-                  </div>
-                    {isSeminar && seminarTopics.length === 0 && !isMobile ? (
-                      <div style={{ marginTop: 8, columnCount: 2, columnGap: 24 }}>
-                        {heroDescriptionBlocks.map((block, index) => (
-                          <p
-                            key={index}
-                            style={{
-                              margin: '0 0 10px',
-                              fontSize: '13px',
-                              lineHeight: 1.35,
-                              breakInside: 'avoid'
-                            }}
-                          >
-                            {block}
-                          </p>
-                        ))}
+                {/* Page 0: Description (and seminar topics) */}
+                {heroPage === 0 && (
+                  <>
+                    {heroDescriptionBlocks.length > 0 && (
+                      <div
+                        style={(isSeminar && seminarTopics.length === 0) || isMentor ? {
+                          gridColumn: '1 / -1',
+                          display: useMentorColumns ? 'flex' : undefined,
+                          flexDirection: useMentorColumns ? 'column' : undefined,
+                          minHeight: useMentorColumns ? 0 : undefined
+                        } : undefined}
+                      >
+                      <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'lowercase' }}>
+                          {descriptionLabel}
                       </div>
-                    ) : useMentorColumns ? (
-                      <div style={{ marginTop: 8, columnCount: 2, columnGap: 24, columnFill: 'auto', width: '100%', flex: 1, minHeight: 0, overflowY: 'auto' }}>
-                        {heroDescriptionBlocks.map((block, index) => (
-                          <p
-                            key={index}
-                            style={{
-                              margin: '0 0 10px',
-                              fontSize: '13px',
-                              lineHeight: 1.35
-                            }}
-                          >
-                            {block}
-                          </p>
-                        ))}
-                      </div>
-                    ) : (
-                      <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        {heroDescriptionBlocks.map((block, index) => (
-                          <p key={index} style={{ margin: 0, fontSize: isMobile ? '12px' : '13px', lineHeight: isMobile ? 1.5 : 1.3 }}>
-                            {block}
-                          </p>
-                        ))}
+                        {isSeminar && seminarTopics.length === 0 && !isMobile ? (
+                          <div style={{ marginTop: 8, columnCount: 2, columnGap: 24 }}>
+                            {heroDescriptionBlocks.map((block, index) => (
+                              <p
+                                key={index}
+                                style={{
+                                  margin: '0 0 10px',
+                                  fontSize: '13px',
+                                  lineHeight: 1.35,
+                                  breakInside: 'avoid'
+                                }}
+                              >
+                                {block}
+                              </p>
+                            ))}
+                          </div>
+                        ) : useMentorColumns ? (
+                          <div style={{ marginTop: 8, columnCount: 2, columnGap: 24, columnFill: 'auto', width: '100%', flex: 1, minHeight: 0, overflowY: 'auto' }}>
+                            {heroDescriptionBlocks.map((block, index) => (
+                              <p
+                                key={index}
+                                style={{
+                                  margin: '0 0 10px',
+                                  fontSize: '13px',
+                                  lineHeight: 1.35
+                                }}
+                              >
+                                {block}
+                              </p>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            {heroDescriptionBlocks.map((block, index) => (
+                              <p key={index} style={{ margin: 0, fontSize: isMobile ? '12px' : '13px', lineHeight: isMobile ? 1.5 : 1.3 }}>
+                                {block}
+                              </p>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
-                )}
-                {isSeminar && seminarTopics.length > 0 && (
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'lowercase' }}>
-                      topics
-                    </div>
-                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      {seminarTopics.map((topic, index) => (
-                        <div key={`${topic.number}-${index}`} style={{ display: 'grid', gridTemplateColumns: '26px 1fr', columnGap: 8 }}>
-                          <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em' }}>
-                            {topic.number}
-                          </div>
-                          <div style={{ fontSize: isMobile ? '12px' : '13px', lineHeight: isMobile ? 1.5 : 1.3 }}>
-                            {topic.text}
-                          </div>
+                    {isSeminar && seminarTopics.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'lowercase' }}>
+                          topics
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          {seminarTopics.map((topic, index) => (
+                            <div key={`${topic.number}-${index}`} style={{ display: 'grid', gridTemplateColumns: '26px 1fr', columnGap: 8 }}>
+                              <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em' }}>
+                                {topic.number}
+                              </div>
+                              <div style={{ fontSize: isMobile ? '12px' : '13px', lineHeight: isMobile ? 1.5 : 1.3 }}>
+                                {topic.text}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* For items without goals/aims, show them on page 0 in the right column */}
+                    {!hasGoalsOrAims && (heroGoalsList.length > 0 || heroGoalsTextBlocks.length > 0 || heroAimsBlocks.length > 0) && !isSeminar && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        {heroGoalsList.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'lowercase' }}>
+                              goals
+                            </div>
+                            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                              {heroGoalsList.map((goal, index) => (
+                                <div key={index} style={{ display: 'grid', gridTemplateColumns: '26px 1fr', columnGap: 8 }}>
+                                  <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em' }}>
+                                    {String(index + 1).padStart(2, '0')}
+                                  </div>
+                                  <div style={{ fontSize: isMobile ? '12px' : '13px', lineHeight: isMobile ? 1.5 : 1.3 }}>
+                                    {goal}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {heroGoalsTextBlocks.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'lowercase' }}>
+                              goals
+                            </div>
+                            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {heroGoalsTextBlocks.map((block, index) => (
+                                <p key={index} style={{ margin: 0, fontSize: isMobile ? '12px' : '13px', lineHeight: isMobile ? 1.5 : 1.3 }}>
+                                  {block}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {heroAimsBlocks.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'lowercase' }}>
+                              aims
+                            </div>
+                            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {heroAimsBlocks.map((block, index) => (
+                                <p key={index} style={{ margin: 0, fontSize: isMobile ? '12px' : '13px', lineHeight: isMobile ? 1.5 : 1.3 }}>
+                                  {block}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
                 )}
-                {(heroGoalsList.length > 0 || heroGoalsTextBlocks.length > 0 || heroAimsBlocks.length > 0) && !isSeminar && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                {/* Page 1: Goals and Aims (only for items with hasGoalsOrAims) */}
+                {heroPage === 1 && hasGoalsOrAims && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16, gridColumn: '1 / -1' }}>
                     {heroGoalsList.length > 0 && (
                       <div>
                         <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'lowercase' }}>
@@ -1933,6 +1999,33 @@ export default function TeachingPage() {
                   </div>
                 )}
               </div>
+
+              {/* Pagination dots */}
+              {heroTotalPages > 1 && (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
+                  {Array.from({ length: heroTotalPages }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setHeroPage(idx)
+                      }}
+                      aria-label={`Page ${idx + 1}`}
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        border: 'none',
+                        background: heroPage === idx ? '#000' : '#ccc',
+                        cursor: 'pointer',
+                        padding: 0,
+                        transition: 'background 0.2s ease'
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
             {isMobile && heroThumbs.length > 0 && (
               <div
@@ -1944,7 +2037,7 @@ export default function TeachingPage() {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gridTemplateColumns: 'repeat(auto-fill, 70px)',
                     gap: 8
                   }}
                 >
@@ -1963,7 +2056,9 @@ export default function TeachingPage() {
                           border: 'none',
                           background: 'transparent',
                           padding: 0,
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          width: 70,
+                          height: 54
                         }}
                       >
                         <img
@@ -1971,7 +2066,7 @@ export default function TeachingPage() {
                           alt={`${selectedItem?.title || 'Teaching project'} thumbnail ${index + 1}`}
                           style={{
                             width: '100%',
-                            height: 54,
+                            height: '100%',
                             objectFit: 'cover',
                             borderRadius: 8,
                             display: 'block',
