@@ -421,9 +421,9 @@ const imageEntries = [
      imgHeightMobile: 'auto',
      objectFitMobile: 'contain',
     images: [
-      { src: '/speculations/lud (1).jpg', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px'},
-      { src: '/speculations/lud (2).jpg', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' },
-      { src: '/speculations/lud (3).jpg', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' }
+      { src: '/speculations/lud (1).webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px'},
+      { src: '/speculations/lud (2).webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' },
+      { src: '/speculations/lud (3).webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' }
       ],
     subtitle: '2007 _ 2008',
     description: 'LUDEX, was conceived as a computational game that generates digital metropolises through spatial "fluxion". The project was submitted as a bachelor thesis. This Situationist-inspired system maps architectural categories onto a toggleable board to transform site-specific boundaries.',
