@@ -741,6 +741,7 @@ export default function ViewImages() {
             labelTop={135}
             onBack={handleBack}
             onShuffle={handleShuffleHome}
+            readingModeDisabled={true}
           />
 
           <RightPanelTransform
@@ -846,6 +847,7 @@ export default function ViewImages() {
           readingMode={readingMode}
           onPrimaryAction={() => setReadingMode((prev) => !prev)}
           primaryActive={readingMode}
+          primaryDisabled={true}
           onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
           secondaryIcon="shuffle"
           onBack={handleBack}

@@ -730,6 +730,7 @@ export default function SpacesOverviewPage() {
             onBack={handleBack}
             backDisabled={!overlayProject && !canGoBack}
             onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
+            readingModeDisabled={true}
           />
 
           <RightPanelTransform
@@ -767,6 +768,7 @@ export default function SpacesOverviewPage() {
           readingMode={readingMode}
           onPrimaryAction={toggleReadingMode}
           primaryActive={readingMode}
+          primaryDisabled={true}
           onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
           secondaryIcon="shuffle"
           onBack={handleBack}

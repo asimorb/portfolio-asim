@@ -1091,6 +1091,7 @@ export default function TeachingPage() {
             labelTop={175}
             onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
             onBack={handleBack}
+            readingModeDisabled={true}
           />
 
           <div
@@ -1172,6 +1173,7 @@ export default function TeachingPage() {
           readingMode={readingMode}
           onPrimaryAction={toggleReadingMode}
           primaryActive={readingMode}
+          primaryDisabled={true}
           onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
           secondaryIcon="shuffle"
           onBack={() => navigateWithFade('/reflect')}

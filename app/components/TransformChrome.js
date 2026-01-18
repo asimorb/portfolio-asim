@@ -190,7 +190,8 @@ export function LeftPanelTransform({
     }
   },
   shuffleDisabled = false,
-  hideBack = false
+  hideBack = false,
+  readingModeDisabled = false
 }) {
   const defaultBack = () => {
     if (typeof window === 'undefined') return
@@ -254,12 +255,12 @@ export function LeftPanelTransform({
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4 7.58 4 4 7.58 4 12s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08a6 6 0 1 1-5.65-8c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z" /></svg>
         </button>
         <button
-          onClick={toggleReadingMode}
+          onClick={() => { if (!readingModeDisabled) toggleReadingMode() }}
           aria-label="Toggle reading mode"
-          style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #000', backgroundColor: readingMode ? '#000' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontFamily: 'var(--font-karla)', fontSize: '18px', fontWeight: 600, color: readingMode ? '#FFFDF3' : '#000', transition: 'all 0.3s ease' }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#FFFDF3'; showTooltip(readingMode ? 'Trivia off' : 'Trivia on', e, 'right') }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = readingMode ? '#000' : 'transparent'; e.currentTarget.style.color = readingMode ? '#FFFDF3' : '#000'; hideTooltip() }}
-          onFocus={(e) => showTooltip(readingMode ? 'Trivia off' : 'Trivia on', e, 'right')}
+          style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #000', backgroundColor: readingModeDisabled ? '#e5e5e5' : readingMode ? '#000' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: readingModeDisabled ? 'default' : 'pointer', fontFamily: 'var(--font-karla)', fontSize: '18px', fontWeight: 600, color: readingModeDisabled ? '#8f8f8f' : readingMode ? '#FFFDF3' : '#000', transition: 'all 0.3s ease' }}
+          onMouseEnter={(e) => { if (readingModeDisabled) return; e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#FFFDF3'; showTooltip(readingMode ? 'Trivia off' : 'Trivia on', e, 'right') }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = readingModeDisabled ? '#e5e5e5' : readingMode ? '#000' : 'transparent'; e.currentTarget.style.color = readingModeDisabled ? '#8f8f8f' : readingMode ? '#FFFDF3' : '#000'; hideTooltip() }}
+          onFocus={(e) => { if (!readingModeDisabled) showTooltip(readingMode ? 'Trivia off' : 'Trivia on', e, 'right') }}
           onBlur={hideTooltip}
         >
           i

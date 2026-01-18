@@ -602,6 +602,7 @@ export default function ThingsPage() {
             labelTop={135}
             onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
             onBack={handleBack}
+            readingModeDisabled={true}
           />
 
           <RightPanelTransform
@@ -641,6 +642,7 @@ export default function ThingsPage() {
             readingMode={readingMode}
             onPrimaryAction={toggleReadingMode}
             primaryActive={readingMode}
+            primaryDisabled={true}
             onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
             secondaryIcon="shuffle"
             onBack={() => navigateWithFade('/make')}

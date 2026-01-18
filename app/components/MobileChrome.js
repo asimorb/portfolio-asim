@@ -71,6 +71,7 @@ export function MobileChrome({
   readingMode = false,
   onPrimaryAction,
   primaryActive = false,
+  primaryDisabled = false,
   onSecondaryAction,
   secondaryIcon = 'layers',
   onBack,
@@ -243,21 +244,21 @@ const defaultBack = () => {
           <button
             type="button"
             aria-label="Toggle reading mode"
-            onClick={onPrimaryAction}
+            onClick={() => { if (!primaryDisabled) onPrimaryAction?.() }}
             style={{
               width: 40,
               height: 40,
               borderRadius: '50%',
               border: '1.5px solid #000',
-              background: primaryActive ? '#000' : 'transparent',
-              color: primaryActive ? '#FFFDF3' : '#000',
+              background: primaryDisabled ? '#e5e5e5' : primaryActive ? '#000' : 'transparent',
+              color: primaryDisabled ? '#8f8f8f' : primaryActive ? '#FFFDF3' : '#000',
               fontFamily: 'var(--font-karla)',
               fontSize: '18px',
               fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer'
+              cursor: primaryDisabled ? 'default' : 'pointer'
             }}
           >
             i

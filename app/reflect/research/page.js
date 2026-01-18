@@ -1087,6 +1087,7 @@ export default function ReflectResearchPage() {
             labelTop={175}
             onBack={handleBack}
             onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
+            readingModeDisabled={true}
           />
 
           <div
@@ -1168,6 +1169,7 @@ export default function ReflectResearchPage() {
           readingMode={readingMode}
           onPrimaryAction={toggleReadingMode}
           primaryActive={readingMode}
+          primaryDisabled={true}
           onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
           secondaryIcon="shuffle"
           onBack={handleBack}

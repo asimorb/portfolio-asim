@@ -892,6 +892,7 @@ export default function CurriculumVitaePage() {
           labelTop={85}
           onBack={handleBack}
           onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
+          readingModeDisabled={true}
         />
       )}
 
@@ -932,6 +933,7 @@ export default function CurriculumVitaePage() {
           bottomLabel=""
           readingMode={readingMode}
           primaryActive={readingMode}
+          primaryDisabled={true}
           onPrimaryAction={toggleReadingMode}
           onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
           secondaryIcon="shuffle"

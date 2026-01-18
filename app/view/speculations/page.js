@@ -413,6 +413,42 @@ const imageEntries = [
     notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
     },
 
+          {
+    id: 'lud',
+    displayId: '(IF) PLAY 01',
+     imgWidthMobile: '90%',
+     maxHMobile: '420px',
+     imgHeightMobile: 'auto',
+     objectFitMobile: 'contain',
+    images: [
+      { src: '/speculations/lud (1).jpg', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px'},
+      { src: '/speculations/lud (2).jpg', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' },
+      { src: '/speculations/lud (3).jpg', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' }
+      ],
+    subtitle: '2007 _ 2008',
+    description: 'LUDEX, was conceived as a computational game that generates digital metropolises through spatial "fluxion". The project was submitted as a bachelor thesis. This Situationist-inspired system maps architectural categories onto a toggleable board to transform site-specific boundaries.',
+    notes: 'At its technical core is LUDEX, an interactive architectural game designed to generate digital metropolises through the constant transformation of spatial boundaries, or "fluxion". Using the National College of Arts as a case study, the system categorizes architectural programs into six distinct studies—including anti-Euclidian architecture and psychogeography—which are mapped onto a LUDEX BOARD as toggleable, geometric divisions. These computational "slices" are then extruded into mega-structural wireframes and complex 3D forms, shifting the user\'s role from a spectator to an active "player-architect".',
+    imgWidth: '80%',
+    maxH: '580px',
+    padding: '0px',
+    imageOverflow: 'visible',
+    imgOffsetX: '0px',
+    imgOffsetY: '0px',
+    textColumns: 2, textGridTemplate: '2.5fr 1fr', textMarginTop: '0px', textMarginLeft: '-400px', textAlignSelf: 'stretch', textOffsetX: '0px', textOffsetY: '0px',
+    textMaxWidth: '1000px',  
+    textColumnGap: '28px',
+    textRowGap: '16px',
+      
+    subtitleColumn: 1, subtitleOffsetX: '-330px', subtitleOffsetY: '1160px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
+    subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
+      
+    descriptionColumn: 1, descriptionOffsetX: '-330px', descriptionOffsetY: '175px', descriptionMaxWidth: '520px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
+    descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
+      
+    notesColumn: 2, notesOffsetX: '-345px', notesOffsetY: '175px', notesMaxWidth: '300px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
+    notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
+    },
+
     {
     id: 'idn4cci',
     file: '/speculations/idn.webp', 
@@ -831,6 +867,7 @@ export default function SpeculationsPage() {
             labelTop={225}
             onBack={handleBack}
             onShuffle={() => navigateWithFade('/', { preserveHomeLayout: false })}
+            readingModeDisabled={true}
           />
 
           <RightPanelTransform
@@ -868,6 +905,7 @@ export default function SpeculationsPage() {
           readingMode={readingMode}
           onPrimaryAction={() => setReadingMode((prev) => !prev)}
           primaryActive={readingMode}
+          primaryDisabled={true}
           onSecondaryAction={() => navigateWithFade('/', { preserveHomeLayout: false })}
           secondaryIcon="shuffle"
           onBack={handleBack}
