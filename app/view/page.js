@@ -886,6 +886,9 @@ export default function ViewPage() {
           <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '13px', fontWeight: 400, lineHeight: '16px', color: '#000', top: 120, right: 300, maxWidth: 250 }}>
             Looking is a form of making: framing, composing, speculating. Images document what is, but they also rehearse what could be. Each photograph, rendering, or sketch is a proposal — an argument about how the world might be seen. To view is to test hypotheses with our eyes, to surface patterns, and to spark the next question. Speculations and images here invite that loop of seeing, questioning, and seeing again.
           </div>
+          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-serif)', fontSize: '14px', fontStyle: 'italic', fontWeight: 400, lineHeight: '18px', color: '#000', top: 320, right: 340, maxWidth: 250 }}>
+            to rotate is to reorient your gaze
+          </div>
         </>
       )}
 

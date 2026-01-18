@@ -1,4 +1,4 @@
-import { Noto_Nastaliq_Urdu, Karla } from 'next/font/google'
+import { Noto_Nastaliq_Urdu, Karla, Libre_Baskerville } from 'next/font/google'
 import './globals.css'
 
 const nastaliq = Noto_Nastaliq_Urdu({
@@ -15,6 +15,14 @@ const karla = Karla({
   display: 'swap',
 })
 
+const libreBaskerville = Libre_Baskerville({
+  subsets: ['latin'],
+  weight: ['400'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
+})
+
 export const metadata = {
   title: 'Asim Portfolio',
   description: 'Interactive portfolio with Arabic typography navigation',
@@ -22,7 +30,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${nastaliq.variable} ${karla.variable}`}>
+    <html lang="en" className={`${nastaliq.variable} ${karla.variable} ${libreBaskerville.variable}`}>
       <body style={{ margin: 0, padding: 0, overflow: 'hidden' }}>
         {children}
       </body>

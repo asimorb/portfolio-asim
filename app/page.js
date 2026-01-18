@@ -1186,7 +1186,7 @@ export default function Home() {
     alif: {
       arabic: '\u0627',
       category: 'view',
-      trivia: "Alif (\u0627 / \u0623) is the first letter of the Arabic alphabet. It serves as a carrier for the glottal stop hamza (\u0621) and represents the long vowel sound /a/. Alif is written as a straight vertical stroke, making it one of the simplest letters to recognize. Its written shape changes when combined with other letters like Lam (\u0644\u0627).",
+      trivia: "Alif (\u0627 / \u0623) is the first letter of the Arabic alphabet. It serves as a carrier for the glottal stop hamza (\u0621) and represents the long vowel sound /a/. It is written as a straight vertical stroke, making it one of the simplest letters to recognize. Its written shape changes when combined with other letters like Lam (\u0644\u0627).",
     },
     sad: {
       arabic: '\u0635',
@@ -1625,8 +1625,8 @@ if (!hasMounted) return null
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  padding: '12px 14px',
+                  gap: '8px',
+                  padding: '8px 12px',
                   background: 'transparent',
                   borderBottom: key !== letterOrder[letterOrder.length - 1] ? '1.25px solid #000' : 'none'
                 }}
@@ -1652,11 +1652,11 @@ if (!hasMounted) return null
         </div>
         <div
           style={{
-            marginTop: '80px',
+            marginTop: '30px',
             marginRight: '25px',
             paddingBottom: '16px',
-            fontSize: '28px',
-            lineHeight: '26px',
+            fontSize: '21px',
+            lineHeight: '22px',
             fontWeight: 300,
             maxWidth: '85%',
             pointerEvents: 'auto',
@@ -1664,7 +1664,7 @@ if (!hasMounted) return null
             textAlign: 'right'
           }}
         >
-          Welcome. This is a place where fragments are assembled - spaces, images, reflections. Not to explain, but to invite different ways of seeing.
+          Welcome. I am Asim (عاصم), and this portfolio is an experiment in spatial interaction, where the arabic letters to my name serve as the interface. By moving, rotating, scaling, and mirroring these letters, you navigate the different facets of my work. These four transformations form the fundamental grammar of my practice and the essential actions through which we perceive, inhabit, and reshape our environments. 
         </div>
       </div>
     )}
@@ -1752,18 +1752,18 @@ if (!hasMounted) return null
     {/* Reading mode welcome text */}
     {readingMode && !isMobile && (
       <div
-        className="fixed left-30 top-120 max-w-sm"
+        className="fixed left-30 top-100 max-w-sm"
         style={{
           zIndex: 40,
           fontFamily: 'var(--font-karla)',
-          fontSize: '40px',
+          fontSize: '30px',
           fontWeight: 200,
-          lineHeight: '40px',
-          maxWidth: '400px',
+          lineHeight: '30px',
+          maxWidth: '420px',
           color: '#000'
         }}
       >
-        Welcome. This is a place where fragments are assembled — spaces, images, reflections. Not to explain, but to invite different ways of seeing.
+        Welcome. I am Asim (عاصم), and this portfolio is an experiment in spatial interaction, where the arabic letters to my name serve as the interface. By moving, rotating, scaling, and mirroring these letters, you navigate the different facets of my work. These four transformations form the fundamental grammar of my practice and the essential actions through which we perceive, inhabit, and reshape our environments. 
       </div>
     )}
     

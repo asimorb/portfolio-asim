@@ -843,6 +843,9 @@ const toggleReadingMode = () => {
           <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '13px', fontWeight: 400, lineHeight: '16px', color: '#000', ...readingBodyStyle }}>
             We do not first encounter empty space and then fill it with things; rather, spaces and things emerge together through our engaged inhabitation. The hammer is intelligible through its place in the workshop, just as the workshop becomes a workshop through the arrangement of tools that afford our projects. Neither subject nor object, neither mind nor matter, but the unified field of meaningful action - where perception is already grasping possibilities, and where things show themselves as invitations rather than inert presences. The world does not wait to be known; it offers itself to be inhabited.
           </div>
+          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-serif)', fontSize: '14px', fontStyle: 'italic', fontWeight: 400, lineHeight: '18px', color: '#000', top: 400, right: 310, maxWidth: 350 }}>
+            to mirror is to implore reflective logic
+          </div>
         </>
       )}
 

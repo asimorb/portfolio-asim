@@ -5,7 +5,7 @@ export const spacesProjects = [
     client: 'kaiser khan',
     type: 'residential',
     status: 'complete',
-    notes: 'in this kashmiri farmhouse, walls do more than define space—they express it. They frame, dissect, hold, and invite, creating a structure that’s both dynamic and functional. the result is a home with no front or back, but a continuous play of form and experience.',
+    notes: 'in this kashmiri farmhouse, walls do more than define space—they express it. they frame, dissect, hold, and invite, creating a structure that’s both dynamic and functional. the result is a home with no front or back, but a continuous play of form and experience.',
     gallery: [
       { label: 'sam (1)', aspectRatio: '4 / 3', src: '/spaces/sam (1).jpg' },
       { label: 'sam (2)', aspectRatio: '3 / 4', src: '/spaces/sam (2).jpg' },

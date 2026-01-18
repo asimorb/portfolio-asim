@@ -1158,6 +1158,9 @@ export default function ReflectPage() {
           <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '13px', fontWeight: 400, lineHeight: '16px', color: '#000', ...readingBodyStyle }}>
             Research and teaching as reflective practices that reshape how we perceive and build. To reflect is to fold experience back onto itself: to notice patterns, question assumptions, and surface tacit knowledge. Research and teaching are twin laboratories for this work-one probing, one distilling. Each experiment, each studio critique, is a mirror that scales our thinking up or down, revealing proportions we had not seen. Reflection is not retreat; it is calibration for what comes next.
           </div>
+          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-serif)', fontSize: '14px', fontStyle: 'italic', fontWeight: 400, lineHeight: '18px', color: '#000', top: 360, right: 340, maxWidth: 250 }}>
+            to scale is to outgrow dimensions
+          </div>
         </>
       )}
 

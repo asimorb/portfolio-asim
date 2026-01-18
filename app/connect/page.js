@@ -1077,10 +1077,13 @@ export default function ConnectPage() {
       {readingMode && !isMobile && (
         <>
           <div className="fixed left-30 top-130 max-w-sm" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '40px', fontWeight: 200, lineHeight: '40px', maxWidth: '400px', color: '#000' }}>
-           Biographical and curricular trajectories presented as translations, situating practice within its disciplinary, cultural, and geographic contexts.  
+           Biographical and curricular trajectories presented as translations, situating practice within its disciplinary, cultural, and geographic contexts.
           </div>
           <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '13px', fontWeight: 400, lineHeight: '16px', color: '#000', ...readingBodyStyle }}>
             Networks of work, practice, and story. Curriculum vitae and about me as openings to conversation, not static records. Connection is a living archive: work, roles, and collaborations woven across contexts. A CV captures the surface; the stories underneath are where meaning and momentum live. About me is an invitation to dialogue — a snapshot of values, methods, and curiosities that shape how I show up with others.
+          </div>
+          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-serif)', fontSize: '14px', fontStyle: 'italic', fontWeight: 400, lineHeight: '18px', color: '#000', top: 330, right: 360, maxWidth: 250 }}>
+            to move is to shift perspective
           </div>
         </>
       )}
