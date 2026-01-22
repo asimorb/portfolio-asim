@@ -954,7 +954,7 @@ const LetterStack = ({
     if (readingMode && !isMobile) {
       const timer = setTimeout(() => {
         setIsHidden(true)
-      }, 2500)
+      }, 1500)
 
       return () => {
         clearTimeout(timer)
