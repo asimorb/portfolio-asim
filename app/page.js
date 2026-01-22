@@ -4,6 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MobileChrome } from './components/MobileChrome'
 import { loadHomeLayout, persistHomeLayout, pushNavStack } from './components/navState'
 import { useMediaQuery } from './components/useMediaQuery'
+import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from './components/TransformChrome'
 
 const getFormattedNow = () => {
   const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
@@ -1483,28 +1484,52 @@ if (!hasMounted) return null
     )}
     {!isMobile && (
       <>
-        <TopBar 
-          hoveredElement={hoveredElement} 
-          setHoveredElement={setHoveredElement} 
+        <TopBarTransform
+          hoveredElement={hoveredElement}
+          setHoveredElement={setHoveredElement}
           readingMode={readingMode}
-          showDotTooltip={showDotTooltip}
-          hideButtonTooltip={hideButtonTooltip}
-          navigateWithFade={navigateWithFade}
+          glowFilter="hue-rotate(var(--glow-rotation))"
+          showTooltip={showTooltip}
+          hideTooltip={hideButtonTooltip}
+          activePage="home"
         />
-        <LeftPanel 
+        <LeftPanelTransform
           readingMode={readingMode}
-          shuffleLetters={shuffleLetters}
           toggleReadingMode={toggleReadingMode}
-          showButtonTooltip={showButtonTooltip}
-          hideButtonTooltip={hideButtonTooltip}
+          showTooltip={showTooltip}
+          hideTooltip={hideButtonTooltip}
+          label="HOME"
+          labelTop={120}
         />
-        <RightPanel 
-          hoveredElement={hoveredElement} 
-          setHoveredElement={setHoveredElement} 
+        <RightPanelTransform
+          hoveredElement={hoveredElement}
+          setHoveredElement={setHoveredElement}
           expandedCategory={expandedCategory}
           setExpandedCategory={setExpandedCategory}
           readingMode={readingMode}
-          navigateWithFade={navigateWithFade}
+          glowFilter="hue-rotate(var(--glow-rotation))"
+          showTooltip={showTooltip}
+          hideTooltip={hideButtonTooltip}
+          activePage="home"
+          categories={[
+            { name: 'make', subcategories: ['spaces', 'things'] },
+            { name: 'view', subcategories: ['speculations', 'images'] },
+            { name: 'reflect', subcategories: ['research', 'teaching'] },
+            { name: 'connect', subcategories: ['curriculum vitae', 'about me'] }
+          ]}
+          onNavigate={(sub, category) => {
+            if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
+              navigateWithFade(sub === 'things' ? 'make/things' : 'make/spaces')
+            } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
+              navigateWithFade(`view/${sub}`)
+            } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
+              navigateWithFade(`reflect/${sub}`)
+            } else if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
+              navigateWithFade(`connect/${sub === 'curriculum vitae' ? 'curriculum-vitae' : sub}`)
+            } else {
+              navigateWithFade(category)
+            }
+          }}
         />
       </>
     )}
