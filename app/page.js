@@ -97,12 +97,12 @@ TimeDisplay.displayName = 'TimeDisplay'
 
 const TopBar = ({ hoveredElement, setHoveredElement, readingMode, showDotTooltip, hideButtonTooltip, navigateWithFade }) => {
   const dotCategories = ['make', 'view', 'reflect', 'connect']
-  
+
   return (
-    <div 
+    <div
       className="fixed top-10 left-10 right-10 flex items-center justify-end"
-      style={{ 
-        zIndex: 5,
+      style={{
+        zIndex: 50,
         fontFamily: 'var(--font-karla)',
         fontSize: '14px',
         fontWeight: 400,
@@ -438,7 +438,26 @@ const RightPanel = ({ hoveredElement, setHoveredElement, expandedCategory, setEx
     { name: 'reflect', subcategories: ['research', 'teaching'] },
     { name: 'connect', subcategories: ['curriculum vitae', 'about me'] }
   ]
-  
+
+  const expandTimerRef = useRef(null)
+  const collapseTimerRef = useRef(null)
+
+  useEffect(() => {
+    if (expandTimerRef.current) clearTimeout(expandTimerRef.current)
+    if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current)
+
+    if (hoveredElement && categories.some((c) => c.name === hoveredElement)) {
+      expandTimerRef.current = setTimeout(() => setExpandedCategory(hoveredElement), 500)
+    } else if (expandedCategory) {
+      collapseTimerRef.current = setTimeout(() => setExpandedCategory(null), 500)
+    }
+
+    return () => {
+      if (expandTimerRef.current) clearTimeout(expandTimerRef.current)
+      if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current)
+    }
+  }, [hoveredElement, expandedCategory, setExpandedCategory])
+
   const baseHeight = 140
   const expandedHeight = 350
   const lineHeight = expandedCategory ? expandedHeight : baseHeight
@@ -459,28 +478,27 @@ const RightPanel = ({ hoveredElement, setHoveredElement, expandedCategory, setEx
   return (
     <>
       {/* Vertical dotted line */}
-      <div 
+      <div
         className="fixed right-10 bottom-10"
         style={{
           width: '2px',
           height: `${lineHeight}px`,
           background: 'repeating-linear-gradient(to bottom, #000 0px, #000 2px, transparent 3px, transparent 6px)',
           opacity: 0.8,
-          zIndex: 5,
+          zIndex: 50,
           transition: 'height 0.3s ease'
         }}
       />
-      
+
       {/* Category labels */}
-      <div 
+      <div
         className="fixed right-15 bottom-10"
-        style={{ zIndex: 5 }}
+        style={{ zIndex: 50 }}
       >
-        <div 
+        <div
           className="flex flex-col items-end"
           onMouseLeave={() => {
             setHoveredElement(null)
-            setExpandedCategory(null)
           }}
           style={{
             fontFamily: 'var(--font-karla)',
