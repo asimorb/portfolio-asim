@@ -4,7 +4,6 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MobileChrome } from './components/MobileChrome'
 import { loadHomeLayout, persistHomeLayout, pushNavStack } from './components/navState'
 import { useMediaQuery } from './components/useMediaQuery'
-import { LeftPanelTransform, RightPanelTransform, TopBarTransform } from './components/TransformChrome'
 
 const getFormattedNow = () => {
   const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
@@ -127,9 +126,8 @@ const TopBar = ({ hoveredElement, setHoveredElement, readingMode, showDotTooltip
           {dotCategories.map((category) => {
             const isActive = hoveredElement === category
             return (
-              <button
+              <div
                 key={category}
-                type="button"
                 style={{
                   width: '12px',
                   height: '12px',
@@ -137,11 +135,10 @@ const TopBar = ({ hoveredElement, setHoveredElement, readingMode, showDotTooltip
                   backgroundColor: isActive ? '#FDABD3' : '#000000',
                   filter: isActive ? 'hue-rotate(var(--glow-rotation))' : 'none',
                   transition: 'background-color 0.3s ease',
-                  cursor: 'pointer',
-                  border: 'none',
-                  padding: 0,
-                  margin: 0
+                  cursor: 'pointer'
                 }}
+                role="button"
+                tabIndex={0}
                 aria-label={`Go to ${category}`}
                 onMouseEnter={(e) => {
                   if (readingMode) return
@@ -152,9 +149,25 @@ const TopBar = ({ hoveredElement, setHoveredElement, readingMode, showDotTooltip
                   setHoveredElement(null)
                   hideButtonTooltip()
                 }}
+                onFocus={(e) => {
+                  if (readingMode) return
+                  setHoveredElement(category)
+                  showDotTooltip(category, e)
+                }}
+                onBlur={() => {
+                  setHoveredElement(null)
+                  hideButtonTooltip()
+                }}
                 onClick={() => {
                   if (readingMode) return
                   navigateWithFade(category)
+                }}
+                onKeyDown={(e) => {
+                  if (readingMode) return
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    navigateWithFade(category)
+                  }
                 }}
               />
             )
@@ -459,16 +472,16 @@ const RightPanel = ({ hoveredElement, setHoveredElement, expandedCategory, setEx
       />
       
       {/* Category labels */}
-      <div
+      <div 
         className="fixed right-15 bottom-10"
         style={{ zIndex: 5 }}
-        onMouseLeave={() => {
-          setHoveredElement(null)
-          setExpandedCategory(null)
-        }}
       >
-        <div
+        <div 
           className="flex flex-col items-end"
+          onMouseLeave={() => {
+            setHoveredElement(null)
+            setExpandedCategory(null)
+          }}
           style={{
             fontFamily: 'var(--font-karla)',
             letterSpacing: '-0.02em',
@@ -1484,52 +1497,28 @@ if (!hasMounted) return null
     )}
     {!isMobile && (
       <>
-        <TopBarTransform
-          hoveredElement={hoveredElement}
-          setHoveredElement={setHoveredElement}
+        <TopBar 
+          hoveredElement={hoveredElement} 
+          setHoveredElement={setHoveredElement} 
           readingMode={readingMode}
-          glowFilter="hue-rotate(var(--glow-rotation))"
-          showTooltip={showTooltip}
-          hideTooltip={hideButtonTooltip}
-          activePage="home"
+          showDotTooltip={showDotTooltip}
+          hideButtonTooltip={hideButtonTooltip}
+          navigateWithFade={navigateWithFade}
         />
-        <LeftPanelTransform
+        <LeftPanel 
           readingMode={readingMode}
+          shuffleLetters={shuffleLetters}
           toggleReadingMode={toggleReadingMode}
-          showTooltip={showTooltip}
-          hideTooltip={hideButtonTooltip}
-          label="HOME"
-          labelTop={120}
+          showButtonTooltip={showButtonTooltip}
+          hideButtonTooltip={hideButtonTooltip}
         />
-        <RightPanelTransform
-          hoveredElement={hoveredElement}
-          setHoveredElement={setHoveredElement}
+        <RightPanel 
+          hoveredElement={hoveredElement} 
+          setHoveredElement={setHoveredElement} 
           expandedCategory={expandedCategory}
           setExpandedCategory={setExpandedCategory}
           readingMode={readingMode}
-          glowFilter="hue-rotate(var(--glow-rotation))"
-          showTooltip={showTooltip}
-          hideTooltip={hideButtonTooltip}
-          activePage="make"
-          categories={[
-            { name: 'make', subcategories: ['spaces', 'things'] },
-            { name: 'view', subcategories: ['speculations', 'images'] },
-            { name: 'reflect', subcategories: ['research', 'teaching'] },
-            { name: 'connect', subcategories: ['curriculum vitae', 'about me'] }
-          ]}
-          onNavigate={(sub, category) => {
-            if (category === 'make' && (sub === 'spaces' || sub === 'things')) {
-              navigateWithFade(sub === 'things' ? 'make/things' : 'make/spaces')
-            } else if (category === 'view' && (sub === 'speculations' || sub === 'images')) {
-              navigateWithFade(`view/${sub}`)
-            } else if (category === 'reflect' && (sub === 'research' || sub === 'teaching')) {
-              navigateWithFade(`reflect/${sub}`)
-            } else if (category === 'connect' && (sub === 'curriculum vitae' || sub === 'about me')) {
-              navigateWithFade(`connect/${sub === 'curriculum vitae' ? 'curriculum-vitae' : sub}`)
-            } else {
-              navigateWithFade(category)
-            }
-          }}
+          navigateWithFade={navigateWithFade}
         />
       </>
     )}
