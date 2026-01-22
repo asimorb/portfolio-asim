@@ -948,10 +948,27 @@ const LetterStack = ({
   showTooltip,
   isMobile = false
 }) => {
+  const [isHidden, setIsHidden] = React.useState(false)
+
+  React.useEffect(() => {
+    if (readingMode && !isMobile) {
+      const timer = setTimeout(() => {
+        setIsHidden(true)
+      }, 3500)
+
+      return () => {
+        clearTimeout(timer)
+        setIsHidden(false)
+      }
+    } else {
+      setIsHidden(false)
+    }
+  }, [readingMode, isMobile])
+
   return (
     <>
       <div
-        className="letter-stack-positioner absolute inset-0 flex items-center justify-center"
+        className={`letter-stack-positioner absolute inset-0 flex items-center justify-center ${isHidden ? 'letter-stack-hidden' : ''}`}
         style={{
           transform: `translateX(var(--stack-offset-x)) translateY(var(--stack-offset-y)) scale(var(--stack-scale))`,
           transformOrigin: 'center',
