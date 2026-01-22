@@ -948,9 +948,9 @@ const LetterStack = ({
   showTooltip,
   isMobile = false
 }) => {
-  const [isHidden, setIsHidden] = React.useState(false)
+  const [isHidden, setIsHidden] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (readingMode && !isMobile) {
       const timer = setTimeout(() => {
         setIsHidden(true)
