@@ -472,16 +472,16 @@ const RightPanel = ({ hoveredElement, setHoveredElement, expandedCategory, setEx
       />
       
       {/* Category labels */}
-      <div 
+      <div
         className="fixed right-15 bottom-10"
         style={{ zIndex: 5 }}
+        onMouseLeave={() => {
+          setHoveredElement(null)
+          setExpandedCategory(null)
+        }}
       >
-        <div 
+        <div
           className="flex flex-col items-end"
-          onMouseLeave={() => {
-            setHoveredElement(null)
-            setExpandedCategory(null)
-          }}
           style={{
             fontFamily: 'var(--font-karla)',
             letterSpacing: '-0.02em',
