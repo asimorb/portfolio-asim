@@ -1510,7 +1510,7 @@ if (!hasMounted) return null
           glowFilter="hue-rotate(var(--glow-rotation))"
           showTooltip={showTooltip}
           hideTooltip={hideButtonTooltip}
-          activePage="home"
+          activePage="make"
           categories={[
             { name: 'make', subcategories: ['spaces', 'things'] },
             { name: 'view', subcategories: ['speculations', 'images'] },
