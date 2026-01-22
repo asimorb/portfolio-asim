@@ -5,7 +5,13 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "Bash(npx eslint:*)",
-      "Bash(ls -la \"c:\\\\Users\\\\asimo\\\\Downloads\\\\portfolio-asim\\\\public\\\\research\"\" | grep -i \"study 3 \")"
+      "Bash(ls -la \"c:\\\\Users\\\\asimo\\\\Downloads\\\\portfolio-asim\\\\public\\\\research\"\" | grep -i \"study 3 \")",
+      "Bash(findstr:*)",
+      "Bash(npm run dev:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill -9)",
+      "Bash(netstat:*)",
+      "Bash(curl:*)"
     ]
   }
 }

@@ -946,20 +946,16 @@ const LetterStack = ({
   calculateTooltipPosition,
   tooltipStyle,
   showTooltip,
-  isMobile = false,
-  stackOffset = { x: -30, y: 325 },
-  stackScale = 1
+  isMobile = false
 }) => {
-  const fontSize = isMobile ? 85 : 100
   return (
     <>
       <div
-        className="absolute inset-0 flex items-center justify-center"
+        className="letter-stack-positioner absolute inset-0 flex items-center justify-center"
         style={{
-          transform: `translate(${stackOffset.x}px, ${stackOffset.y}px) scale(${stackScale})`,
+          transform: `translateX(var(--stack-offset-x)) translateY(var(--stack-offset-y)) scale(var(--stack-scale))`,
           transformOrigin: 'center',
-          zIndex: 10,
-          position: 'relative'
+          zIndex: 10
         }}
       >
         <style jsx>{`
@@ -1014,7 +1010,7 @@ const LetterStack = ({
                 aria-label={`${letterKey} letter, open ${letter.category}`}
                 style={{
                   fontFamily: 'var(--font-nastaliq)',
-                  fontSize: `${fontSize}px`,
+                  fontSize: 'var(--letter-font-size)',
                   fontWeight: 700,
                   color: (isHovered || hoveredElement === letter.category) ? '#FDABD3' : '#000000',
                   filter: (isHovered || hoveredElement === letter.category) ? 'hue-rotate(var(--glow-rotation))' : 'none',
@@ -1065,54 +1061,46 @@ const LetterStack = ({
         </div>
       </div>
       
-      {readingMode && !isMobile ? (() => {
-        const gridPositions = [
-          { top: window.innerHeight * 0.35, left: window.innerWidth * 0.82 },   // mim
-          { top: window.innerHeight * 0.15, left: window.innerWidth * 0.71 },   // sad
-          { top: window.innerHeight * 0.15, left: window.innerWidth * 0.82 },   // alif
-          { top: window.innerHeight * 0.15, left: window.innerWidth * 0.59 }   //ayin
-        ]
-        const tooltipWidth = 185
-        const tooltipHeight = 140
-
-        return (
-          <>
-            {letterOrder.map((key, idx) => {
-              const target = gridPositions[idx]
-              const textAlign = 'left'
-              return (
-                <div
-                  key={key}
-                  className="fixed z-50 pointer-events-none overflow-hidden"
-                  style={{
-                    top: `${target.top}px`,
-                    left: `${target.left}px`,
-                    width: `${tooltipWidth}px`,
-                    minHeight: `${tooltipHeight}px`,
-                    opacity: 1,
-                    transition: 'opacity 0.2s ease'
-                  }}
-                >
-                  <p 
-                    style={{
-                      fontFamily: 'var(--font-karla)',
-                      fontSize: '13px',
-                      fontWeight: 400,
-                      lineHeight: '14px',
-                      color: '#000000',
-                      margin: 0,
-                      padding: 0,
-                      textAlign
-                    }}
-                  >
-                    {letters[key].trivia}
-                  </p>
-                </div>
-              )
-            })}
-          </>
-        )
-      })()
+      {readingMode && !isMobile ? (
+        <div
+          style={{
+            position: 'fixed',
+            top: '120px',
+            right: '120px',
+            maxWidth: '520px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '18px 26px',
+            zIndex: 20,
+            pointerEvents: 'none'
+          }}
+        >
+          {letterOrder.map((key) => (
+            <div
+              key={key}
+              style={{
+                pointerEvents: 'none'
+              }}
+            >
+              <p 
+                style={{
+                  fontFamily: 'var(--font-karla)',
+                  fontSize: 'clamp(12px, 0.9vw, 14px)',
+                  fontWeight: 400,
+                  lineHeight: 'clamp(14px, 1.1vw, 16px)',
+                  color: '#000000',
+                  margin: 0,
+                  padding: 0,
+                  textAlign: 'left',
+                  maxWidth: '320px'
+                }}
+              >
+                {letters[key].trivia}
+              </p>
+            </div>
+          ))}
+        </div>
+      )
       : (!isMobile && hoveredLetter && tooltipStyle?.style && (
         <div
           className="fixed z-50 pointer-events-none overflow-hidden"
@@ -1176,7 +1164,12 @@ export default function Home() {
   const transitionTimerRef = useRef(null)
   const mobileMenuTimerRef = useRef(null)
   const letterRefs = useRef({})
-
+  const [showGuides, setShowGuides] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const search = window.location.search.toLowerCase()
+    if (search.includes('guides')) setShowGuides(true)
+  }, [])
   const letters = {
     ayin: {
       arabic: '\u0639',
@@ -1501,6 +1494,30 @@ if (!hasMounted) return null
       onTouchEnd={handleTouchEnd}
     >
     <GradientGlow />
+    {showGuides && !isMobile && (
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 2000
+        }}
+      >
+        {['14%', '32%', '50%', '68%', '86%'].map((left) => (
+          <div
+            key={left}
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left,
+              borderLeft: '1px dashed red',
+              opacity: 0.6
+            }}
+          />
+        ))}
+      </div>
+    )}
     {!isMobile && (
       <>
         <TopBar 
@@ -1527,6 +1544,41 @@ if (!hasMounted) return null
           navigateWithFade={navigateWithFade}
         />
       </>
+    )}
+    {!isMobile && readingMode && (
+      <div
+        style={{
+          position: 'fixed',
+          top: '120px',
+          right: '120px',
+          maxWidth: '560px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+          gap: '20px 28px',
+          zIndex: 18,
+          pointerEvents: 'none'
+        }}
+      >
+        {letterOrder.map((key) => (
+          <div key={'desktop-blurb-' + key} style={{ pointerEvents: 'none' }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-karla)',
+                fontSize: 'clamp(12px, 1vw, 14px)',
+                fontWeight: 400,
+                lineHeight: 'clamp(14px, 1.2vw, 18px)',
+                color: '#000000',
+                margin: 0,
+                padding: 0,
+                textAlign: 'left',
+                maxWidth: '320px'
+              }}
+            >
+              {letters[key].trivia}
+            </p>
+          </div>
+        ))}
+      </div>
     )}
     {isMobile && (
       <MobileChrome
@@ -1767,26 +1819,50 @@ if (!hasMounted) return null
       </div>
     )}
     
-    {!isolatedLetter && (!readingMode || !isMobile) && (
-      <LetterStack
-        readingMode={readingMode}
-        lettersVisible={lettersVisible}
-        letterOrder={letterOrder}
-        letters={letters}
-        hoveredLetter={hoveredLetter}
-        hoveredElement={hoveredElement}
-        setHoveredLetter={setHoveredLetter}
-        setHoveredElement={setHoveredElement}
-        setTooltipStyle={setTooltipStyle}
-        letterRefs={letterRefs}
-        handleLetterClick={handleLetterClick}
-        calculateTooltipPosition={calculateTooltipPosition}
-        tooltipStyle={tooltipStyle}
-        showTooltip={showTooltip}
-        isMobile={isMobile}
-        stackOffset={isMobile ? { x: 0, y: 350 } : { x: -30, y: 325 }}
-        stackScale={isMobile ? 0.9 : 1}
-      />
+    {/* Desktop letter stack - hidden in reading mode */}
+    {!isMobile && !isolatedLetter && !readingMode && (
+      <div className="hero-field">
+        <LetterStack
+          readingMode={readingMode}
+          lettersVisible={lettersVisible}
+          letterOrder={letterOrder}
+          letters={letters}
+          hoveredLetter={hoveredLetter}
+          hoveredElement={hoveredElement}
+          setHoveredLetter={setHoveredLetter}
+          setHoveredElement={setHoveredElement}
+          setTooltipStyle={setTooltipStyle}
+          letterRefs={letterRefs}
+          handleLetterClick={handleLetterClick}
+          calculateTooltipPosition={calculateTooltipPosition}
+          tooltipStyle={tooltipStyle}
+          showTooltip={showTooltip}
+          isMobile={isMobile}
+        />
+      </div>
+    )}
+
+    {/* Mobile letter stack - centered in viewport */}
+    {isMobile && !isolatedLetter && !readingMode && (
+      <div className="mobile-letter-stack">
+        <LetterStack
+          readingMode={readingMode}
+          lettersVisible={lettersVisible}
+          letterOrder={letterOrder}
+          letters={letters}
+          hoveredLetter={hoveredLetter}
+          hoveredElement={hoveredElement}
+          setHoveredLetter={setHoveredLetter}
+          setHoveredElement={setHoveredElement}
+          setTooltipStyle={setTooltipStyle}
+          letterRefs={letterRefs}
+          handleLetterClick={handleLetterClick}
+          calculateTooltipPosition={calculateTooltipPosition}
+          tooltipStyle={tooltipStyle}
+          showTooltip={showTooltip}
+          isMobile={isMobile}
+        />
+      </div>
     )}
     {isolatedLetter === 'ayin' && <div>Mirror Transform</div>}
     {isolatedLetter === 'alif' && <div>Rotate Transform</div>}
@@ -1795,5 +1871,21 @@ if (!hasMounted) return null
   </div>
 )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
