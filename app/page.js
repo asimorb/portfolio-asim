@@ -993,8 +993,8 @@ const LetterStack = ({
           }
         `}</style>
         
-        <div 
-          className={`breathing fade-in flex items-center justify-center ${lettersVisible ? 'opacity-100' : 'opacity-0'}`}
+        <div
+          className={`${!readingMode ? 'breathing' : ''} fade-in flex items-center justify-center ${lettersVisible ? 'opacity-100' : 'opacity-0'}`}
         >
           {letterOrder.map((letterKey, index) => {
             const letter = letters[letterKey]
@@ -1021,7 +1021,7 @@ const LetterStack = ({
                   padding: '10px 12px',
                   marginRight: index < letterOrder.length - 1 ? '-18px' : '-12px',
                   lineHeight: 1,
-                  animation: `breatheSpacing${index} 2.5s ease-in-out infinite`,
+                  animation: readingMode ? 'none' : `breatheSpacing${index} 2.5s ease-in-out infinite`,
                   transform: letterKey === 'alif' ? 'rotate(-3deg)' : 'none',
                   transition: 'color 0.3s ease',
                   pointerEvents: readingMode ? 'none' : 'auto'
@@ -1060,48 +1060,8 @@ const LetterStack = ({
           })}
         </div>
       </div>
-      
-      {readingMode && !isMobile ? (
-        <div
-          style={{
-            position: 'fixed',
-            top: '120px',
-            right: '120px',
-            maxWidth: '520px',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '18px 26px',
-            zIndex: 20,
-            pointerEvents: 'none'
-          }}
-        >
-          {letterOrder.map((key) => (
-            <div
-              key={key}
-              style={{
-                pointerEvents: 'none'
-              }}
-            >
-              <p 
-                style={{
-                  fontFamily: 'var(--font-karla)',
-                  fontSize: 'clamp(12px, 0.9vw, 14px)',
-                  fontWeight: 400,
-                  lineHeight: 'clamp(14px, 1.1vw, 16px)',
-                  color: '#000000',
-                  margin: 0,
-                  padding: 0,
-                  textAlign: 'left',
-                  maxWidth: '320px'
-                }}
-              >
-                {letters[key].trivia}
-              </p>
-            </div>
-          ))}
-        </div>
-      )
-      : (!isMobile && hoveredLetter && tooltipStyle?.style && (
+
+      {!isMobile && hoveredLetter && tooltipStyle?.style && !readingMode && (
         <div
           className="fixed z-50 pointer-events-none overflow-hidden"
           style={{
@@ -1125,7 +1085,7 @@ const LetterStack = ({
             {letters[hoveredLetter].trivia}
           </p>
         </div>
-      ))}
+      )}
     </>
   )
 }
@@ -1547,11 +1507,11 @@ if (!hasMounted) return null
     )}
     {!isMobile && readingMode && (
       <div
+        className="reading-mode-trivia"
         style={{
           position: 'fixed',
           top: '120px',
           right: '120px',
-          maxWidth: '560px',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
           gap: '20px 28px',
@@ -1564,14 +1524,11 @@ if (!hasMounted) return null
             <p
               style={{
                 fontFamily: 'var(--font-karla)',
-                fontSize: 'clamp(12px, 1vw, 14px)',
                 fontWeight: 400,
-                lineHeight: 'clamp(14px, 1.2vw, 18px)',
                 color: '#000000',
                 margin: 0,
                 padding: 0,
-                textAlign: 'left',
-                maxWidth: '320px'
+                textAlign: 'left'
               }}
             >
               {letters[key].trivia}
@@ -1803,24 +1760,13 @@ if (!hasMounted) return null
 
     {/* Reading mode welcome text */}
     {readingMode && !isMobile && (
-      <div
-        className="fixed left-30 top-100 max-w-sm"
-        style={{
-          zIndex: 40,
-          fontFamily: 'var(--font-karla)',
-          fontSize: '30px',
-          fontWeight: 200,
-          lineHeight: '30px',
-          maxWidth: '420px',
-          color: '#000'
-        }}
-      >
-        Welcome. I am Asim (عاصم), and this portfolio is an experiment in spatial interaction, where the arabic letters to my name serve as the interface. By moving, rotating, scaling, and mirroring these letters, you navigate the different facets of my work. These four transformations form the fundamental grammar of my practice and the essential actions through which we perceive, inhabit, and reshape our environments. 
+      <div className="reading-mode-welcome">
+        Welcome. I am Asim (عاصم), and this portfolio is an experiment in spatial interaction, where the arabic letters to my name serve as the interface. By moving, rotating, scaling, and mirroring these letters, you navigate the different facets of my work. These four transformations form the fundamental grammar of my practice and the essential actions through which we perceive, inhabit, and reshape our environments.
       </div>
     )}
     
-    {/* Desktop letter stack - hidden in reading mode */}
-    {!isMobile && !isolatedLetter && !readingMode && (
+    {/* Desktop letter stack - always visible, static in reading mode */}
+    {!isMobile && !isolatedLetter && (
       <div className="hero-field">
         <LetterStack
           readingMode={readingMode}

@@ -53,7 +53,7 @@ body {
 .letter-stack-positioner {
   /* Defaults for wide state - but will be overridden by container queries on desktop */
   --stack-offset-x: -30px;
-  --stack-offset-y: -50px;
+  --stack-offset-y: -120px;
   --stack-scale: 1;
   --letter-font-size: 100px;
 
@@ -68,7 +68,7 @@ body {
 @container hero (min-width: 1433px) {
   .letter-stack-positioner {
     --stack-offset-x: -30px;
-    --stack-offset-y: -50px;
+    --stack-offset-y: -120px;
     --stack-scale: 1;
     --letter-font-size: 100px;
   }
@@ -78,9 +78,9 @@ body {
 @container hero (min-width: 1263px) and (max-width: 1432px) {
   .letter-stack-positioner {
     --stack-offset-x: -15px;
-    --stack-offset-y: -40px;
-    --stack-scale: 0.95;
-    --letter-font-size: 100px;
+    --stack-offset-y: -100px;
+    --stack-scale: 1;
+    --letter-font-size: 90px;
   }
 }
 
@@ -88,9 +88,116 @@ body {
 @container hero (max-width: 1262px) {
   .letter-stack-positioner {
     --stack-offset-x: 0px;
-    --stack-offset-y: -30px;
-    --stack-scale: 0.9;
-    --letter-font-size: 85px;
+    --stack-offset-y: -80px;
+    --stack-scale: 1;
+    --letter-font-size: 80px;
+  }
+}
+
+/* Welcome text responsive sizing - uses viewport media queries since it's position: fixed */
+.reading-mode-welcome {
+  position: fixed;
+  z-index: 40;
+  font-family: var(--font-karla);
+  color: #000;
+  font-size: 30px;
+  line-height: 30px;
+  font-weight: 200;
+  top: auto;
+  left: 120px;
+  right: auto;
+  bottom: 200px;
+  max-width: 460px;
+  text-align: left;
+}
+
+/* Wide state: left column */
+@media (min-width: 1537px) {
+  .reading-mode-welcome {
+    font-size: 30px;
+    line-height: 30px;
+    top: auto;
+    left: 120px;
+    right: auto;
+    bottom: 100px;
+    max-width: 460px;
+    text-align: left;
+  }
+}
+
+/* Medium state: left column, smaller text */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .reading-mode-welcome {
+    font-size: 28px;
+    line-height: 28px;
+    top: auto;
+    left: 120px;
+    right: auto;
+    bottom: 100px;
+    max-width: 460px;
+    text-align: left;
+  }
+}
+
+/* Narrow state: bottom row, left-aligned below letters */
+@media (max-width: 1366px) {
+  .reading-mode-welcome {
+    font-size: 28px;
+    line-height: 28px;
+    top: auto;
+    left: 120px;
+    right: 120px;
+    bottom: 100px;
+    max-width: 460px;
+    text-align: left;
+    transform: none;
+  }
+}
+
+/* Trivia text responsive sizing - uses viewport media queries since it's position: fixed */
+.reading-mode-trivia {
+  max-width: 560px;
+}
+
+.reading-mode-trivia p {
+  font-size: 13px;
+  line-height: 15px;
+  max-width: 240px;
+}
+
+@media (min-width: 1537px) {
+  .reading-mode-trivia {
+    max-width: 560px;
+  }
+
+  .reading-mode-trivia p {
+    font-size: 13px;
+    line-height: 15px;
+    max-width: 240px;
+  }
+}
+
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .reading-mode-trivia {
+    max-width: 560px;
+  }
+
+  .reading-mode-trivia p {
+    font-size: 13px;
+    line-height: 15px;
+    max-width: 240px;
+  }
+}
+
+@media (max-width: 1366px) {
+  .reading-mode-trivia {
+    max-width: 560px;
+  }
+
+  .reading-mode-trivia p {
+    font-size: 13px;
+    line-height: 15px;
+    max-width: 240px;
   }
 }
 
@@ -108,7 +215,7 @@ body {
   /* Override container query variables for mobile */
   --stack-offset-x: 0px;
   --stack-offset-y: -60px;
-  --stack-scale: 0.9;
+  --stack-scale: 1;
   --letter-font-size: 100px;
 
   /* Don't use absolute positioning on mobile - already positioned by parent */
