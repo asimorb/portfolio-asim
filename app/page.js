@@ -126,8 +126,9 @@ const TopBar = ({ hoveredElement, setHoveredElement, readingMode, showDotTooltip
           {dotCategories.map((category) => {
             const isActive = hoveredElement === category
             return (
-              <div
+              <button
                 key={category}
+                type="button"
                 style={{
                   width: '12px',
                   height: '12px',
@@ -135,10 +136,11 @@ const TopBar = ({ hoveredElement, setHoveredElement, readingMode, showDotTooltip
                   backgroundColor: isActive ? '#FDABD3' : '#000000',
                   filter: isActive ? 'hue-rotate(var(--glow-rotation))' : 'none',
                   transition: 'background-color 0.3s ease',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  border: 'none',
+                  padding: 0,
+                  margin: 0
                 }}
-                role="button"
-                tabIndex={0}
                 aria-label={`Go to ${category}`}
                 onMouseEnter={(e) => {
                   if (readingMode) return
@@ -149,25 +151,9 @@ const TopBar = ({ hoveredElement, setHoveredElement, readingMode, showDotTooltip
                   setHoveredElement(null)
                   hideButtonTooltip()
                 }}
-                onFocus={(e) => {
-                  if (readingMode) return
-                  setHoveredElement(category)
-                  showDotTooltip(category, e)
-                }}
-                onBlur={() => {
-                  setHoveredElement(null)
-                  hideButtonTooltip()
-                }}
                 onClick={() => {
                   if (readingMode) return
                   navigateWithFade(category)
-                }}
-                onKeyDown={(e) => {
-                  if (readingMode) return
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    navigateWithFade(category)
-                  }
                 }}
               />
             )
