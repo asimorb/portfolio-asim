@@ -53,7 +53,7 @@ body {
 .letter-stack-positioner {
   /* Defaults for wide state - but will be overridden by container queries on desktop */
   --stack-offset-x: -30px;
-  --stack-offset-y: -120px;
+  --stack-offset-y: -80px;
   --stack-scale: 1;
   --letter-font-size: 100px;
 
@@ -75,7 +75,7 @@ body {
 @container hero (min-width: 1433px) {
   .letter-stack-positioner {
     --stack-offset-x: -30px;
-    --stack-offset-y: -120px;
+    --stack-offset-y: -80px;
     --stack-scale: 1;
     --letter-font-size: 100px;
   }
@@ -85,7 +85,7 @@ body {
 @container hero (min-width: 1263px) and (max-width: 1432px) {
   .letter-stack-positioner {
     --stack-offset-x: -15px;
-    --stack-offset-y: -100px;
+    --stack-offset-y: -80px;
     --stack-scale: 1;
     --letter-font-size: 90px;
   }
@@ -227,4 +227,330 @@ body {
 
   /* Don't use absolute positioning on mobile - already positioned by parent */
   position: relative;
+}
+
+/* ============================================
+   TRANSFORM PAGE READING MODE STYLES
+   ============================================ */
+
+/* Make page interactive elements fade transition */
+.make-interactive-layer {
+  transition: opacity 900ms ease-out, visibility 900ms ease-out;
+}
+
+.make-interactive-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Make page main reading description - wide state */
+@media (min-width: 1537px) {
+  .make-reading-description {
+    font-family: var(--font-karla);
+    font-size: 30px;
+    font-weight: 200;
+    line-height: 30px;
+    color: #000;
+    max-width: 400px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* Make page main reading description - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .make-reading-description {
+    font-family: var(--font-karla);
+    font-size: 28px;
+    font-weight: 200;
+    line-height: 28px;
+    color: #000;
+    max-width: 380px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* Make page main reading description - narrow state */
+@media (max-width: 1366px) {
+  .make-reading-description {
+    font-family: var(--font-karla);
+    font-size: 28px;
+    font-weight: 200;
+    line-height: 28px;
+    color: #000;
+    max-width: 380px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* Make page body reading text - wide state */
+@media (min-width: 1537px) {
+  .make-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 350px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* Make page body reading text - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .make-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* Make page body reading text - narrow state */
+@media (max-width: 1366px) {
+  .make-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* Make page quote reading text - wide state */
+@media (min-width: 1537px) {
+  .make-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 350px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* Make page quote reading text - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .make-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* Make page quote reading text - narrow state */
+@media (max-width: 1366px) {
+  .make-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* View page interactive elements fade transition */
+.view-interactive-layer {
+  transition: opacity 900ms ease-out, visibility 900ms ease-out;
+}
+
+.view-interactive-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* View page main reading description - wide state */
+@media (min-width: 1537px) {
+  .view-reading-description {
+    font-family: var(--font-karla);
+    font-size: 30px;
+    font-weight: 200;
+    line-height: 30px;
+    color: #000;
+    max-width: 400px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* View page main reading description - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .view-reading-description {
+    font-family: var(--font-karla);
+    font-size: 28px;
+    font-weight: 200;
+    line-height: 28px;
+    color: #000;
+    max-width: 380px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* View page main reading description - narrow state */
+@media (max-width: 1366px) {
+  .view-reading-description {
+    font-family: var(--font-karla);
+    font-size: 28px;
+    font-weight: 200;
+    line-height: 28px;
+    color: #000;
+    max-width: 380px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* View page body reading text - wide state */
+@media (min-width: 1537px) {
+  .view-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 350px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* View page body reading text - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .view-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* View page body reading text - narrow state */
+@media (max-width: 1366px) {
+  .view-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* View page quote reading text - wide state */
+@media (min-width: 1537px) {
+  .view-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 350px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* View page quote reading text - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .view-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* View page quote reading text - narrow state */
+@media (max-width: 1366px) {
+  .view-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
 }
