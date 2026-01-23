@@ -554,3 +554,325 @@ body {
     z-index: 40;
   }
 }
+
+/* Reflect page interactive elements fade transition */
+.reflect-interactive-layer {
+  transition: opacity 900ms ease-out, visibility 900ms ease-out;
+}
+
+.reflect-interactive-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Reflect page main reading description - wide state */
+@media (min-width: 1537px) {
+  .reflect-reading-description {
+    font-family: var(--font-karla);
+    font-size: 30px;
+    font-weight: 200;
+    line-height: 30px;
+    color: #000;
+    max-width: 400px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* Reflect page main reading description - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .reflect-reading-description {
+    font-family: var(--font-karla);
+    font-size: 28px;
+    font-weight: 200;
+    line-height: 28px;
+    color: #000;
+    max-width: 380px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* Reflect page main reading description - narrow state */
+@media (max-width: 1366px) {
+  .reflect-reading-description {
+    font-family: var(--font-karla);
+    font-size: 28px;
+    font-weight: 200;
+    line-height: 28px;
+    color: #000;
+    max-width: 380px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* Reflect page body reading text - wide state */
+@media (min-width: 1537px) {
+  .reflect-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 350px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* Reflect page body reading text - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .reflect-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* Reflect page body reading text - narrow state */
+@media (max-width: 1366px) {
+  .reflect-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* Reflect page quote reading text - wide state */
+@media (min-width: 1537px) {
+  .reflect-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 350px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* Reflect page quote reading text - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .reflect-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* Reflect page quote reading text - narrow state */
+@media (max-width: 1366px) {
+  .reflect-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* Connect page interactive elements fade transition */
+.connect-interactive-layer {
+  transition: opacity 900ms ease-out, visibility 900ms ease-out;
+}
+
+.connect-interactive-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Connect page main reading description - wide state */
+@media (min-width: 1537px) {
+  .connect-reading-description {
+    font-family: var(--font-karla);
+    font-size: 30px;
+    font-weight: 200;
+    line-height: 30px;
+    color: #000;
+    max-width: 400px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* Connect page main reading description - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .connect-reading-description {
+    font-family: var(--font-karla);
+    font-size: 28px;
+    font-weight: 200;
+    line-height: 28px;
+    color: #000;
+    max-width: 380px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* Connect page main reading description - narrow state */
+@media (max-width: 1366px) {
+  .connect-reading-description {
+    font-family: var(--font-karla);
+    font-size: 28px;
+    font-weight: 200;
+    line-height: 28px;
+    color: #000;
+    max-width: 380px;
+    position: fixed;
+    left: 120px;
+    top: auto;
+    bottom: 100px;
+    z-index: 40;
+  }
+}
+
+/* Connect page body reading text - wide state */
+@media (min-width: 1537px) {
+  .connect-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 350px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* Connect page body reading text - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .connect-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* Connect page body reading text - narrow state */
+@media (max-width: 1366px) {
+  .connect-reading-body {
+    font-family: var(--font-karla);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 200px;
+    right: 200px;
+    z-index: 40;
+  }
+}
+
+/* Connect page quote reading text - wide state */
+@media (min-width: 1537px) {
+  .connect-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 350px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* Connect page quote reading text - medium state */
+@media (min-width: 1367px) and (max-width: 1536px) {
+  .connect-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}
+
+/* Connect page quote reading text - narrow state */
+@media (max-width: 1366px) {
+  .connect-reading-quote {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 18px;
+    color: #000;
+    max-width: 340px;
+    position: fixed;
+    top: 400px;
+    right: 305px;
+    z-index: 40;
+  }
+}

@@ -1152,13 +1152,13 @@ export default function ReflectPage() {
 
       {readingMode && !isMobile && (
         <>
-          <div className="fixed left-30 top-110 max-w-sm" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '40px', fontWeight: 200, lineHeight: '40px', maxWidth: '400px', color: '#000' }}>
+          <div className="reflect-reading-description">
             Perspectives on interactivity, presence, and quality across immersive media and design. Methods, studies, and pedagogy that are evidence-led, practice-linked, and open to challenge.
           </div>
-          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '13px', fontWeight: 400, lineHeight: '16px', color: '#000', ...readingBodyStyle }}>
+          <div className="reflect-reading-body">
             Research and teaching as reflective practices that reshape how we perceive and build. To reflect is to fold experience back onto itself: to notice patterns, question assumptions, and surface tacit knowledge. Research and teaching are twin laboratories for this work-one probing, one distilling. Each experiment, each studio critique, is a mirror that scales our thinking up or down, revealing proportions we had not seen. Reflection is not retreat; it is calibration for what comes next.
           </div>
-          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-serif)', fontSize: '14px', fontStyle: 'italic', fontWeight: 400, lineHeight: '18px', color: '#000', top: 360, right: 340, maxWidth: 250 }}>
+          <div className="reflect-reading-quote">
             to scale is to outgrow dimensions
           </div>
         </>
@@ -1293,6 +1293,7 @@ export default function ReflectPage() {
 
       <div className={`absolute inset-0 bg-white pointer-events-none ${navigatingTo ? 'opacity-100' : 'opacity-0'}`} style={{ zIndex: 50, transition: 'opacity 2s ease-in-out', backgroundColor: '#FFFDF3' }} />
 
+      <div className={`reflect-interactive-layer ${readingMode ? 'reflect-interactive-hidden' : ''}`}>
         {targets.length > 0 && (
       <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 2, pointerEvents: 'none' }}>
         <circle cx={orbitCenterX} cy={orbitCenterY} r={knobRadius} stroke={knobActive ? '#FDABD3' : '#000'} strokeWidth="2" strokeDasharray="4,4" fill="none" style={{ filter: knobActive ? glowFilter : 'none' }} />
@@ -1307,7 +1308,9 @@ export default function ReflectPage() {
         })}
       </svg>
       )}
+      </div>
 
+      <div className={`reflect-interactive-layer ${readingMode ? 'reflect-interactive-hidden' : ''}`}>
       {(() => {
         if (!targets.length) return null
         const labelSize = { width: 160, height: 40 }
@@ -1402,7 +1405,9 @@ export default function ReflectPage() {
           )
         })
       })()}
+      </div>
 
+      <div className={`reflect-interactive-layer ${readingMode ? 'reflect-interactive-hidden' : ''}`}>
       <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 4, pointerEvents: 'auto' }}>
         <circle
           cx={knobX}
@@ -1443,9 +1448,10 @@ export default function ReflectPage() {
           onTouchEnd={handleTouchEndDrag}
         />
       </svg>
+      </div>
 
       <div
-        className="absolute select-none leading-none"
+        className={`absolute select-none leading-none reflect-interactive-layer ${readingMode ? 'reflect-interactive-hidden' : ''}`}
         ref={letterRef}
         style={{
           left: `${letterCenterX}px`,
@@ -1461,7 +1467,9 @@ export default function ReflectPage() {
           zIndex: 10,
           color: '#000',
           lineHeight: '0.9em',
-          pointerEvents: 'none',
+          opacity: navigatingTo ? 0 : (readingMode ? 0 : 1),
+          transition: 'opacity 900ms ease-out, visibility 900ms ease-out, transform 200ms ease-out',
+          pointerEvents: readingMode ? 'none' : 'auto',
           transform: `translate(-50%, -50%) translateY(${letterGlyphOffsetY}px) scale(${scaleFactor})`,
           transformOrigin: '50% 50%'
         }}

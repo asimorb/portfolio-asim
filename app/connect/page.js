@@ -1076,18 +1076,19 @@ export default function ConnectPage() {
 
       {readingMode && !isMobile && (
         <>
-          <div className="fixed left-30 top-130 max-w-sm" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '40px', fontWeight: 200, lineHeight: '40px', maxWidth: '400px', color: '#000' }}>
+          <div className="connect-reading-description">
            Biographical and curricular trajectories presented as translations, situating practice within its disciplinary, cultural, and geographic contexts.
           </div>
-          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '13px', fontWeight: 400, lineHeight: '16px', color: '#000', ...readingBodyStyle }}>
+          <div className="connect-reading-body">
             Networks of work, practice, and story. Curriculum vitae and about me as openings to conversation, not static records. Connection is a living archive: work, roles, and collaborations woven across contexts. A CV captures the surface; the stories underneath are where meaning and momentum live. About me is an invitation to dialogue — a snapshot of values, methods, and curiosities that shape how I show up with others.
           </div>
-          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-serif)', fontSize: '14px', fontStyle: 'italic', fontWeight: 400, lineHeight: '18px', color: '#000', top: 330, right: 360, maxWidth: 250 }}>
+          <div className="connect-reading-quote">
             to move is to shift perspective
           </div>
         </>
       )}
 
+      <div className={`connect-interactive-layer ${readingMode ? 'connect-interactive-hidden' : ''}`}>
       {targets.length > 0 && (() => {
         const labelSize = { width: 200, height: 32 }
         const pad = 16
@@ -1196,7 +1197,9 @@ export default function ConnectPage() {
           </>
         )
       })()}
+      </div>
 
+      <div className={`connect-interactive-layer ${readingMode ? 'connect-interactive-hidden' : ''}`}>
       <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 4, pointerEvents: 'auto' }}>
         <line
           x1={knobPos.x}
@@ -1277,9 +1280,10 @@ export default function ConnectPage() {
           }}
         />
       </svg>
+      </div>
 
       <div
-        className="absolute select-none leading-none"
+        className={`absolute select-none leading-none connect-interactive-layer ${readingMode ? 'connect-interactive-hidden' : ''}`}
         ref={letterRef}
         style={{
           left: `${letterPos.x}px`,
@@ -1295,7 +1299,9 @@ export default function ConnectPage() {
           zIndex: 10,
           color: '#000',
           lineHeight: '0.9em',
-          pointerEvents: 'none',
+          opacity: navigatingTo ? 0 : (readingMode ? 0 : 1),
+          transition: 'opacity 900ms ease-out, visibility 900ms ease-out, transform 200ms ease-out',
+          pointerEvents: readingMode ? 'none' : 'auto',
           transform: `translate(-50%, -50%) translateY(${letterGlyphOffsetY}px)`,
           transformOrigin: '50% 50%'
         }}

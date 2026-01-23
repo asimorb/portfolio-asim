@@ -880,13 +880,13 @@ export default function ViewPage() {
 
       {readingMode && !isMobile && (
         <>
-          <div className="fixed left-30 top-120 max-w-sm" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '40px', fontWeight: 200, lineHeight: '40px', maxWidth: '400px', color: '#000' }}>
+          <div className="view-reading-description">
             Visual inquiries from documentation to speculation. Photography and visual experiments, documenting realities while opening questions about possible futures.
           </div>
-          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '13px', fontWeight: 400, lineHeight: '16px', color: '#000', top: 120, right: 300, maxWidth: 250 }}>
+          <div className="view-reading-body">
             Looking is a form of making: framing, composing, speculating. Images document what is, but they also rehearse what could be. Each photograph, rendering, or sketch is a proposal — an argument about how the world might be seen. To view is to test hypotheses with our eyes, to surface patterns, and to spark the next question. Speculations and images here invite that loop of seeing, questioning, and seeing again.
           </div>
-          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-serif)', fontSize: '14px', fontStyle: 'italic', fontWeight: 400, lineHeight: '18px', color: '#000', top: 320, right: 340, maxWidth: 250 }}>
+          <div className="view-reading-quote">
             to rotate is to reorient your gaze
           </div>
         </>
@@ -932,6 +932,7 @@ export default function ViewPage() {
 
       {/* Arc fill toward furthest target */}
       {/* Target guides + labels */}
+      <div className={`view-interactive-layer ${readingMode ? 'view-interactive-hidden' : ''}`}>
       {(() => {
         if (targetAngles.length !== 2) return null
         const labelSize = { width: 160, height: 40 }
@@ -1028,8 +1029,10 @@ export default function ViewPage() {
           )
         })
       })()}
+      </div>
 
       {/* Whisker */}
+      <div className={`view-interactive-layer ${readingMode ? 'view-interactive-hidden' : ''}`}>
       <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 4 }}>
         <line
           x1={letterCenterX}
@@ -1094,10 +1097,11 @@ export default function ViewPage() {
           onTouchEnd={handleWhiskerTouchEnd}
         />
       </svg>
+      </div>
 
       {/* Letter */}
       <div
-        className="absolute select-none leading-none"
+        className={`absolute select-none leading-none view-interactive-layer ${readingMode ? 'view-interactive-hidden' : ''}`}
         ref={letterRef}
         style={{
           left: `${letterPosition.x}px`,
@@ -1112,12 +1116,12 @@ export default function ViewPage() {
           justifyContent: 'center',
           zIndex: 10,
           color: '#000',
-          opacity: navigatingTo ? 0 : 1,
-          transition: navigatingTo ? 'opacity 0.5s ease-in-out' : (isDraggingRotate ? 'none' : 'transform 0.2s ease'),
-          pointerEvents: 'none',
-        transform: `translateY(${letterGlyphOffsetY}px) rotate(${letterAngle - 3}deg)`,
-        transformOrigin: '50% 50%'
-      }}
+          opacity: navigatingTo ? 0 : (readingMode ? 0 : 1),
+          transition: 'opacity 900ms ease-out, visibility 900ms ease-out, transform 200ms ease-out',
+          pointerEvents: readingMode ? 'none' : 'auto',
+          transform: `translateY(${letterGlyphOffsetY}px) rotate(${letterAngle - 3}deg)`,
+          transformOrigin: '50% 50%'
+        }}
         aria-label={`${selectedLetterKey} letter`}
         onMouseMove={handleLetterMouseMove}
       >

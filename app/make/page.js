@@ -837,13 +837,13 @@ const toggleReadingMode = () => {
 
       {readingMode && !isMobile && (
         <>
-          <div className="fixed left-30 top-120 max-w-sm" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '40px', fontWeight: 200, lineHeight: '40px', maxWidth: '400px', color: '#000' }}>
+          <div className="make-reading-description">
             Works spanning built architecture and extended reality. Spaces and things as material and digital constructs, examined for how they shape modes of inhabitation and interaction.
           </div>
-          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-karla)', fontSize: '13px', fontWeight: 400, lineHeight: '16px', color: '#000', ...readingBodyStyle }}>
+          <div className="make-reading-body">
             We do not first encounter empty space and then fill it with things; rather, spaces and things emerge together through our engaged inhabitation. The hammer is intelligible through its place in the workshop, just as the workshop becomes a workshop through the arrangement of tools that afford our projects. Neither subject nor object, neither mind nor matter, but the unified field of meaningful action - where perception is already grasping possibilities, and where things show themselves as invitations rather than inert presences. The world does not wait to be known; it offers itself to be inhabited.
           </div>
-          <div className="fixed" style={{ zIndex: 40, fontFamily: 'var(--font-serif)', fontSize: '14px', fontStyle: 'italic', fontWeight: 400, lineHeight: '18px', color: '#000', top: 400, right: 310, maxWidth: 350 }}>
+          <div className="make-reading-quote">
             to mirror is to implore reflective logic
           </div>
         </>
@@ -886,98 +886,100 @@ const toggleReadingMode = () => {
 
       <div className={`absolute inset-0 bg-white pointer-events-none ${navigatingTo ? 'opacity-100' : 'opacity-0'}`} style={{ zIndex: 50, transition: 'opacity 2s ease-in-out', backgroundColor: '#FFFDF3' }} />
 
-      {axes.map((axis, index) => {
-        const knobPos = getPositionOnAxis(axis.knobPosition, axis)
-        const targetPos = getPositionOnAxis(1, axis)
-        const isAtTarget = axis.knobPosition > 0.95
-        const vx = axis.end.x - axis.start.x
-        const vy = axis.end.y - axis.start.y
-        const vlen = Math.max(Math.sqrt(vx * vx + vy * vy), 1)
-        const ux = vx / vlen
-        const uy = vy / vlen
-        const letterCenter = letterPosition ? { x: letterPosition.x + letterSize / 2, y: letterPosition.y + letterSize / 2 } : { x: 0, y: 0 }
-        const vToTarget = { x: targetPos.x - letterCenter.x, y: targetPos.y - letterCenter.y }
-        const vLenTarget = Math.max(Math.sqrt(vToTarget.x * vToTarget.x + vToTarget.y * vToTarget.y), 1)
-        const vnx = vToTarget.x / vLenTarget
-        const vny = vToTarget.y / vLenTarget
-        const alongOffset = 6
-        const basePos = { x: targetPos.x + vnx * alongOffset, y: targetPos.y + vny * alongOffset }
-        const perp = { x: -vny, y: vnx }
-        const perpLen = Math.max(Math.sqrt(perp.x * perp.x + perp.y * perp.y), 1)
-        const pnx = perp.x / perpLen
-        const pny = perp.y / perpLen
-        const perpOffset = 28
-        const candidates = [
-          { x: basePos.x + pnx * perpOffset, y: basePos.y + pny * perpOffset },
-          { x: basePos.x - pnx * perpOffset, y: basePos.y - pny * perpOffset }
-        ]
-        const labelSize = { width: 160, height: 40 }
-        const pad = 16
-        const clamp = (val, min, max) => Math.min(Math.max(val, min), max)
-        const chooseCandidate = (cand) => {
-          if (typeof window === 'undefined') {
-            return { boxX: cand.x - labelSize.width / 2, boxY: cand.y - labelSize.height / 2, delta: 0 }
+      <div className={`make-interactive-layer ${readingMode ? 'make-interactive-hidden' : ''}`}>
+        {axes.map((axis, index) => {
+          const knobPos = getPositionOnAxis(axis.knobPosition, axis)
+          const targetPos = getPositionOnAxis(1, axis)
+          const isAtTarget = axis.knobPosition > 0.95
+          const vx = axis.end.x - axis.start.x
+          const vy = axis.end.y - axis.start.y
+          const vlen = Math.max(Math.sqrt(vx * vx + vy * vy), 1)
+          const ux = vx / vlen
+          const uy = vy / vlen
+          const letterCenter = letterPosition ? { x: letterPosition.x + letterSize / 2, y: letterPosition.y + letterSize / 2 } : { x: 0, y: 0 }
+          const vToTarget = { x: targetPos.x - letterCenter.x, y: targetPos.y - letterCenter.y }
+          const vLenTarget = Math.max(Math.sqrt(vToTarget.x * vToTarget.x + vToTarget.y * vToTarget.y), 1)
+          const vnx = vToTarget.x / vLenTarget
+          const vny = vToTarget.y / vLenTarget
+          const alongOffset = 6
+          const basePos = { x: targetPos.x + vnx * alongOffset, y: targetPos.y + vny * alongOffset }
+          const perp = { x: -vny, y: vnx }
+          const perpLen = Math.max(Math.sqrt(perp.x * perp.x + perp.y * perp.y), 1)
+          const pnx = perp.x / perpLen
+          const pny = perp.y / perpLen
+          const perpOffset = 28
+          const candidates = [
+            { x: basePos.x + pnx * perpOffset, y: basePos.y + pny * perpOffset },
+            { x: basePos.x - pnx * perpOffset, y: basePos.y - pny * perpOffset }
+          ]
+          const labelSize = { width: 160, height: 40 }
+          const pad = 16
+          const clamp = (val, min, max) => Math.min(Math.max(val, min), max)
+          const chooseCandidate = (cand) => {
+            if (typeof window === 'undefined') {
+              return { boxX: cand.x - labelSize.width / 2, boxY: cand.y - labelSize.height / 2, delta: 0 }
+            }
+            const maxX = window.innerWidth - labelSize.width - pad
+            const maxY = window.innerHeight - labelSize.height - pad
+            const boxX = clamp(cand.x - labelSize.width / 2, pad, maxX)
+            const boxY = clamp(cand.y - labelSize.height / 2, pad, maxY)
+            const dx = (cand.x - labelSize.width / 2) - boxX
+            const dy = (cand.y - labelSize.height / 2) - boxY
+            return { boxX, boxY, delta: dx * dx + dy * dy }
           }
-          const maxX = window.innerWidth - labelSize.width - pad
-          const maxY = window.innerHeight - labelSize.height - pad
-          const boxX = clamp(cand.x - labelSize.width / 2, pad, maxX)
-          const boxY = clamp(cand.y - labelSize.height / 2, pad, maxY)
-          const dx = (cand.x - labelSize.width / 2) - boxX
-          const dy = (cand.y - labelSize.height / 2) - boxY
-          return { boxX, boxY, delta: dx * dx + dy * dy }
-        }
-        const c1 = chooseCandidate(candidates[0])
-        const c2 = chooseCandidate(candidates[1])
-        const best = c1.delta <= c2.delta ? c1 : c2
-        const labelBox = { x: best.boxX, y: best.boxY, width: labelSize.width, height: labelSize.height }
-        const knobStroke = (hoveredKnob === index || isAtTarget || isDragging) ? '#FDABD3' : '#000'
-        const knobFilter = knobStroke === '#FDABD3' ? glowFilter : 'none'
-        const knobFill = isAtTarget ? '#FDABD3' : '#FFFDF3'
-        return (
-          <div key={index}>
-            <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 2 }}>
-              <line x1={axis.start.x} y1={axis.start.y} x2={axis.end.x} y2={axis.end.y} stroke="#FDABD3" strokeWidth="2" strokeDasharray="4,4" style={{ filter: glowFilter }} />
-              <circle cx={targetPos.x} cy={targetPos.y} r="8" fill="#FDABD3" className={isAtTarget ? '' : 'pulse-dot'} opacity={isAtTarget ? '0.5' : undefined} style={{ filter: glowFilter }} />
-              <foreignObject x={labelBox.x} y={labelBox.y} width={labelBox.width} height={labelBox.height}>
-                <div
-                  onMouseEnter={!isMobile ? (e) => { setHoveredElement(axis.label); showTooltip(axis.label, e) } : undefined}
-                  onMouseLeave={!isMobile ? () => { setHoveredElement(null); hideTooltip() } : undefined}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
-                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation() }}
-                  onKeyDown={(e) => { e.preventDefault(); e.stopPropagation() }}
-                  tabIndex={-1}
-                  style={{ fontFamily: 'var(--font-karla)', fontSize: isMobile ? '14px' : '16px', fontWeight: 500, fontStyle: 'normal', textTransform: 'uppercase', textAlign: 'center', color: hoveredElement === axis.label ? '#FDABD3' : '#000', filter: hoveredElement === axis.label ? glowFilter : 'none', transition: 'color 0.3s ease', cursor: 'default', pointerEvents: isMobile ? 'none' : 'auto', userSelect: 'none' }}
-                >
-                  {axis.label}
-                </div>
-              </foreignObject>
-            </svg>
-            <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 4, pointerEvents: 'none' }}>
-              <circle
-                cx={knobPos.x}
-                cy={knobPos.y}
-                r="8"
-                fill={knobFill}
-                stroke={knobStroke}
-                strokeWidth="2"
-                style={{ cursor: 'grab', pointerEvents: 'auto', filter: knobFilter, transition: 'fill 0.3s ease, stroke 0.3s ease', outline: 'none' }}
-                role="button"
-                tabIndex={0}
-                aria-label="Drag to mirror"
-                onMouseDown={(e) => handleMouseDown(e, index)}
-                onTouchStart={(e) => handleTouchStart(e, index)}
-                onMouseEnter={(e) => { setHoveredKnob(index); showTooltip('Drag to mirror', e) }}
-                onMouseLeave={() => { setHoveredKnob(null); hideTooltip() }}
-                onFocus={(e) => { setHoveredKnob(index); showTooltip('Drag to mirror', e) }}
-                onBlur={() => { setHoveredKnob(null); hideTooltip() }}
-              />
-            </svg>
-          </div>
-        )
-      })}
+          const c1 = chooseCandidate(candidates[0])
+          const c2 = chooseCandidate(candidates[1])
+          const best = c1.delta <= c2.delta ? c1 : c2
+          const labelBox = { x: best.boxX, y: best.boxY, width: labelSize.width, height: labelSize.height }
+          const knobStroke = (hoveredKnob === index || isAtTarget || isDragging) ? '#FDABD3' : '#000'
+          const knobFilter = knobStroke === '#FDABD3' ? glowFilter : 'none'
+          const knobFill = isAtTarget ? '#FDABD3' : '#FFFDF3'
+          return (
+            <div key={index}>
+              <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 2 }}>
+                <line x1={axis.start.x} y1={axis.start.y} x2={axis.end.x} y2={axis.end.y} stroke="#FDABD3" strokeWidth="2" strokeDasharray="4,4" style={{ filter: glowFilter }} />
+                <circle cx={targetPos.x} cy={targetPos.y} r="8" fill="#FDABD3" className={isAtTarget ? '' : 'pulse-dot'} opacity={isAtTarget ? '0.5' : undefined} style={{ filter: glowFilter }} />
+                <foreignObject x={labelBox.x} y={labelBox.y} width={labelBox.width} height={labelBox.height}>
+                  <div
+                    onMouseEnter={!isMobile ? (e) => { setHoveredElement(axis.label); showTooltip(axis.label, e) } : undefined}
+                    onMouseLeave={!isMobile ? () => { setHoveredElement(null); hideTooltip() } : undefined}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+                    onMouseDown={(e) => { e.preventDefault(); e.stopPropagation() }}
+                    onKeyDown={(e) => { e.preventDefault(); e.stopPropagation() }}
+                    tabIndex={-1}
+                    style={{ fontFamily: 'var(--font-karla)', fontSize: isMobile ? '14px' : '16px', fontWeight: 500, fontStyle: 'normal', textTransform: 'uppercase', textAlign: 'center', color: hoveredElement === axis.label ? '#FDABD3' : '#000', filter: hoveredElement === axis.label ? glowFilter : 'none', transition: 'color 0.3s ease', cursor: 'default', pointerEvents: isMobile ? 'none' : 'auto', userSelect: 'none' }}
+                  >
+                    {axis.label}
+                  </div>
+                </foreignObject>
+              </svg>
+              <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 4, pointerEvents: 'none' }}>
+                <circle
+                  cx={knobPos.x}
+                  cy={knobPos.y}
+                  r="8"
+                  fill={knobFill}
+                  stroke={knobStroke}
+                  strokeWidth="2"
+                  style={{ cursor: 'grab', pointerEvents: 'auto', filter: knobFilter, transition: 'fill 0.3s ease, stroke 0.3s ease', outline: 'none' }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Drag to mirror"
+                  onMouseDown={(e) => handleMouseDown(e, index)}
+                  onTouchStart={(e) => handleTouchStart(e, index)}
+                  onMouseEnter={(e) => { setHoveredKnob(index); showTooltip('Drag to mirror', e) }}
+                  onMouseLeave={() => { setHoveredKnob(null); hideTooltip() }}
+                  onFocus={(e) => { setHoveredKnob(index); showTooltip('Drag to mirror', e) }}
+                  onBlur={() => { setHoveredKnob(null); hideTooltip() }}
+                />
+              </svg>
+            </div>
+          )
+        })}
+      </div>
 
       <div
-        className="absolute select-none leading-none"
+        className={`absolute select-none leading-none make-interactive-layer ${readingMode ? 'make-interactive-hidden' : ''}`}
         ref={letterRef}
         style={{
           left: `${letterPosition.x}px`,
@@ -992,9 +994,9 @@ const toggleReadingMode = () => {
           justifyContent: 'center',
           zIndex: 10,
           color: '#000',
-          opacity: navigatingTo ? 0 : 1,
-          transition: navigatingTo ? 'opacity 0.5s ease-in-out' : (isDragging ? 'none' : 'transform 0.3s ease'),
-          pointerEvents: 'none',
+          opacity: navigatingTo ? 0 : (readingMode ? 0 : 1),
+          transition: 'opacity 900ms ease-out, visibility 900ms ease-out, transform 200ms ease-out',
+          pointerEvents: readingMode ? 'none' : 'auto',
           transform: `${getLetterTransform() === 'none' ? '' : getLetterTransform()} ${letterOffsetY !== 0 ? `translateY(${letterOffsetY}px)` : ''}`.trim() || 'none',
           transformOrigin: 'center'
         }}
