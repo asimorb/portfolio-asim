@@ -241,9 +241,10 @@ const MobileMenuOverlay = ({
   onNavigate,
   glowFilter,
   activeMenuCategory,
-  setActiveMenuCategory
+  setActiveMenuCategory,
+  isNarrowDesktop
 }) => {
-  const lineWidth = '200px'
+  const lineWidth = isNarrowDesktop ? '240px' : '200px'
   const panelPaddingX = 18
   const panelRef = useRef(null)
   const [panelOffset, setPanelOffset] = useState({ left: 0, top: 0 })
@@ -418,8 +419,10 @@ export default function ThingsPage() {
   const [pageOpacity, setPageOpacity] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeMenuCategory, setActiveMenuCategory] = useState(null)
+  const [mounted, setMounted] = useState(false)
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const [glowDelaySeconds] = useState(() => syncGlowOffset().delaySeconds)
+  const isNarrowDesktop = useMediaQuery('(max-width: 1400px)')
+  const [glowDelaySeconds, setGlowDelaySeconds] = useState(0)
   const [activeCategoryId, setActiveCategoryId] = useState(() => thingsProjects?.[0]?.slug || 'arb')
   const [lightboxImage, setLightboxImage] = useState(null)
   const scrollContainerRef = useRef(null)
@@ -427,6 +430,8 @@ export default function ThingsPage() {
   const [mobileHintVisible, setMobileHintVisible] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const [bottomBandPage, setBottomBandPage] = useState(0)
+  const bottomBandScrollRef = useRef(null)
 
   const handleBack = () => {
     navigateWithFade('/make')
@@ -443,8 +448,14 @@ export default function ThingsPage() {
   }
 
   useEffect(() => {
+    setMounted(true)
     const fadeTimer = setTimeout(() => setPageOpacity(1), 30)
     return () => clearTimeout(fadeTimer)
+  }, [])
+
+  useEffect(() => {
+    const { delaySeconds } = syncGlowOffset()
+    setGlowDelaySeconds(delaySeconds)
   }, [])
 
   useEffect(() => {
@@ -569,7 +580,30 @@ export default function ThingsPage() {
   }
   const hideTooltip = () => setTooltip(null)
 
-  const containerHeight = isMobile ? 300 : 500
+  // Prevent SSR to avoid hydration mismatches
+  if (!mounted) {
+    return null
+  }
+
+  const chromeMargin = 32
+  const containerHeight = isMobile ? 300 : (isNarrowDesktop ? 400 : 500)
+  const sideRailLeft = isMobile ? 0 : (isNarrowDesktop ? 96 : 140)
+  const sideRailTop = isMobile ? 0 : (isNarrowDesktop ? 180 : 220)
+  const sideRailWidth = isMobile ? 0 : (isNarrowDesktop ? 260 : 220)
+  const metadataWidth = isMobile ? 0 : (isNarrowDesktop ? 300 : 220)
+  const notesMaxWidth = isNarrowDesktop ? 840 : 980
+  const heroTopWide = `calc(45% + ${chromeMargin}px)`
+  const heroTopNarrow = `calc(46% + ${chromeMargin}px)`
+  const heroTop = isMobile ? 'auto' : (isNarrowDesktop ? heroTopNarrow : heroTopWide)
+  const heroWidthClamp = isMobile
+    ? '100%'
+    : (isNarrowDesktop
+      ? `min(600px, calc(100vw - ${2 * (sideRailLeft + sideRailWidth + chromeMargin)}px))`
+      : `min(clamp(820px, 72vw, 1200px), calc(100vw - ${2 * (sideRailLeft + sideRailWidth + chromeMargin)}px))`)
+
+
+
+
 
   return (
     <div
@@ -589,6 +623,8 @@ export default function ThingsPage() {
         :root { --glow-offset: 0deg; }
         @property --glow-rotation { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
         @keyframes glowHue { 0% { --glow-rotation: 0deg; } 100% { --glow-rotation: 360deg; } }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        div::-webkit-scrollbar { display: none; }
       `}</style>
 
       {/* Desktop Chrome */}
@@ -611,13 +647,75 @@ export default function ThingsPage() {
             hoveredElement={hoveredElement}
             setHoveredElement={setHoveredElement}
             readingMode={readingMode}
-            analyticsText="THINGS OVERVIEW"
+            analyticsText=""
             glowFilter={glowFilter}
             showTooltip={showTooltip}
             hideTooltip={hideTooltip}
             activePage="make"
             onNavigate={(category) => navigateWithFade(`/${category}`)}
           />
+
+          <div
+            style={{
+              position: 'fixed',
+              top: 40,
+              left: 100,
+              zIndex: 6,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              fontFamily: 'var(--font-karla)',
+              fontSize: '14px'
+            }}
+          >
+            <div style={{ display: 'flex', gap: '14px' }}>
+              {thingsProjects.map((project, idx) => {
+                const isActive = project.slug === activeCategoryId
+                return (
+                  <button
+                    key={`things-tally-${project.slug}`}
+                    type="button"
+                    onClick={() => setActiveCategoryId(project.slug)}
+                    style={{
+                      border: isActive ? '1px solid #000' : '1px solid transparent',
+                      background: isActive ? '#000' : 'none',
+                      padding: '4px 6px',
+                      cursor: isActive ? 'default' : 'pointer',
+                      fontFamily: 'inherit',
+                      fontSize: 'inherit',
+                      fontWeight: 600,
+                      color: isActive ? '#fff' : '#000',
+                      borderRadius: '999px',
+                      lineHeight: 1,
+                      minWidth: '24px',
+                      height: '20px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {idx + 1}
+                  </button>
+                )
+              })}
+            </div>
+
+            {isNarrowDesktop && (
+              <div
+                key={`things-label-${activeCategoryId}`}
+                style={{
+                  fontFamily: 'var(--font-karla)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#000',
+                  textTransform: 'lowercase',
+                  animation: 'fadeIn 220ms ease'
+                }}
+              >
+                {currentProject?.title}
+              </div>
+            )}
+          </div>
 
           <LeftPanelTransform
             readingMode={readingMode}
@@ -705,6 +803,7 @@ export default function ThingsPage() {
             glowFilter="hue-rotate(var(--glow-rotation))"
             activeMenuCategory={activeMenuCategory}
             setActiveMenuCategory={setActiveMenuCategory}
+            isNarrowDesktop={isNarrowDesktop}
           />
         </>
       )}
@@ -864,7 +963,7 @@ export default function ThingsPage() {
             {/* Bottom: Swipeable pages (project + location, notes) */}
             <div
               style={{
-                flex: '0 0 auto',
+                flex: '0 0 150px',
                 padding: '16px',
                 background: '#F2F2F2',
                 fontFamily: 'var(--font-karla)',
@@ -873,7 +972,6 @@ export default function ThingsPage() {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
-                minHeight: 160,
                 position: 'relative'
               }}
             >
@@ -898,6 +996,14 @@ export default function ThingsPage() {
                 </div>
               )}
               <div
+                ref={bottomBandScrollRef}
+                onScroll={(e) => {
+                  const container = e.target
+                  const scrollLeft = container.scrollLeft
+                  const itemWidth = container.scrollWidth / 2
+                  const page = Math.round(scrollLeft / itemWidth)
+                  setBottomBandPage(page)
+                }}
                 style={{
                   display: 'grid',
                   gridAutoFlow: 'column',
@@ -906,7 +1012,10 @@ export default function ThingsPage() {
                   overflowX: 'auto',
                   scrollSnapType: 'x mandatory',
                   touchAction: 'pan-x',
-                  paddingBottom: 4
+                  flex: '1 1 auto',
+                  minHeight: 0,
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none'
                 }}
               >
                 {/* Page 1: Project + Location */}
@@ -924,7 +1033,7 @@ export default function ThingsPage() {
                     <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
                       project
                     </div>
-                    <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-0.02em', textTransform: 'lowercase' }}>
+                    <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-0.02em', textTransform: 'lowercase' }}>
                       {currentProject?.title || '--'}
                     </div>
                   </div>
@@ -932,7 +1041,7 @@ export default function ThingsPage() {
                     <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
                       location
                     </div>
-                    <div style={{ fontSize: 24, fontWeight: 200, letterSpacing: '-0.02em', lineHeight: 0.6, whiteSpace: 'pre-line' }}>
+                    <div style={{ fontSize: 18, fontWeight: 200, letterSpacing: '-0.02em', lineHeight: 0.6, whiteSpace: 'pre-line' }}>
                       {currentProject?.location || '--'}
                     </div>
                   </div>
@@ -944,16 +1053,54 @@ export default function ThingsPage() {
                     scrollSnapAlign: 'start',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 2
+                    gap: 2,
+                    height: '100%',
+                    overflowY: 'auto',
+                    paddingRight: 6
                   }}
                 >
                   <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
                     notes
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 200, letterSpacing: '-0.02em', lineHeight: 1.4 }}>
+                  <div style={{ fontSize: 16, fontWeight: 200, letterSpacing: '-0.02em', lineHeight: 1.1, whiteSpace: 'pre-line' }}>
                     {currentProject?.notes || '--'}
                   </div>
                 </div>
+              </div>
+
+              {/* Scroll indicator dots */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: 6,
+                  paddingTop: 8
+                }}
+              >
+                {[0, 1].map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => {
+                      if (bottomBandScrollRef.current) {
+                        const container = bottomBandScrollRef.current
+                        const targetScroll = page * container.scrollWidth / 2
+                        container.scrollTo({ left: targetScroll, behavior: 'smooth' })
+                      }
+                    }}
+                    aria-label={`Go to page ${page + 1}`}
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: bottomBandPage === page ? '#000' : '#ccc',
+                      transition: 'background 0.2s ease',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer'
+                    }}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -961,56 +1108,81 @@ export default function ThingsPage() {
       ) : (
         // Desktop Layout
         <>
-          {/* Left sidebar: categories only */}
-          <div
-            style={{
-              position: 'fixed',
-              left: 140,
-              top: 220,
-              width: 220,
-              zIndex: 40,
-              fontFamily: 'var(--font-karla)',
-              color: '#000'
-            }}
-          >
-            {/* Category list */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 24 }}>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setActiveCategoryId(cat.id)}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    padding: 0,
-                    fontFamily: 'inherit',
-                    fontSize: 'inherit',
-                    fontWeight: cat.id === activeCategoryId ? 500 : 200,
-                    color: '#000',
-                    cursor: 'pointer',
-                    textTransform: 'lowercase',
-                    textAlign: 'left'
-                  }}
-                >
-                  {cat.label}
-                </button>
-              ))}
+          {/* Left sidebar: categories only (wide desktop) */}
+          {!isNarrowDesktop && (
+            <div
+              style={{
+                position: 'fixed',
+                left: sideRailLeft,
+                top: sideRailTop,
+                width: sideRailWidth,
+                zIndex: 40,
+                fontFamily: 'var(--font-karla)',
+                color: '#000'
+              }}
+            >
+              {/* Category list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 24 }}>
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setActiveCategoryId(cat.id)}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      padding: 0,
+                      fontFamily: 'inherit',
+                      fontSize: 'inherit',
+                      fontWeight: cat.id === activeCategoryId ? 500 : 200,
+                      color: '#000',
+                      cursor: 'pointer',
+                      textTransform: 'lowercase',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Narrow desktop: category title below hero (left-aligned) */}
+          {!isMobile && isNarrowDesktop && (
+            <div
+              style={{
+                position: 'fixed',
+                left: 'calc(50% + 80px)',
+                transform: 'translateX(-50%)',
+                top: `calc(${heroTop} + ${containerHeight / 2}px + 24px)`,
+                fontFamily: 'var(--font-karla)',
+                fontSize: 14,
+                fontWeight: 700,
+                textTransform: 'lowercase',
+                color: '#000',
+                zIndex: 41,
+                pointerEvents: 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {currentProject?.title || ''}
+            </div>
+          )}
 
           {/* Black container with horizontal scroll */}
           <div
             style={{
               position: 'fixed',
-              left: 425,
-              right: 275,
-              top: '45%',
-              transform: 'translateY(-50%)',
+              left: isNarrowDesktop ? 'calc(50% + 120px)' : 'calc(50% + 50px)',
+              transform: 'translate(-50%, -50%)',
+              top: isNarrowDesktop ? `calc(${heroTop} + 50px)` : heroTop,
               height: containerHeight,
+              width: heroWidthClamp,
               background: '#000',
               borderRadius: 16,
-              zIndex: 30
+              zIndex: 30,
+              transition: 'width 0.3s ease, height 0.3s ease'
             }}
             onWheel={(e) => {
               if (!scrollContainerRef.current) return
@@ -1115,9 +1287,10 @@ export default function ThingsPage() {
           <div
             style={{
               position: 'fixed',
-              left: 425,
-              right: 275,
-              top: `calc(45% + ${containerHeight / 2}px + 12px)`,
+              left: 'calc(50% + 70px)',
+              transform: 'translateX(-50%)',
+              width: heroWidthClamp,
+              top: `calc(${heroTop} + ${containerHeight / 2}px + 12px)`,
               display: 'flex',
               justifyContent: 'center',
               gap: 6,
@@ -1128,10 +1301,10 @@ export default function ThingsPage() {
               <div
                 key={idx}
                 style={{
-                  width: 6,
-                  height: 6,
+                  width: 8,
+                  height: 8,
                   borderRadius: '50%',
-                  background: scrollProgress >= threshold - 0.125 && scrollProgress <= threshold + 0.125
+                  background: scrollProgress >= threshold - 0.12 && scrollProgress <= threshold + 0.12
                     ? '#000'
                     : '#ccc',
                   transition: 'background 0.2s ease'
@@ -1141,35 +1314,73 @@ export default function ThingsPage() {
           </div>
 
           {/* Location + Notes - under the black container */}
-          <div
-            style={{
-              position: 'fixed',
-              left: 425,
-              top: `calc(45% + ${containerHeight / 2}px + 36px)`,
-              display: 'flex',
-              gap: 48,
-              fontFamily: 'var(--font-karla)',
-              color: '#000',
-              zIndex: 40
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
-                location
+                    {/* Metadata placement */}
+          {!isMobile && isNarrowDesktop ? (
+            <div
+              style={{
+                position: 'fixed',
+                left: sideRailLeft,
+                top: '220px',
+                transform: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 18,
+                fontFamily: 'var(--font-karla)',
+                color: '#000',
+                zIndex: 40,
+                width: metadataWidth
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
+                  location
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 200, letterSpacing: '-0.02em', marginTop: 12, lineHeight: 0.6, whiteSpace: 'pre-line', maxWidth: notesMaxWidth }}>
+                  {currentProject?.location || '--'}
+                </div>
               </div>
-              <div style={{ fontSize: 20, fontWeight: 200, letterSpacing: '-0.02em', marginTop: 12, lineHeight: 0.6, whiteSpace: 'pre-line' }}>
-                {currentProject?.location || '--'}
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
+                  notes
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 200, letterSpacing: '-0.02em', lineHeight: 1.05, marginTop: 4, maxWidth: notesMaxWidth }}>
+                  {currentProject?.notes || '--'}
+                </div>
               </div>
             </div>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
-                notes
+          ) : (
+            <div
+              style={{
+                position: 'fixed',
+                left: 'calc(50% + 70px)',
+                transform: 'translateX(-50%)',
+                width: heroWidthClamp,
+                top: `calc(${heroTop} + ${containerHeight / 2}px + 30px)`,
+                display: 'flex',
+                gap: 48,
+                fontFamily: 'var(--font-karla)',
+                color: '#000',
+                zIndex: 40
+              }}
+            >
+              <div style={{ minWidth: 200 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
+                  location
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 200, letterSpacing: '-0.02em', marginTop: 12, lineHeight: 0.6, whiteSpace: 'pre-line' }}>
+                  {currentProject?.location || '--'}
+                </div>
               </div>
-              <div style={{ fontSize: 20, fontWeight: 200, letterSpacing: '-0.02em', lineHeight: 1.4, marginTop: 4, maxWidth: 850 }}>
-                {currentProject?.notes || '--'}
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
+                  notes
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 200, letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 4, maxWidth: notesMaxWidth }}>
+                  {currentProject?.notes || '--'}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </>
       )}
 
@@ -1261,3 +1472,18 @@ export default function ThingsPage() {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

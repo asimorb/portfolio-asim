@@ -8,7 +8,7 @@ const getMatch = (query) => {
 }
 
 export const useMediaQuery = (query) => {
-  const [matches, setMatches] = useState(getMatch(query))
+  const [matches, setMatches] = useState(false)
 
   useEffect(() => {
     const media = window.matchMedia(query)

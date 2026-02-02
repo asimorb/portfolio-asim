@@ -255,9 +255,17 @@ export default function AboutMePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeMenuCategory, setActiveMenuCategory] = useState('connect')
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [hydrated, setHydrated] = useState(false)
   const messageTextareaRef = useRef(null)
   const formRef = useRef(null)
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const mediaQueryMobile = useMediaQuery('(max-width: 768px)')
+  const mediaQueryMediumDesktop = useMediaQuery('(min-width: 769px) and (max-width: 1366px)')
+  const isMobile = hydrated ? mediaQueryMobile : false
+  const isMediumDesktop = hydrated ? mediaQueryMediumDesktop : false
+
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
   const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
     const target = path.startsWith('/') ? path : `/${path}`
     if (typeof window !== 'undefined') {
@@ -277,12 +285,35 @@ export default function AboutMePage() {
     return () => clearTimeout(fadeTimer)
   }, [])
 
+  useEffect(() => {
+    let rafId
+    const updateGuideFilters = () => {
+      if (typeof window === 'undefined') return
+      const key = 'glowStartMs'
+      const start = Number(window.sessionStorage.getItem(key)) || Date.now()
+      const elapsedMs = Date.now() - start
+      const baseAngle = ((elapsedMs / 60000) * 360) % 360
+      const offsetAngle = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--glow-offset')) || 0
+      const totalAngle = (baseAngle + offsetAngle) % 360
+      const filterValue = `hue-rotate(${totalAngle}deg)`
+      const guideElements = document.querySelectorAll('line[stroke="#FDABD3"], circle[fill="#FDABD3"]')
+      guideElements.forEach((el) => {
+        el.style.filter = filterValue
+      })
+      rafId = requestAnimationFrame(updateGuideFilters)
+    }
+    rafId = requestAnimationFrame(updateGuideFilters)
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId)
+    }
+  }, [])
+
   const glowFilter = 'hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))'
-  const readingBodyStyle = { top: 230, left: 800, maxWidth: 470 }
-  const messageBoxHeight = 545
+  const readingBodyStyle = { top: 230, left: isMediumDesktop ? 460 : 800, maxWidth: 470 }
+  const messageBoxHeight = isMediumDesktop ? 450 : 545
   const messageBoxBottomBuffer = 28
   const messageTextareaMinHeight = 140
-  const messageBoxStyle = { top: 200, left: 800, width: 600, height: messageBoxHeight }
+  const messageBoxStyle = { top: 200, left: isMediumDesktop ? 460 : 800, width: isMediumDesktop ? 450 : 600, height: messageBoxHeight }
   const infoCalloutStyle = { left: 90, bottom: 48, lineLength: 54 }
   const bodyColumnOneParagraphs = [
     'I make things to understand them. Whether designing built spaces, developing interactive environments, or conducting user research, my practice centers on iterative making prototyping ideas, observing how people engage with them, and refining based on what emerges through use.',
@@ -417,9 +448,27 @@ export default function AboutMePage() {
         :root { --glow-offset: 0deg; }
         @property --glow-rotation { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
         @keyframes glowHue { 0% { --glow-rotation: 0deg; } 100% { --glow-rotation: 360deg; } }
-        .glow-core-static { position: absolute; width: 160px; height: 160px; left: 20%; top: 36%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent); opacity: 0.7; filter: blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset))); pointer-events: none; z-index: 2; }
-        .glow-core-transition { position: absolute; width: 500px; height: 500px; left: 30%; top: 58%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent); opacity: 0.6; filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg)); pointer-events: none; z-index: 0; }
-        .glow-core-intersection { position: absolute; width: 300px; height: 300px; left: 26%; top: 52%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent); opacity: 0.75; filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg)); pointer-events: none; z-index: 1; }
+        @keyframes restlessMove {
+          0% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+          15% { transform: translate(-50%, -50%) translate(40px, -30px) scale(1.05); }
+          30% { transform: translate(-50%, -50%) translate(-50px, 20px) scale(0.96); }
+          45% { transform: translate(-50%, -50%) translate(35px, 45px) scale(1.03); }
+          60% { transform: translate(-50%, -50%) translate(-60px, -15px) scale(0.94); }
+          75% { transform: translate(-50%, -50%) translate(30px, -40px) scale(1.06); }
+          90% { transform: translate(-50%, -50%) translate(-40px, 30px) scale(0.98); }
+          100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+        }
+        @keyframes hueRotate70 {
+          0% { filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg + 0deg)); }
+          100% { filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg + 360deg)); }
+        }
+        @keyframes hueRotate80 {
+          0% { filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg + 0deg)); }
+          100% { filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg + 360deg)); }
+        }
+        .glow-core-static { position: absolute; width: 160px; height: 160px; left: 20%; top: 36%; background: radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent); opacity: 0.7; filter: blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset))); animation: restlessMove 60s ease-in-out infinite; pointer-events: none; z-index: 2; }
+        .glow-core-transition { position: absolute; width: 500px; height: 500px; left: 30%; top: 58%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent); opacity: 0.6; animation: hueRotate80 80s linear infinite; pointer-events: none; z-index: 0; }
+        .glow-core-intersection { position: absolute; width: 300px; height: 300px; left: 26%; top: 52%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent); opacity: 0.75; animation: hueRotate70 70s linear infinite; pointer-events: none; z-index: 1; }
         .message-field { width: 100%; border: none; background: transparent; padding: 6px 0 10px; font-family: var(--font-karla); font-size: 22px; font-weight: 500; line-height: 1.3; color: #000; }
         .message-field::placeholder { font-size: 22px; font-weight: 500; letter-spacing: 0; text-transform: none; color: rgba(0, 0, 0, 0.35); }
         .message-field:focus { outline: none; }
@@ -569,14 +618,15 @@ export default function AboutMePage() {
       )}
 
       <div
-        className={isMobile ? '' : 'fixed left-30 top-90 max-w-sm'}
+        className={isMobile ? '' : 'fixed left-30 max-w-sm'}
         style={{
           zIndex: 40,
           fontFamily: 'var(--font-karla)',
-          fontSize: isMobile ? '24px' : '40px',
+          fontSize: isMobile ? '24px' : isMediumDesktop ? '26px' : '40px',
           fontWeight: 200,
-          lineHeight: isMobile ? '28px' : '40px',
-          maxWidth: isMobile ? '100%' : '450px',
+          lineHeight: isMobile ? '28px' : isMediumDesktop ? '26px' : '40px',
+          maxWidth: isMobile ? '100%' : isMediumDesktop ? '270px' : '450px',
+          top: isMobile ? 'auto' : isMediumDesktop ? '19rem' : '22.5rem',
           textAlign: isMobile ? 'left' : 'right',
           color: '#000',
           padding: isMobile ? '120px 18px 40px' : 0

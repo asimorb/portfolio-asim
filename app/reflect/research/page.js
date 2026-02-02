@@ -750,6 +750,10 @@ export default function ReflectResearchPage() {
   const [hydrated, setHydrated] = useState(false)
   const mediaQueryMatch = useMediaQuery('(max-width: 768px)')
   const isMobile = hydrated ? mediaQueryMatch : false
+  const isMedium = useMediaQuery('(max-width: 1500px)')
+  const isTouchDevice = useMediaQuery('(hover: none) and (pointer: coarse)')
+  const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1920)
+  const isMediumViewport = hydrated ? (viewportWidth !== null ? viewportWidth <= 1500 : isMedium) : false
   const [glowDelaySeconds, setGlowDelaySeconds] = useState(0)
   const [activeCategoryId, setActiveCategoryId] = useState('publications')
   const [activeIndexByCategory, setActiveIndexByCategory] = useState(() => (
@@ -763,11 +767,41 @@ export default function ReflectResearchPage() {
   const [mobileCardMaxHeight, setMobileCardMaxHeight] = useState(null)
   const [mobileNavTop, setMobileNavTop] = useState(null)
   const swipeStartRef = useRef(null)
+  const desktopSwipeStartRef = useRef(null)
   const mobileMenuTimerRef = useRef(null)
   useEffect(() => setHydrated(true), [])
   useEffect(() => {
     const { delaySeconds } = syncGlowOffset()
     setGlowDelaySeconds(delaySeconds)
+  }, [])
+  useEffect(() => {
+    let rafId
+    const updateGuideFilters = () => {
+      if (typeof window === 'undefined') return
+      const key = 'glowStartMs'
+      const start = Number(window.sessionStorage.getItem(key)) || Date.now()
+      const elapsedMs = Date.now() - start
+      const baseAngle = ((elapsedMs / 60000) * 360) % 360
+      const offsetAngle = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--glow-offset')) || 0
+      const totalAngle = (baseAngle + offsetAngle) % 360
+      const filterValue = `hue-rotate(${totalAngle}deg)`
+      const guideElements = document.querySelectorAll('line[stroke="#FDABD3"], circle[fill="#FDABD3"]')
+      guideElements.forEach((el) => {
+        el.style.filter = filterValue
+      })
+      rafId = requestAnimationFrame(updateGuideFilters)
+    }
+    rafId = requestAnimationFrame(updateGuideFilters)
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId)
+    }
+  }, [])
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handleResizeViewportWidth = () => setViewportWidth(window.innerWidth)
+    handleResizeViewportWidth()
+    window.addEventListener('resize', handleResizeViewportWidth)
+    return () => window.removeEventListener('resize', handleResizeViewportWidth)
   }, [])
   const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
     const target = path.startsWith('/') ? path : `/${path}`
@@ -993,6 +1027,29 @@ export default function ReflectResearchPage() {
     }
   }
 
+  const handleDesktopTouchStart = (event) => {
+    if (isMobile || !isTouchDevice) return
+    if (!event.touches || event.touches.length !== 1) return
+    const touch = event.touches[0]
+    desktopSwipeStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  const handleDesktopTouchEnd = (event) => {
+    if (isMobile || !isTouchDevice) return
+    const start = desktopSwipeStartRef.current
+    desktopSwipeStartRef.current = null
+    if (!start || !event.changedTouches || event.changedTouches.length !== 1) return
+    const touch = event.changedTouches[0]
+    const deltaX = touch.clientX - start.x
+    const deltaY = touch.clientY - start.y
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return
+    if (deltaX < 0) {
+      handleSwipeNext()
+    } else {
+      handleSwipePrev()
+    }
+  }
+
   useEffect(() => {
     if (!isMobile) {
       setMobileCardMaxHeight(null)
@@ -1041,12 +1098,12 @@ export default function ReflectResearchPage() {
         transition: 'opacity 0.6s ease',
         padding: isMobile ? '120px 20px 160px' : 0
       }}
-      className="glow-hue-driver"
     >
-      <style jsx global>{`
+      <style>{`
         :root { --glow-offset: 0deg; }
         @property --glow-rotation { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
         @keyframes glowHue { 0% { --glow-rotation: 0deg; } 100% { --glow-rotation: 360deg; } }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
       `}</style>
 
       {!isMobile && (
@@ -1133,6 +1190,26 @@ export default function ReflectResearchPage() {
               )
             })}
           </div>
+
+          {!isMobile && isMediumViewport && (
+            <div
+              key={`category-label-${activeCategoryId}`}
+              style={{
+                position: 'fixed',
+                top: 74,
+                left: 100,
+                zIndex: 6,
+                fontFamily: 'var(--font-karla)',
+                fontSize: '16px',
+                fontWeight: 600,
+                color: '#000',
+                textTransform: 'lowercase',
+                animation: 'fadeIn 220ms ease'
+              }}
+            >
+              {activeCategory.label}
+            </div>
+          )}
 
           <RightPanelTransform
             hoveredElement={hoveredElement}
@@ -1237,10 +1314,14 @@ export default function ReflectResearchPage() {
         style={{
           position: 'relative',
           zIndex: 1,
-          padding: isMobile ? '0' : '140px 240px 120px 140px',
+          padding: isMobile ? '0' : (hydrated && isMediumViewport) ? '120px 180px 120px 50px' : '140px 240px 120px 140px',
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '180px minmax(420px, 1fr)',
-          gap: isMobile ? '24px' : '100px',
+          gridTemplateColumns: isMobile
+            ? '1fr'
+            : (hydrated && isMediumViewport)
+              ? '1fr'
+              : '180px minmax(420px, 1fr)',
+          gap: isMobile ? '24px' : (hydrated && isMediumViewport) ? '0px' : '100px',
           alignItems: 'start'
         }}
       >
@@ -1252,7 +1333,7 @@ export default function ReflectResearchPage() {
               right: isMobile ? 20 : 'auto',
               top: isMobile ? 'calc(env(safe-area-inset-top, 0px) + 60px)' : '380px',
               zIndex: isMobile ? 82 : 'auto',
-              display: 'flex',
+              display: isMobile ? 'flex' : isMediumViewport ? 'none' : 'flex',
               flexDirection: isMobile ? 'row' : 'column',
               flexWrap: isMobile ? 'wrap' : 'nowrap',
               gap: isMobile ? '18px' : '8px',
@@ -1289,8 +1370,23 @@ export default function ReflectResearchPage() {
           </div>
         </div>
 
-        <div style={{ position: 'relative', maxWidth: isMobile ? '100%' : '720px', width: isMobile ? '100%' : 'auto', boxSizing: 'border-box', fontFamily: 'var(--font-karla)', color: '#000', marginTop: isMobile ? '8px' : '60px', marginLeft: isMobile ? 0 : '250px' }}>
-          {!isMobile && activeCategory.id === 'studies' && hasImages && showExpanded && (
+        <div
+          style={{
+            position: 'relative',
+            maxWidth: isMobile ? '100%' : (hydrated && isMediumViewport) ? '690px' : '840px',
+            width: isMobile ? '100%' : 'auto',
+            boxSizing: 'border-box',
+            fontFamily: 'var(--font-karla)',
+            color: '#000',
+            marginTop: isMobile ? '8px' : '60px',
+            marginLeft: isMobile ? 0 : 'clamp(80px, 12vw, 220px)',
+            transform: undefined,
+            transition: 'transform 220ms ease, margin-left 220ms ease'
+          }}
+          onTouchStart={handleDesktopTouchStart}
+          onTouchEnd={handleDesktopTouchEnd}
+        >
+          {!isMobile && !isMediumViewport && activeCategory.id === 'studies' && hasImages && showExpanded && (
             <div
               style={{
                 position: 'absolute',
@@ -1373,7 +1469,7 @@ export default function ReflectResearchPage() {
                   {activeItem?.title}
                 </div>
                 {showExpanded ? (
-                  <div style={{ marginTop: '18px', fontSize: '13px', lineHeight: 1.55, maxWidth: activeCategory.id === 'studies' && !isMobile ? 'none' : '600px' }}>
+                  <div style={{ marginTop: '18px', fontSize: '13px', lineHeight: 1.55, maxWidth: activeCategory.id === 'studies' && !isMobile ? 'none' : '820px' }} >
                     {activeItem?.details?.length ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                         {activeItem.details.map((detail) => (
@@ -1445,7 +1541,7 @@ export default function ReflectResearchPage() {
                 )}
               </div>
 
-              {hasImages && (isMobile || !(activeCategory.id === 'studies' && showExpanded)) && (
+              {hasImages && (isMobile || !(activeCategory.id === 'studies' && showExpanded && !isMediumViewport)) && (
                 <div
                   ref={mobileImagesRef}
                   style={{

@@ -334,6 +334,7 @@ export default function ConnectPage() {
   const noticeTimerRef = useRef(null)
   const mobileMenuTimerRef = useRef(null)
   const letterRef = useRef(null)
+  const isDraggingRef = useRef(false)
 
   const letterSize = isMobile ? 170 : 200
   const letterGlyphOffsetY = isMobile ? -60 : -8
@@ -360,7 +361,7 @@ export default function ConnectPage() {
     if (posX && posY) {
       return { x: parseFloat(posX), y: parseFloat(posY) }
     }
-    return null
+    return { x: window.innerWidth / 2 - letterSize / 2, y: window.innerHeight / 2 - letterSize / 2 }
   }, [isMobile, letterSize])
 
   const pathPoints = useMemo(() => {
@@ -707,12 +708,13 @@ export default function ConnectPage() {
 
   const handleMouseDown = (e) => {
     setIsDragging(true)
+    isDraggingRef.current = true
     e.stopPropagation()
     e.preventDefault()
   }
 
   const handleMouseMove = (e) => {
-    if (!isDragging || !segments.length) return
+    if (!isDraggingRef.current || !segments.length) return
     const mx = e.clientX
     const my = e.clientY
     setControlPos({ x: mx, y: my })
@@ -751,7 +753,10 @@ export default function ConnectPage() {
   }
 
   useEffect(() => {
-    const handleUp = () => setIsDragging(false)
+    const handleUp = () => {
+      setIsDragging(false)
+      isDraggingRef.current = false
+    }
     window.addEventListener('mouseup', handleUp)
     return () => window.removeEventListener('mouseup', handleUp)
   }, [])
@@ -760,13 +765,14 @@ export default function ConnectPage() {
     const touch = e.touches[0]
     if (!touch) return
     setIsDragging(true)
+    isDraggingRef.current = true
     e.stopPropagation()
     e.preventDefault()
     handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY })
   }
 
   const handleTouchMoveDrag = (e) => {
-    if (!isDragging) return
+    if (!isDraggingRef.current) return
     const touch = e.touches[0]
     if (!touch) return
     e.stopPropagation()
@@ -778,6 +784,7 @@ export default function ConnectPage() {
     e.stopPropagation()
     e.preventDefault()
     setIsDragging(false)
+    isDraggingRef.current = false
   }
 
   const targets = useMemo(() => {
@@ -853,14 +860,22 @@ export default function ConnectPage() {
   }
 
   const handleSwipeTouchStart = (e) => {
-    if (readingMode) return
+    if (readingMode || isDragging) return
     const touch = e.touches[0]
     if (!touch) return
-    setSwipeStart({ x: touch.clientX, y: touch.clientY })
+    const touchX = touch.clientX
+    const touchY = touch.clientY
+    const knobTouchRadius = 80
+    const dx = touchX - controlKnobPos.x
+    const dy = touchY - controlKnobPos.y
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    const isTouchingKnob = distance < knobTouchRadius
+    if (isTouchingKnob) return
+    setSwipeStart({ x: touchX, y: touchY })
   }
 
   const handleSwipeTouchEnd = (e) => {
-    if (readingMode) return
+    if (readingMode || isDragging) return
     if (!swipeStart) return
     const touch = e.changedTouches[0]
     if (!touch) return
@@ -869,10 +884,11 @@ export default function ConnectPage() {
     const absX = Math.abs(dx)
     const absY = Math.abs(dy)
     setSwipeStart(null)
-    if (absX < 50 || absX < absY) return
-    if (dx > 50) {
+    const swipeThreshold = 100
+    if (absX < swipeThreshold || absX < absY * 1.2) return
+    if (dx > swipeThreshold) {
       navigateWithFade('/reflect')
-    } else if (dx < -50) {
+    } else if (dx < -swipeThreshold) {
       navigateWithFade('/', { preserveHomeLayout: false })
     }
   }
@@ -884,7 +900,7 @@ export default function ConnectPage() {
   return (
     <div
       onMouseMove={handleMouseMove}
-      onMouseUp={() => { if (isDragging) setIsDragging(false) }}
+      onMouseUp={() => { if (isDraggingRef.current) { setIsDragging(false); isDraggingRef.current = false } }}
       onTouchStart={handleSwipeTouchStart}
       onTouchEnd={handleSwipeTouchEnd}
       style={{
@@ -901,6 +917,8 @@ export default function ConnectPage() {
         overflow: 'hidden',
         animation: 'glowHue 60s linear infinite',
         animationDelay: `-${glowDelaySeconds}s`,
+        animationPlayState: 'running',
+        willChange: '--glow-rotation',
         opacity: pageOpacity,
         transition: 'opacity 0.6s ease'
       }}
@@ -911,10 +929,28 @@ export default function ConnectPage() {
         @keyframes glowHue { 0% { --glow-rotation: 0deg; } 100% { --glow-rotation: 360deg; } }
         @keyframes pulse-dot { 0%, 100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.25); } }
         @keyframes fadeInPage { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes restlessMove {
+          0% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+          15% { transform: translate(-50%, -50%) translate(40px, -30px) scale(1.05); }
+          30% { transform: translate(-50%, -50%) translate(-50px, 20px) scale(0.96); }
+          45% { transform: translate(-50%, -50%) translate(35px, 45px) scale(1.03); }
+          60% { transform: translate(-50%, -50%) translate(-60px, -15px) scale(0.94); }
+          75% { transform: translate(-50%, -50%) translate(30px, -40px) scale(1.06); }
+          90% { transform: translate(-50%, -50%) translate(-40px, 30px) scale(0.98); }
+          100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+        }
+        @keyframes hueRotate70 {
+          0% { filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg + 0deg)); }
+          100% { filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg + 360deg)); }
+        }
+        @keyframes hueRotate80 {
+          0% { filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg + 0deg)); }
+          100% { filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg + 360deg)); }
+        }
         .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-        .glow-core-static { position: absolute; width: 160px; height: 160px; left: 20%; top: 36%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent); opacity: 0.7; filter: blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset))); pointer-events: none; z-index: 2; }
-        .glow-core-transition { position: absolute; width: 500px; height: 500px; left: 30%; top: 58%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent); opacity: 0.6; filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg)); pointer-events: none; z-index: 0; }
-        .glow-core-intersection { position: absolute; width: 300px; height: 300px; left: 26%; top: 52%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent); opacity: 0.75; filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg)); pointer-events: none; z-index: 1; }
+        .glow-core-static { position: absolute; width: 160px; height: 160px; left: 20%; top: 36%; background: radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent); opacity: 0.7; filter: blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset))); animation: restlessMove 60s ease-in-out infinite; pointer-events: none; z-index: 2; }
+        .glow-core-transition { position: absolute; width: 500px; height: 500px; left: 30%; top: 58%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent); opacity: 0.6; animation: hueRotate80 80s linear infinite; pointer-events: none; z-index: 0; }
+        .glow-core-intersection { position: absolute; width: 300px; height: 300px; left: 26%; top: 52%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent); opacity: 0.75; animation: hueRotate70 70s linear infinite; pointer-events: none; z-index: 1; }
       `}</style>
 
       <div className="glow-core-transition" />
@@ -950,30 +986,21 @@ export default function ConnectPage() {
 
       {readingMode && isMobile && (
         <div
+          className="mobile-reading-overlay"
           style={{
-            position: 'fixed',
-            inset: 0,
-            padding: '110px 18px 120px',
             zIndex: 60,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '14px',
-            fontFamily: 'var(--font-karla)',
-            color: '#000',
-            overflowY: 'auto',
-            pointerEvents: 'auto',
             alignItems: 'flex-end'
           }}
         >
           <div
             style={{
-              marginTop: '670px',
-              marginRight: '25px',
-              paddingBottom: '16px',
-              fontSize: '28px',
-              lineHeight: '26px',
+              marginTop: '320px',
+              marginRight: 'var(--m-space-2)',
+              paddingBottom: 'var(--m-space-2)',
+              fontSize: 'clamp(22px, 6vw, 28px)',
+              lineHeight: 'clamp(26px, 6.4vw, 32px)',
               fontWeight: 300,
-              maxWidth: '85%',
+              maxWidth: 'var(--m-reading-max)',
               textAlign: 'right',
               alignSelf: 'flex-end',
               pointerEvents: 'auto'
@@ -1009,23 +1036,7 @@ export default function ConnectPage() {
       )}
 
       {isMobile && readingMode && (
-        <div
-          className="fixed left-1/2 bottom-4"
-          style={{
-            zIndex: 70,
-            background: '#000',
-            color: '#FFFDF3',
-            padding: '6px 12px',
-            borderRadius: '999px',
-            fontFamily: 'var(--font-karla)',
-            fontSize: '12px',
-            letterSpacing: '0.02em',
-            pointerEvents: 'none',
-            transform: 'translateX(-50%)'
-          }}
-        >
-          reading mode
-        </div>
+        <div className="mobile-reading-pill">reading mode</div>
       )}
 
       {isMobile && !readingMode && showSwipeHint && (
@@ -1139,18 +1150,18 @@ export default function ConnectPage() {
 
         return (
           <>
-            <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 2, pointerEvents: 'none' }}>
+            <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 2, pointerEvents: 'none', filter: glowFilter, WebkitFilter: glowFilter }}>
               <polyline
                 points={smoothPoints.map((p) => `${p.x},${p.y}`).join(' ')}
                 fill="none"
                 stroke="#FDABD3"
                 strokeWidth="2"
                 strokeDasharray="6,6"
-                style={{ filter: glowFilter, strokeLinecap: 'round' }}
+                style={{ strokeLinecap: 'round' }}
               />
               {targets.map((t, idx) => (
                 <g key={idx}>
-                  <circle cx={t.point.x} cy={t.point.y} r="8" fill="#FDABD3" className="pulse-dot" style={{ filter: glowFilter }} />
+                  <circle cx={t.point.x} cy={t.point.y} r="8" fill="#FDABD3" className="pulse-dot" />
                 </g>
               ))}
             </svg>
@@ -1301,7 +1312,8 @@ export default function ConnectPage() {
           lineHeight: '0.9em',
           opacity: navigatingTo ? 0 : (readingMode ? 0 : 1),
           transition: 'opacity 900ms ease-out, visibility 900ms ease-out, transform 200ms ease-out',
-          pointerEvents: readingMode ? 'none' : 'auto',
+          // Let knob hover/drag events pass through the letter sitting on top of it.
+        pointerEvents: 'none',
           transform: `translate(-50%, -50%) translateY(${letterGlyphOffsetY}px)`,
           transformOrigin: '50% 50%'
         }}

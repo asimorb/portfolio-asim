@@ -5,6 +5,21 @@ import { MobileChrome } from '../components/MobileChrome'
 import { clearHomeLayout, getNavStackLength, popNavStack, pushNavStack } from '../components/navState'
 import { useMediaQuery } from '../components/useMediaQuery'
 
+const syncGlowOffset = () => {
+  if (typeof window === 'undefined') return { delaySeconds: 0 }
+  const key = 'glowStartMs'
+  let start = Number(window.sessionStorage.getItem(key))
+  if (!start) {
+    start = Date.now()
+    window.sessionStorage.setItem(key, `${start}`)
+  }
+  const elapsedMs = Date.now() - start
+  const angle = ((elapsedMs / 60000) * 360) % 360
+  const delaySeconds = (elapsedMs / 1000) % 60
+  document.documentElement.style.setProperty('--glow-offset', `${angle}deg`)
+  return { delaySeconds }
+}
+
 const createSeed = (baseRadius) => {
   const angles = []
   while (angles.length < 2) {
@@ -626,6 +641,7 @@ export default function ReflectPage() {
   const [hoveredKnob, setHoveredKnob] = useState(false)
   const [showScaleHint, setShowScaleHint] = useState(false)
   const [pageOpacity, setPageOpacity] = useState(0)
+  const [glowDelaySeconds, setGlowDelaySeconds] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeMenuCategory, setActiveMenuCategory] = useState(null)
   const [showSwipeHint, setShowSwipeHint] = useState(false)
@@ -641,6 +657,7 @@ export default function ReflectPage() {
   const hintShownRef = useRef(false)
   const mobileMenuTimerRef = useRef(null)
   const letterRef = useRef(null)
+  const isDraggingRef = useRef(false)
 
   const letterSize = isMobile ? 170 : 200
   const baseRadius = isMobile ? 90 : 120
@@ -712,11 +729,21 @@ export default function ReflectPage() {
       }
       targetCentersRef.current = [c1, c2]
     }
+    // Calculate safe radii that respect topbar bounds (top 90px protected area)
+    const topbarHeight = 90
+    const getConstrainedRadius = (center, unseenRadius) => {
+      // Maximum radius is limited by distance to topbar and bottom margin
+      const maxRadiusTop = center.y - topbarHeight
+      const maxRadiusBottom = innerHeight - center.y - (isMobile ? 140 : 200)
+      const maxRadius = Math.min(maxRadiusTop, maxRadiusBottom)
+      return Math.min(unseenRadius, Math.max(maxRadius, 40)) // Ensure minimum radius of 40
+    }
+    const { innerHeight } = window
     return [
-      { label: seed.order[0], angle: seed.angles[0], radius: seed.radii[0], center: targetCentersRef.current[0] },
-      { label: seed.order[1], angle: seed.angles[1], radius: seed.radii[1], center: targetCentersRef.current[1] }
+      { label: seed.order[0], angle: seed.angles[0], radius: getConstrainedRadius(targetCentersRef.current[0], seed.radii[0]), center: targetCentersRef.current[0] },
+      { label: seed.order[1], angle: seed.angles[1], radius: getConstrainedRadius(targetCentersRef.current[1], seed.radii[1]), center: targetCentersRef.current[1] }
     ]
-  }, [letterPosition, seed])
+  }, [letterPosition, seed, isMobile])
 
   const [knobAngle, setKnobAngle] = useState(() => (targets[0]?.angle ?? 0) + 45)
   const [knobRadius, setKnobRadius] = useState(baseRadius)
@@ -752,10 +779,9 @@ export default function ReflectPage() {
   }
 
   useEffect(() => {
-    const randomOffset = Math.floor(Math.random() * 360)
-    if (typeof document !== 'undefined') {
-      document.documentElement.style.setProperty('--glow-offset', `${randomOffset}deg`)
-    }
+    const { delaySeconds } = syncGlowOffset()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setGlowDelaySeconds(delaySeconds)
     const fadeTimer = setTimeout(() => setPageOpacity(1), 30)
     setHasMounted(true)
     return () => clearTimeout(fadeTimer)
@@ -902,14 +928,22 @@ export default function ReflectPage() {
   }
 
   const handleSwipeTouchStart = (e) => {
-    if (readingMode) return
+    if (readingMode || isDragging) return
     const touch = e.touches[0]
     if (!touch) return
-    setSwipeStart({ x: touch.clientX, y: touch.clientY })
+    const touchX = touch.clientX
+    const touchY = touch.clientY
+    const knobTouchRadius = 80
+    const dx = touchX - knobX
+    const dy = touchY - knobY
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    const isTouchingKnob = distance < knobTouchRadius
+    if (isTouchingKnob) return
+    setSwipeStart({ x: touchX, y: touchY })
   }
 
   const handleSwipeTouchEnd = (e) => {
-    if (readingMode) return
+    if (readingMode || isDragging) return
     if (!swipeStart) return
     const touch = e.changedTouches[0]
     if (!touch) return
@@ -918,10 +952,11 @@ export default function ReflectPage() {
     const absX = Math.abs(dx)
     const absY = Math.abs(dy)
     setSwipeStart(null)
-    if (absX < 50 || absX < absY) return
-    if (dx < -50) {
+    const swipeThreshold = 100
+    if (absX < swipeThreshold || absX < absY * 1.2) return
+    if (dx < -swipeThreshold) {
       navigateWithFade('/connect')
-    } else if (dx > 50) {
+    } else if (dx > swipeThreshold) {
       navigateWithFade('/view')
     }
   }
@@ -1003,7 +1038,10 @@ export default function ReflectPage() {
   }
 
   useEffect(() => {
-    const handleUp = () => setIsDragging(false)
+    const handleUp = () => {
+      setIsDragging(false)
+      isDraggingRef.current = false
+    }
     window.addEventListener('mouseup', handleUp)
     return () => window.removeEventListener('mouseup', handleUp)
   }, [])
@@ -1012,13 +1050,14 @@ export default function ReflectPage() {
     const touch = e.touches[0]
     if (!touch) return
     setIsDragging(true)
+    isDraggingRef.current = true
     e.stopPropagation()
     e.preventDefault()
     handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY })
   }
 
   const handleTouchMoveDrag = (e) => {
-    if (!isDragging) return
+    if (!isDraggingRef.current) return
     const touch = e.touches[0]
     if (!touch) return
     e.stopPropagation()
@@ -1030,6 +1069,7 @@ export default function ReflectPage() {
     e.stopPropagation()
     e.preventDefault()
     setIsDragging(false)
+    isDraggingRef.current = false
   }
 
   const snapToClosest = () => {
@@ -1116,6 +1156,8 @@ export default function ReflectPage() {
         userSelect: isDragging ? 'none' : 'auto',
         overflow: 'hidden',
         animation: 'glowHue 60s linear infinite',
+        animationPlayState: 'running',
+        willChange: '--glow-rotation',
         opacity: pageOpacity,
         transition: 'opacity 0.6s ease'
       }}
@@ -1126,10 +1168,28 @@ export default function ReflectPage() {
         @keyframes glowHue { 0% { --glow-rotation: 0deg; } 100% { --glow-rotation: 360deg; } }
         @keyframes pulse-dot { 0%, 100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.25); } }
         @keyframes fadeInPage { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes restlessMove {
+          0% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+          15% { transform: translate(-50%, -50%) translate(40px, -30px) scale(1.05); }
+          30% { transform: translate(-50%, -50%) translate(-50px, 20px) scale(0.96); }
+          45% { transform: translate(-50%, -50%) translate(35px, 45px) scale(1.03); }
+          60% { transform: translate(-50%, -50%) translate(-60px, -15px) scale(0.94); }
+          75% { transform: translate(-50%, -50%) translate(30px, -40px) scale(1.06); }
+          90% { transform: translate(-50%, -50%) translate(-40px, 30px) scale(0.98); }
+          100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+        }
+        @keyframes hueRotate70 {
+          0% { filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg + 0deg)); }
+          100% { filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg + 360deg)); }
+        }
+        @keyframes hueRotate80 {
+          0% { filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg + 0deg)); }
+          100% { filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg + 360deg)); }
+        }
         .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-        .glow-core-static { position: absolute; width: 160px; height: 160px; left: 20%; top: 36%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent); opacity: 0.7; filter: blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset))); pointer-events: none; z-index: 2; }
-        .glow-core-transition { position: absolute; width: 500px; height: 500px; left: 30%; top: 58%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent); opacity: 0.6; filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg)); pointer-events: none; z-index: 0; }
-        .glow-core-intersection { position: absolute; width: 300px; height: 300px; left: 26%; top: 52%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent); opacity: 0.75; filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg)); pointer-events: none; z-index: 1; }
+        .glow-core-static { position: absolute; width: 160px; height: 160px; left: 20%; top: 36%; background: radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent); opacity: 0.7; filter: blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset))); animation: restlessMove 60s ease-in-out infinite; pointer-events: none; z-index: 2; }
+        .glow-core-transition { position: absolute; width: 500px; height: 500px; left: 30%; top: 58%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent); opacity: 0.6; animation: hueRotate80 80s linear infinite; pointer-events: none; z-index: 0; }
+        .glow-core-intersection { position: absolute; width: 300px; height: 300px; left: 26%; top: 52%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent); opacity: 0.75; animation: hueRotate70 70s linear infinite; pointer-events: none; z-index: 1; }
       `}</style>
 
       <div className="glow-core-transition" />
@@ -1166,30 +1226,21 @@ export default function ReflectPage() {
 
       {readingMode && isMobile && (
         <div
+          className="mobile-reading-overlay"
           style={{
-            position: 'fixed',
-            inset: 0,
-            padding: '110px 18px 120px',
             zIndex: 60,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '14px',
-            fontFamily: 'var(--font-karla)',
-            color: '#000',
-            overflowY: 'auto',
-            pointerEvents: 'auto',
             alignItems: 'flex-end'
           }}
         >
           <div
             style={{
-              marginTop: '570px',
-              marginRight: '25px',
-              paddingBottom: '16px',
-              fontSize: '28px',
-              lineHeight: '26px',
+              marginTop: '320px',
+              marginRight: 'var(--m-space-2)',
+              paddingBottom: 'var(--m-space-2)',
+              fontSize: 'clamp(22px, 6vw, 28px)',
+              lineHeight: 'clamp(26px, 6.4vw, 32px)',
               fontWeight: 300,
-              maxWidth: '85%',
+              maxWidth: 'var(--m-reading-max)',
               textAlign: 'right',
               alignSelf: 'flex-end',
               pointerEvents: 'auto'
@@ -1257,23 +1308,7 @@ export default function ReflectPage() {
       )}
 
       {isMobile && readingMode && (
-        <div
-          className="fixed left-1/2 bottom-4"
-          style={{
-            zIndex: 70,
-            background: '#000',
-            color: '#FFFDF3',
-            padding: '6px 12px',
-            borderRadius: '999px',
-            fontFamily: 'var(--font-karla)',
-            fontSize: '12px',
-            letterSpacing: '0.02em',
-            pointerEvents: 'none',
-            transform: 'translateX(-50%)'
-          }}
-        >
-          reading mode
-        </div>
+        <div className="mobile-reading-pill">reading mode</div>
       )}
 
       {isMobile && !readingMode && showSwipeHint && (
@@ -1295,14 +1330,14 @@ export default function ReflectPage() {
 
       <div className={`reflect-interactive-layer ${readingMode ? 'reflect-interactive-hidden' : ''}`}>
         {targets.length > 0 && (
-      <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 2, pointerEvents: 'none' }}>
+      <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 2, pointerEvents: 'none', filter: glowFilter, WebkitFilter: glowFilter }}>
         <circle cx={orbitCenterX} cy={orbitCenterY} r={knobRadius} stroke={knobActive ? '#FDABD3' : '#000'} strokeWidth="2" strokeDasharray="4,4" fill="none" style={{ filter: knobActive ? glowFilter : 'none' }} />
         {targets.map((t, idx) => {
           const { x: tx, y: ty } = getTargetPoint(t)
           return (
               <g key={idx}>
-                <circle cx={t.center.x} cy={t.center.y} r={t.radius} stroke="#FDABD3" strokeWidth="2" strokeDasharray="6,6" fill="none" style={{ filter: glowFilter }} />
-              <circle cx={tx} cy={ty} r="8" fill="#FDABD3" className="pulse-dot" style={{ filter: glowFilter }} />
+                <circle cx={t.center.x} cy={t.center.y} r={t.radius} stroke="#FDABD3" strokeWidth="2" strokeDasharray="6,6" fill="none" />
+              <circle cx={tx} cy={ty} r="8" fill="#FDABD3" className="pulse-dot" />
             </g>
           )
         })}

@@ -116,7 +116,7 @@ const defaultBack = () => {
           right: 0,
           zIndex: 80,
           pointerEvents: readingMode ? 'none' : 'auto',
-          padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 20px 8px',
+          padding: 'calc(var(--safe-top) + var(--m-space-3, 14px)) var(--m-inline, 18px) var(--m-space-2, 12px)',
           fontFamily: 'var(--font-karla)',
           color: '#000'
         }}
@@ -218,7 +218,7 @@ const defaultBack = () => {
           right: 0,
           bottom: 0,
           zIndex: 80,
-          padding: '10px 18px calc(env(safe-area-inset-bottom, 0px) + 12px)',
+          padding: 'var(--m-space-2, 12px) var(--m-inline, 18px) calc(var(--safe-bottom) + var(--m-space-3, 14px))',
           borderTop: 'none',
           display: 'flex',
           alignItems: 'center',
@@ -232,8 +232,8 @@ const defaultBack = () => {
           data-mobile-chrome-bottom-line="true"
           style={{
             position: 'absolute',
-            left: 20,
-            right: 20,
+            left: 'var(--m-inline, 18px)',
+            right: 'var(--m-inline, 18px)',
             top: 0,
             height: 1,
             background: '#000',

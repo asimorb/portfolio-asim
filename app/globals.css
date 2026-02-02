@@ -3,6 +3,97 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --glow-offset: 0deg;
+  /* Safe-area defaults (used only by mobile layouts) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Critical CSS Properties for glow animation */
+@property --glow-rotation {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
+/* Critical Keyframe Animations */
+@keyframes glowHue {
+  0% { --glow-rotation: 0deg; }
+  100% { --glow-rotation: 360deg; }
+}
+
+/* Mobile-only layout tokens */
+@media (max-width: 768px) {
+  :root {
+    --m-inline: 18px;
+    --m-max-width: 92vw;
+    --m-reading-max: min(var(--m-max-width), 640px);
+    --m-space-1: 8px;
+    --m-space-2: 12px;
+    --m-space-3: 16px;
+    --m-space-4: 24px;
+    --m-type-body: clamp(16px, 4vw, 19px);
+    --m-line-body: 1.38;
+    --m-type-small: clamp(13px, 3.4vw, 15px);
+    --m-line-small: 1.32;
+    /* Mobile reading paragraph tokens */
+    --m-reading-body-size: clamp(18px, 6vw, 28px);
+    --m-reading-body-line: clamp(16px, 6vw, 26px);
+    /* Mobile chrome heights - sum of padding + content + visual clearance */
+    --m-chrome-top-height: calc(var(--safe-top) + 60px);
+    --m-chrome-bottom-height: calc(var(--safe-bottom) + 80px);
+  }
+
+  .mobile-reading-overlay {
+    position: fixed;
+    top: var(--m-chrome-top-height);
+    bottom: var(--m-chrome-bottom-height);
+    left: 0;
+    right: 0;
+    max-height: 100svh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--m-space-2);
+    padding: 0 var(--m-inline);
+    font-family: var(--font-karla);
+    color: #000;
+    overflow-y: auto;
+    pointer-events: auto;
+    width: 100%;
+    max-width: var(--m-reading-max);
+    margin: 0 auto;
+  }
+
+  .mobile-reading-paragraph {
+    margin-top: clamp(12px, 3vw, 24px);
+    margin-bottom: clamp(40px, 8vw, 80px);
+    margin-right: var(--m-space-2);
+    padding-bottom: var(--m-space-2);
+    font-size: var(--m-reading-body-size);
+    line-height: var(--m-reading-body-line);
+    font-weight: 300;
+    text-align: right;
+    align-self: flex-end;
+  }
+
+  .mobile-reading-pill {
+    position: fixed;
+    left: 68%;
+    bottom: calc(var(--safe-bottom) + 22px);
+    transform: translateX(-50%);
+    z-index: 70;
+    background: #000;
+    color: #FFFDF3;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: var(--font-karla);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
 }
 
 @theme inline {
@@ -55,7 +146,7 @@ body {
   --stack-offset-x: -30px;
   --stack-offset-y: -80px;
   --stack-scale: 1;
-  --letter-font-size: 100px;
+  --letter-font-size: 85px;
 
   /* Re-enable pointer events on stack itself */
   pointer-events: auto;
@@ -77,7 +168,7 @@ body {
     --stack-offset-x: -30px;
     --stack-offset-y: -80px;
     --stack-scale: 1;
-    --letter-font-size: 100px;
+    --letter-font-size: 85px;
   }
 }
 
@@ -135,13 +226,13 @@ body {
 /* Medium state: left column, smaller text */
 @media (min-width: 1367px) and (max-width: 1536px) {
   .reading-mode-welcome {
-    font-size: 28px;
-    line-height: 28px;
+    font-size: 26px;
+    line-height: 26px;
     top: auto;
     left: 120px;
     right: auto;
     bottom: 100px;
-    max-width: 460px;
+    max-width: 400px;
     text-align: left;
   }
 }
@@ -149,13 +240,13 @@ body {
 /* Narrow state: bottom row, left-aligned below letters */
 @media (max-width: 1366px) {
   .reading-mode-welcome {
-    font-size: 28px;
-    line-height: 28px;
+    font-size: 26px;
+    line-height: 26px;
     top: auto;
     left: 120px;
     right: 120px;
     bottom: 100px;
-    max-width: 460px;
+    max-width: 400px;
     text-align: left;
     transform: none;
   }
@@ -163,13 +254,13 @@ body {
 
 /* Trivia text responsive sizing - uses viewport media queries since it's position: fixed */
 .reading-mode-trivia {
-  max-width: 560px;
+  max-width: 520px;
 }
 
 .reading-mode-trivia p {
-  font-size: 13px;
-  line-height: 15px;
-  max-width: 240px;
+  font-size: 12px;
+  line-height: 14px;
+  max-width: 220px;
 }
 
 @media (min-width: 1537px) {
@@ -178,33 +269,33 @@ body {
   }
 
   .reading-mode-trivia p {
-    font-size: 13px;
-    line-height: 15px;
-    max-width: 240px;
+    font-size: 12px;
+    line-height: 14px;
+    max-width: 220px;
   }
 }
 
 @media (min-width: 1367px) and (max-width: 1536px) {
   .reading-mode-trivia {
-    max-width: 560px;
+    max-width: 520px;
   }
 
   .reading-mode-trivia p {
-    font-size: 13px;
-    line-height: 15px;
-    max-width: 240px;
+    font-size: 12px;
+    line-height: 14px;
+    max-width: 220px;
   }
 }
 
 @media (max-width: 1366px) {
   .reading-mode-trivia {
-    max-width: 560px;
+    max-width: 520px;
   }
 
   .reading-mode-trivia p {
-    font-size: 13px;
-    line-height: 15px;
-    max-width: 240px;
+    font-size: 12px;
+    line-height: 14px;
+    max-width: 220px;
   }
 }
 
@@ -223,7 +314,7 @@ body {
   --stack-offset-x: 0px;
   --stack-offset-y: -60px;
   --stack-scale: 1;
-  --letter-font-size: 100px;
+  --letter-font-size: 85px;
 
   /* Don't use absolute positioning on mobile - already positioned by parent */
   position: relative;
@@ -265,9 +356,9 @@ body {
 @media (min-width: 1367px) and (max-width: 1536px) {
   .make-reading-description {
     font-family: var(--font-karla);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 200;
-    line-height: 28px;
+    line-height: 26px;
     color: #000;
     max-width: 380px;
     position: fixed;
@@ -282,9 +373,9 @@ body {
 @media (max-width: 1366px) {
   .make-reading-description {
     font-family: var(--font-karla);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 200;
-    line-height: 28px;
+    line-height: 26px;
     color: #000;
     max-width: 380px;
     position: fixed;
@@ -315,14 +406,14 @@ body {
 @media (min-width: 1367px) and (max-width: 1536px) {
   .make-reading-body {
     font-family: var(--font-karla);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 15px;
+    line-height: 14px;
     color: #000;
-    max-width: 340px;
+    max-width: 270px;
     position: fixed;
     top: 200px;
-    right: 200px;
+    right: 300px;
     z-index: 40;
   }
 }
@@ -331,9 +422,9 @@ body {
 @media (max-width: 1366px) {
   .make-reading-body {
     font-family: var(--font-karla);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 15px;
+    line-height: 14px;
     color: #000;
     max-width: 340px;
     position: fixed;
@@ -371,8 +462,8 @@ body {
     color: #000;
     max-width: 340px;
     position: fixed;
-    top: 400px;
-    right: 305px;
+    top: 430px;
+    right: 330px;
     z-index: 40;
   }
 }
@@ -426,9 +517,9 @@ body {
 @media (min-width: 1367px) and (max-width: 1536px) {
   .view-reading-description {
     font-family: var(--font-karla);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 200;
-    line-height: 28px;
+    line-height: 26px;
     color: #000;
     max-width: 380px;
     position: fixed;
@@ -443,9 +534,9 @@ body {
 @media (max-width: 1366px) {
   .view-reading-description {
     font-family: var(--font-karla);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 200;
-    line-height: 28px;
+    line-height: 26px;
     color: #000;
     max-width: 380px;
     position: fixed;
@@ -476,14 +567,14 @@ body {
 @media (min-width: 1367px) and (max-width: 1536px) {
   .view-reading-body {
     font-family: var(--font-karla);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 15px;
+    line-height: 14px;
     color: #000;
-    max-width: 340px;
+    max-width: 270px;
     position: fixed;
     top: 200px;
-    right: 200px;
+    right: 300px;
     z-index: 40;
   }
 }
@@ -492,14 +583,14 @@ body {
 @media (max-width: 1366px) {
   .view-reading-body {
     font-family: var(--font-karla);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 15px;
+    line-height: 14px;
     color: #000;
-    max-width: 340px;
+    max-width: 300px;
     position: fixed;
     top: 200px;
-    right: 200px;
+    right: 240px;
     z-index: 40;
   }
 }
@@ -515,8 +606,8 @@ body {
     color: #000;
     max-width: 350px;
     position: fixed;
-    top: 400px;
-    right: 305px;
+    top: 360px;
+    right: 340px;
     z-index: 40;
   }
 }
@@ -532,8 +623,8 @@ body {
     color: #000;
     max-width: 340px;
     position: fixed;
-    top: 400px;
-    right: 305px;
+    top: 360px;
+    right: 360px;
     z-index: 40;
   }
 }
@@ -549,8 +640,8 @@ body {
     color: #000;
     max-width: 340px;
     position: fixed;
-    top: 400px;
-    right: 305px;
+    top: 360px;
+    right: 330px;
     z-index: 40;
   }
 }
@@ -587,9 +678,9 @@ body {
 @media (min-width: 1367px) and (max-width: 1536px) {
   .reflect-reading-description {
     font-family: var(--font-karla);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 200;
-    line-height: 28px;
+    line-height: 26px;
     color: #000;
     max-width: 380px;
     position: fixed;
@@ -604,9 +695,9 @@ body {
 @media (max-width: 1366px) {
   .reflect-reading-description {
     font-family: var(--font-karla);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 200;
-    line-height: 28px;
+    line-height: 26px;
     color: #000;
     max-width: 380px;
     position: fixed;
@@ -637,14 +728,14 @@ body {
 @media (min-width: 1367px) and (max-width: 1536px) {
   .reflect-reading-body {
     font-family: var(--font-karla);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 15px;
+    line-height: 14px;
     color: #000;
-    max-width: 340px;
+    max-width: 270px;
     position: fixed;
     top: 200px;
-    right: 200px;
+    right: 300px;
     z-index: 40;
   }
 }
@@ -653,14 +744,14 @@ body {
 @media (max-width: 1366px) {
   .reflect-reading-body {
     font-family: var(--font-karla);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 15px;
+    line-height: 14px;
     color: #000;
-    max-width: 340px;
+    max-width: 300px;
     position: fixed;
     top: 200px;
-    right: 200px;
+    right: 240px;
     z-index: 40;
   }
 }
@@ -674,10 +765,10 @@ body {
     font-style: italic;
     line-height: 18px;
     color: #000;
-    max-width: 350px;
+    max-width: 300px;
     position: fixed;
-    top: 400px;
-    right: 305px;
+    top: 380px;
+    right: 340px;
     z-index: 40;
   }
 }
@@ -691,10 +782,10 @@ body {
     font-style: italic;
     line-height: 18px;
     color: #000;
-    max-width: 340px;
+    max-width: 300px;
     position: fixed;
-    top: 400px;
-    right: 305px;
+    top: 390px;
+    right: 360px;
     z-index: 40;
   }
 }
@@ -708,10 +799,10 @@ body {
     font-style: italic;
     line-height: 18px;
     color: #000;
-    max-width: 340px;
+    max-width: 300px;
     position: fixed;
-    top: 400px;
-    right: 305px;
+    top: 360px;
+    right: 330px;
     z-index: 40;
   }
 }
@@ -748,9 +839,9 @@ body {
 @media (min-width: 1367px) and (max-width: 1536px) {
   .connect-reading-description {
     font-family: var(--font-karla);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 200;
-    line-height: 28px;
+    line-height: 26px;
     color: #000;
     max-width: 380px;
     position: fixed;
@@ -765,9 +856,9 @@ body {
 @media (max-width: 1366px) {
   .connect-reading-description {
     font-family: var(--font-karla);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 200;
-    line-height: 28px;
+    line-height: 26px;
     color: #000;
     max-width: 380px;
     position: fixed;
@@ -798,14 +889,14 @@ body {
 @media (min-width: 1367px) and (max-width: 1536px) {
   .connect-reading-body {
     font-family: var(--font-karla);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 15px;
+    line-height: 14px;
     color: #000;
-    max-width: 340px;
+    max-width: 250px;
     position: fixed;
     top: 200px;
-    right: 200px;
+    right: 240px;
     z-index: 40;
   }
 }
@@ -814,14 +905,14 @@ body {
 @media (max-width: 1366px) {
   .connect-reading-body {
     font-family: var(--font-karla);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 15px;
+    line-height: 14px;
     color: #000;
-    max-width: 340px;
+    max-width: 250px;
     position: fixed;
     top: 200px;
-    right: 200px;
+    right: 240px;
     z-index: 40;
   }
 }

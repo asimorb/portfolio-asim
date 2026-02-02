@@ -282,7 +282,6 @@ export default function SpacesOverviewPage() {
   const [overlayDragY, setOverlayDragY] = useState(0)
   const [overlayDragTransition, setOverlayDragTransition] = useState('transform 200ms ease')
   const [narrowLayout, setNarrowLayout] = useState(false)
-  const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1440)
 
   const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
 
@@ -305,46 +304,12 @@ export default function SpacesOverviewPage() {
     if (typeof window === 'undefined') return 1
     const narrowStart = 1368
     const narrowEnd = 1024
-    const minScale = 0.56
+    const minScale = 0.75
     const w = window.innerWidth
     if (w >= narrowStart) return 1
     if (w <= narrowEnd) return minScale
     const t = (narrowStart - w) / (narrowStart - narrowEnd)
     return 1 - t * (1 - minScale)
-  })()
-
-  const galleryMaxWidth = (() => {
-    const rail = 220
-    const leftPad = 120
-    const rightGutter = 64
-    const maxW = 900
-    const minW = 260
-    const w = viewportWidth || 1440
-    return clamp(w - (rail + rightGutter + leftPad), minW, maxW)
-  })()
-
-  const gridScale = (() => {
-    const wide = 1
-    const min = 0.45
-    const start = 1500
-    const end = 1024
-    const w = viewportWidth || start
-    if (w >= start) return wide
-    if (w <= end) return min
-    const t = (start - w) / (start - end)
-    return wide - t * (wide - min)
-  })()
-
-  const gridMarginLeft = (() => {
-    const wide = 120
-    const narrow = 40
-    const start = 1500
-    const end = 1024
-    const w = viewportWidth || start
-    if (w >= start) return wide
-    if (w <= end) return narrow
-    const t = (start - w) / (start - end)
-    return wide - t * (wide - narrow)
   })()
 
   const computeOverlayTarget = () => {
@@ -393,13 +358,6 @@ export default function SpacesOverviewPage() {
 
   useEffect(() => {
     setCanGoBack(getNavStackLength() > 0)
-  }, [])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined
-    const onResize = () => setViewportWidth(window.innerWidth)
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
   }, [])
 
   useEffect(() => {
@@ -1004,20 +962,15 @@ export default function SpacesOverviewPage() {
             <div
               style={{
                 display: 'grid',
-                                gridTemplateColumns: isMobile
-                  ? 'repeat(3, minmax(175px, 1fr))'
-                  : viewportWidth < 1400
-                    ? 'repeat(3, minmax(160px, 1fr))'
-                    : 'repeat(4, minmax(160px, 1fr))',
-                gridAutoRows: isMobile ? '175px' : undefined,
+                gridTemplateColumns: isMobile ? 'repeat(3, minmax(70px, 1fr))' : 'repeat(4, minmax(160px, 1fr))',
+                gridAutoRows: isMobile ? '70px' : undefined,
                 gridAutoFlow: isMobile ? 'row dense' : undefined,
-                gap: isMobile ? '20px' : '74px 14px',
+                gap: isMobile ? '8px' : '74px 14px',
                 alignItems: isMobile ? 'stretch' : 'start',
-                maxWidth: isMobile ? '100%' : galleryMaxWidth,
-                marginTop: isMobile ? '100px' : (viewportWidth < 1400 ? '5px' : '60px'),
-                marginLeft: isMobile ? '0px' : `${gridMarginLeft}px`,
-                transform: overlayProject ? 'scale(0.75) translate(120px, -40px)' : `scale(${gridScale})`,
-                transformOrigin: 'top left',
+                maxWidth: isMobile ? '100%' : '860px',
+                marginTop: isMobile ? '100px' : '60px',
+                marginLeft: isMobile ? '0px' : '120px',
+                transform: overlayProject ? 'scale(0.75) translate(120px, -40px)' : 'none',
                 transition: 'transform 420ms cubic-bezier(0.25, 0.9, 0.35, 1)'
               }}
             >
@@ -1288,8 +1241,7 @@ export default function SpacesOverviewPage() {
             >
               {(() => {
                 const titleSize = 10
-                const projectValueSize = 18
-                const notesValueSize = 16
+                const valueSize = 20
                 const letterSpacing = '-0.02em'
                 return (
                   <div
@@ -1318,11 +1270,11 @@ export default function SpacesOverviewPage() {
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                         <div style={{ fontSize: titleSize, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-2px' }}>project</div>
-                        <div style={{ fontSize: projectValueSize, fontWeight: 200, letterSpacing }}>{overlayProject.title}</div>
+                        <div style={{ fontSize: valueSize, fontWeight: 200, letterSpacing }}>{overlayProject.title}</div>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <div style={{ fontSize: titleSize, fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em', marginBottom: '-2px' }}>notes</div>
-                        <div style={{ fontSize: notesValueSize, fontWeight: 200, letterSpacing, lineHeight: 1.1 }}>{overlayProject.notes}</div>
+                        <div style={{ fontSize: valueSize, fontWeight: 200, letterSpacing, lineHeight: '22px' }}>{overlayProject.notes}</div>
                       </div>
                     </div>
                   </div>
@@ -1503,9 +1455,6 @@ export default function SpacesOverviewPage() {
                   gridAutoFlow: 'row dense',
                   gap: '6px',
                   width: `${overlayStyle.thumbWidth || 180}px`,
-                  transform: `scale(${thumbScale})`,
-                  transformOrigin: 'top left',
-                  transition: 'transform 200ms ease',
                   zIndex: 212
                 }}
                 onClick={(e) => e.stopPropagation()}
@@ -1741,15 +1690,4 @@ export default function SpacesOverviewPage() {
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
 

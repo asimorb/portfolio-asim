@@ -253,7 +253,12 @@ export default function TeachingPage() {
   const [pageOpacity, setPageOpacity] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeMenuCategory, setActiveMenuCategory] = useState(null)
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const [hydrated, setHydrated] = useState(false)
+  const mediaQueryMatch = useMediaQuery('(max-width: 768px)')
+  const isMobile = hydrated ? mediaQueryMatch : false
+  const mediaQueryNarrow = useMediaQuery('(max-width: 1400px)')
+  const isNarrowDesktop = hydrated ? mediaQueryNarrow : false
+  const isTouchDevice = useMediaQuery('(hover: none) and (pointer: coarse)')
   const [glowDelaySeconds] = useState(() => syncGlowOffset().delaySeconds)
   const [activeCategoryId, setActiveCategoryId] = useState('studio')
   const [activeIndex, setActiveIndex] = useState(0)
@@ -281,6 +286,7 @@ export default function TeachingPage() {
   const carouselSwipeLastTimeRef = useRef(0)
   const carouselLongPressTimeoutRef = useRef(null)
   const carouselLongPressIntervalRef = useRef(null)
+  const desktopCarouselSwipeStartRef = useRef(null)
   const handleBack = () => {
     navigateWithFade('/reflect')
   }
@@ -307,6 +313,19 @@ export default function TeachingPage() {
         selectedScale: 1.08
       }
     }
+    if (isNarrowDesktop) {
+      return {
+        cardWidth: 208,
+        cardHeight: 208,
+        stackGap: 25,
+        stackOffsetX: 128,
+        tiltY: -14,
+        perspective: 608,
+        baseScaleStep: 0.04,
+        baseMaxScale: 0.74,
+        selectedScale: 0.93
+      }
+    }
     return {
       cardWidth: 260,
       cardHeight: 260,
@@ -318,12 +337,16 @@ export default function TeachingPage() {
       baseMaxScale: 0.92,
       selectedScale: 1.16
     }
-  }, [isMobile])
+  }, [isMobile, isNarrowDesktop])
   const mobileCascadeOffsetY = 120
   const mobileNavGap = 160
   const mobileMetaBottomOffset = activeCategoryId === 'mentor' ? 130 : 80
   const mobileArrowSize = 24
+  const arrowSize = isMobile ? mobileArrowSize : (isNarrowDesktop ? 19 : 24)
   const heroCardWidthDesktop = 640
+  const sideRailLeft = isMobile ? 0 : (isNarrowDesktop ? 96 : 140)
+  const sideRailTop = isMobile ? 0 : (isNarrowDesktop ? 180 : 220)
+  const sideRailWidth = isMobile ? 0 : (isNarrowDesktop ? 260 : 220)
   const heroZoom = useMemo(() => ({
     min: 1,
     max: 3.5,
@@ -693,6 +716,8 @@ export default function TeachingPage() {
     setMobileNotesExpanded(false)
   }, [activeIndex])
 
+  useEffect(() => setHydrated(true), [])
+
   const displayIndex = selectedIndex ?? activeIndex
   const displayItem = filteredTeachingItems[displayIndex] || filteredTeachingItems[0]
   const selectedItem = selectedIndex !== null ? filteredTeachingItems[selectedIndex] : null
@@ -1039,6 +1064,25 @@ export default function TeachingPage() {
     zoomHeroBy(direction * heroZoom.step)
   }
 
+  const handleDesktopCarouselTouchStart = (event) => {
+    if (isMobile || !isTouchDevice) return
+    if (!event.touches || event.touches.length !== 1) return
+    const touch = event.touches[0]
+    desktopCarouselSwipeStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  const handleDesktopCarouselTouchEnd = (event) => {
+    if (isMobile || !isTouchDevice) return
+    const start = desktopCarouselSwipeStartRef.current
+    desktopCarouselSwipeStartRef.current = null
+    if (!start || !event.changedTouches || event.changedTouches.length !== 1) return
+    const touch = event.changedTouches[0]
+    const deltaX = touch.clientX - start.x
+    const deltaY = touch.clientY - start.y
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return
+    stepCarousel(deltaX < 0 ? 1 : -1)
+  }
+
   return (
     <div
       style={{
@@ -1059,6 +1103,7 @@ export default function TeachingPage() {
         :root { --glow-offset: 0deg; }
         @property --glow-rotation { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
         @keyframes glowHue { 0% { --glow-rotation: 0deg; } 100% { --glow-rotation: 360deg; } }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
       `}</style>
 
       {!isMobile && (
@@ -1109,41 +1154,60 @@ export default function TeachingPage() {
               left: 100,
               zIndex: 6,
               display: 'flex',
-              gap: '14px',
+              flexDirection: 'column',
+              gap: '8px',
               fontFamily: 'var(--font-karla)',
               fontSize: '14px',
               fontWeight: 500
             }}
           >
-            {teachingCategories.slice(0, 4).map((category, idx) => {
-              const isActive = category.id === activeCategoryId
-              return (
-                <button
-                  key={`teaching-index-${category.id}`}
-                  type="button"
-                  onClick={() => setActiveCategoryId(category.id)}
-                  style={{
-                    border: isActive ? '1px solid #000' : '1px solid transparent',
-                    background: isActive ? '#000' : 'none',
-                    padding: '4px 6px',
-                    cursor: isActive ? 'default' : 'pointer',
-                    fontFamily: 'inherit',
-                    fontSize: 'inherit',
-                    fontWeight: 600,
-                    color: isActive ? '#fff' : '#000',
-                    borderRadius: '999px',
-                    lineHeight: 1,
-                    minWidth: '24px',
-                    height: '20px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  {idx + 1}
-                </button>
-              )
-            })}
+            <div style={{ display: 'flex', gap: '14px' }}>
+              {teachingCategories.slice(0, 4).map((category, idx) => {
+                const isActive = category.id === activeCategoryId
+                return (
+                  <button
+                    key={`teaching-index-${category.id}`}
+                    type="button"
+                    onClick={() => setActiveCategoryId(category.id)}
+                    style={{
+                      border: isActive ? '1px solid #000' : '1px solid transparent',
+                      background: isActive ? '#000' : 'none',
+                      padding: '4px 6px',
+                      cursor: isActive ? 'default' : 'pointer',
+                      fontFamily: 'inherit',
+                      fontSize: 'inherit',
+                      fontWeight: 600,
+                      color: isActive ? '#fff' : '#000',
+                      borderRadius: '999px',
+                      lineHeight: 1,
+                      minWidth: '24px',
+                      height: '20px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {idx + 1}
+                  </button>
+                )
+              })}
+            </div>
+
+            {hydrated && isNarrowDesktop && (
+              <div
+                key={`teaching-label-${activeCategoryId}`}
+                style={{
+                  fontFamily: 'var(--font-karla)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#000',
+                  textTransform: 'lowercase',
+                  animation: 'fadeIn 220ms ease'
+                }}
+              >
+                {teachingCategories.find(c => c.id === activeCategoryId)?.label}
+              </div>
+            )}
           </div>
 
           <RightPanelTransform
@@ -1317,7 +1381,8 @@ export default function TeachingPage() {
             width: 220,
             zIndex: 40,
             fontFamily: 'var(--font-karla)',
-            color: '#000'
+            color: '#000',
+            display: isNarrowDesktop ? 'none' : 'block'
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '24px' }}>
@@ -1352,8 +1417,8 @@ export default function TeachingPage() {
       <div
         style={{
           position: isMobile ? 'relative' : 'fixed',
-          left: isMobile ? 'auto' : '48%',
-          top: isMobile ? 'auto' : 220,
+          left: isMobile ? 'auto' : (isNarrowDesktop ? 'calc(48% - 15px)' : '48%'),
+          top: isMobile ? 'auto' : (isNarrowDesktop ? 200 : 220),
           width: isMobile ? '100%' : 640,
           height: isMobile ? 280 : 360,
           zIndex: 40,
@@ -1361,6 +1426,8 @@ export default function TeachingPage() {
           margin: isMobile ? `${mobileCascadeOffsetY}px auto 12px` : undefined
         }}
         onWheel={handleCarouselWheel}
+        onTouchStart={handleDesktopCarouselTouchStart}
+        onTouchEnd={handleDesktopCarouselTouchEnd}
       >
         <div
           style={{
@@ -1495,10 +1562,10 @@ export default function TeachingPage() {
             position: 'relative'
           } : {
             display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: 12,
-            padding: '0 80px',
-            transform: 'translateX(120px)',
+            justifyContent: 'center',
+            gap: isNarrowDesktop ? '280px' : '560px',
+            marginTop: isNarrowDesktop ? -60 : 12,
+            transform: isNarrowDesktop ? 'translateX(110px)' : 'translateX(120px)',
             position: 'relative'
           }}
         >
@@ -1549,6 +1616,7 @@ export default function TeachingPage() {
               if (!isMobile) {
                 handleArrowLongPressEnd()
               }
+              hideTooltip()
             }}
             aria-label="Left"
             onMouseEnter={(event) => showTooltip('Left', event)}
@@ -1565,7 +1633,7 @@ export default function TeachingPage() {
             <img
               src="/teaching/arrow_left_alt_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png"
               alt="Previous"
-              style={{ width: isMobile ? mobileArrowSize : 24, height: isMobile ? mobileArrowSize : 24, display: 'block', imageRendering: 'auto' }}
+              style={{ width: arrowSize, height: arrowSize, display: 'block', imageRendering: 'auto' }}
             />
           </button>
           <button
@@ -1591,6 +1659,7 @@ export default function TeachingPage() {
               if (!isMobile) {
                 handleArrowLongPressEnd()
               }
+              hideTooltip()
             }}
             aria-label="Right"
             onMouseEnter={(event) => showTooltip('Right', event)}
@@ -1607,7 +1676,7 @@ export default function TeachingPage() {
             <img
               src="/teaching/arrow_right_alt_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png"
               alt="Next"
-              style={{ width: isMobile ? mobileArrowSize : 24, height: isMobile ? mobileArrowSize : 24, display: 'block', imageRendering: 'auto' }}
+              style={{ width: arrowSize, height: arrowSize, display: 'block', imageRendering: 'auto' }}
             />
           </button>
         </div>
@@ -1686,13 +1755,49 @@ export default function TeachingPage() {
             </div>
           </div>
         )}
-        {!isMobile && (
+      </div>
+
+      {!isMobile && isNarrowDesktop ? (
+        <div
+          style={{
+            position: 'fixed',
+            left: sideRailLeft,
+            top: '290px',
+            transform: 'none',
+            width: sideRailWidth,
+            fontFamily: 'var(--font-karla)',
+            color: '#000',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 18,
+            zIndex: 40
+          }}
+        >
+          <div>
+            <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
+              {levelLabel}
+            </div>
+            <div style={{ fontSize: '18px', fontWeight: 200, letterSpacing: '-0.02em', marginTop: 12 }}>
+              {levelValue}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
+              notes
+            </div>
+            <div style={{ fontSize: '18px', fontWeight: 200, letterSpacing: '-0.02em', lineHeight: '22px', marginTop: 4 }}>
+              {displayItem.notes}
+            </div>
+          </div>
+        </div>
+      ) : (
+        !isMobile && (
           <div
             style={{
               position: 'fixed',
-              left: -430,
-              top: 320,
-              width: 400,
+              left: 140,
+              top: 500,
+              width: 350,
               fontFamily: 'var(--font-karla)',
               color: '#000',
               display: 'flex',
@@ -1717,8 +1822,8 @@ export default function TeachingPage() {
               </div>
             </div>
           </div>
-        )}
-      </div>
+        )
+      )}
 
       {selectedIndex !== null && (
         <div

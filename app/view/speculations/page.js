@@ -24,7 +24,8 @@ const syncGlowOffset = () => {
 const BREAKPOINTS = {
   sm: 640,
   md: 900,
-  lg: 1200
+  lg: 1200,
+  xl: 1400
 }
 const BASE_LAYOUT_WIDTH = 1440
 
@@ -278,14 +279,14 @@ const imageEntries = [
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 2, subtitleOffsetX: '-30px', subtitleOffsetY: '590px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
-    subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
-      
-    descriptionColumn: 2, descriptionOffsetX: '-30px', descriptionOffsetY: '-40px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
-    descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
-      
+    subtitleColumn: 2, subtitleOffsetX: '-30px', subtitleOffsetY: '590px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px',
+    subtitleFontSize: { xl: '20px', lg: '14px' }, subtitleFontWeight: 400, subtitleLineHeight: { xl: '26px', lg: '19px' }, subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
+
+    descriptionColumn: 2, descriptionOffsetX: '-30px', descriptionOffsetY: '-40px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px',
+    descriptionFontSize: { xl: '28px', lg: '18px' }, descriptionFontWeight: 200, descriptionLineHeight: { xl: '26px', lg: '20px' }, descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
+
     notesColumn: 2, notesOffsetX: '-30px', notesOffsetY: '-40px', notesMaxWidth: '300px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
-    notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
+    notesFontSize: { xl: '14px', lg: '12px' }, notesFontWeight: 400, notesLineHeight: { xl: '15px', lg: '13px' }, notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
     },
    {
     id: 'kreativ',
@@ -303,14 +304,14 @@ const imageEntries = [
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 1, subtitleOffsetX: '110px', subtitleOffsetY: '415px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
-    subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
-      
-    descriptionColumn: 2, descriptionOffsetX: '100px', descriptionOffsetY: '230px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
-    descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
-      
+    subtitleColumn: 1, subtitleOffsetX: '110px', subtitleOffsetY: '415px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px',
+    subtitleFontSize: { xl: '20px', lg: '14px' }, subtitleFontWeight: 400, subtitleLineHeight: { xl: '26px', lg: '19px' }, subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
+
+    descriptionColumn: 2, descriptionOffsetX: '100px', descriptionOffsetY: '230px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px',
+    descriptionFontSize: { xl: '28px', lg: '18px' }, descriptionFontWeight: 200, descriptionLineHeight: { xl: '26px', lg: '20px' }, descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
+
     notesColumn: 1, notesOffsetX: '110px', notesOffsetY: '-10px', notesMaxWidth: '400px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
-    notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
+    notesFontSize: { xl: '14px', lg: '12px' }, notesFontWeight: 400, notesLineHeight: { xl: '15px', lg: '13px' }, notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
     },
     {
     id: 'niyf',
@@ -328,14 +329,14 @@ const imageEntries = [
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 2, subtitleOffsetX: '100px', subtitleOffsetY: '220px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
-    subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
-      
-    descriptionColumn: 2, descriptionOffsetX: '100px', descriptionOffsetY: '-84px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
-    descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
-      
+    subtitleColumn: 2, subtitleOffsetX: '100px', subtitleOffsetY: '220px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px',
+    subtitleFontSize: { xl: '20px', lg: '14px' }, subtitleFontWeight: 400, subtitleLineHeight: { xl: '26px', lg: '19px' }, subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
+
+    descriptionColumn: 2, descriptionOffsetX: '100px', descriptionOffsetY: '-84px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px',
+    descriptionFontSize: { xl: '28px', lg: '18px' }, descriptionFontWeight: 200, descriptionLineHeight: { xl: '26px', lg: '20px' }, descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
+
     notesColumn: 1, notesOffsetX: '340px', notesOffsetY: '-280px', notesMaxWidth: '350px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
-    notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
+    notesFontSize: { xl: '14px', lg: '12px' }, notesFontWeight: 400, notesLineHeight: { xl: '15px', lg: '13px' }, notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
     },  
    
   {
@@ -367,14 +368,14 @@ const imageEntries = [
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 2, subtitleOffsetX: '12px', subtitleOffsetY: '410px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
-    subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
-      
-    descriptionColumn: 2, descriptionOffsetX: '15px', descriptionOffsetY: '-75px', descriptionMaxWidth: '550px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
-    descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
-      
+    subtitleColumn: 2, subtitleOffsetX: '12px', subtitleOffsetY: '410px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px',
+    subtitleFontSize: { xl: '20px', lg: '14px' }, subtitleFontWeight: 400, subtitleLineHeight: { xl: '26px', lg: '19px' }, subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
+
+    descriptionColumn: 2, descriptionOffsetX: '15px', descriptionOffsetY: '-75px', descriptionMaxWidth: '550px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px',
+    descriptionFontSize: { xl: '28px', lg: '18px' }, descriptionFontWeight: 200, descriptionLineHeight: { xl: '26px', lg: '20px' }, descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
+
     notesColumn: 2, notesOffsetX: '310px', notesOffsetY: '-540px', notesMaxWidth: '250px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
-    notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
+    notesFontSize: { xl: '14px', lg: '12px' }, notesFontWeight: 400, notesLineHeight: { xl: '15px', lg: '13px' }, notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
     },
 
       {
@@ -385,9 +386,9 @@ const imageEntries = [
      imgHeightMobile: 'auto',
      objectFitMobile: 'contain',
     images: [
-      { src: '/speculations/Poster 01.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px'},
-      { src: '/speculations/Poster 02.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' },
-      { src: '/speculations/Poster 03.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '520px' }
+      { src: '/speculations/Poster 01.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '480px'},
+      { src: '/speculations/Poster 02.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '480px' },
+      { src: '/speculations/Poster 03.webp', imgOffsetX: '0px', imgOffsetY: '0px', imgWidth: '120%', maxH: '480px' }
       ],
     subtitle: '2018 _ 2021',
     description: 'NTNU ARTEC, was a transdisciplinary entity that supporting research and artistic excellence through collaborations in the fields of art(s), humanities, and technology. It was formed by a heterogeneous group of researchers and artists working at different fields and departments at NTNU.',
@@ -403,14 +404,14 @@ const imageEntries = [
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 1, subtitleOffsetX: '-330px', subtitleOffsetY: '1160px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
-    subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
-      
-    descriptionColumn: 1, descriptionOffsetX: '-330px', descriptionOffsetY: '175px', descriptionMaxWidth: '520px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
-    descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
-      
+    subtitleColumn: 1, subtitleOffsetX: '-330px', subtitleOffsetY: '1160px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px',
+    subtitleFontSize: { xl: '20px', lg: '14px' }, subtitleFontWeight: 400, subtitleLineHeight: { xl: '26px', lg: '19px' }, subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
+
+    descriptionColumn: 1, descriptionOffsetX: '-330px', descriptionOffsetY: '175px', descriptionMaxWidth: '520px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px',
+    descriptionFontSize: { xl: '28px', lg: '18px' }, descriptionFontWeight: 200, descriptionLineHeight: { xl: '26px', lg: '20px' }, descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
+
     notesColumn: 2, notesOffsetX: '-345px', notesOffsetY: '175px', notesMaxWidth: '250px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
-    notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
+    notesFontSize: { xl: '14px', lg: '12px' }, notesFontWeight: 400, notesLineHeight: { xl: '15px', lg: '13px' }, notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
     },
 
           {
@@ -439,14 +440,14 @@ const imageEntries = [
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 1, subtitleOffsetX: '-330px', subtitleOffsetY: '1160px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
-    subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
-      
-    descriptionColumn: 1, descriptionOffsetX: '-330px', descriptionOffsetY: '175px', descriptionMaxWidth: '520px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
-    descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
-      
+    subtitleColumn: 1, subtitleOffsetX: '-330px', subtitleOffsetY: '1160px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px',
+    subtitleFontSize: { xl: '20px', lg: '14px' }, subtitleFontWeight: 400, subtitleLineHeight: { xl: '26px', lg: '19px' }, subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
+
+    descriptionColumn: 1, descriptionOffsetX: '-330px', descriptionOffsetY: '175px', descriptionMaxWidth: '520px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px',
+    descriptionFontSize: { xl: '28px', lg: '18px' }, descriptionFontWeight: 200, descriptionLineHeight: { xl: '26px', lg: '20px' }, descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
+
     notesColumn: 2, notesOffsetX: '-345px', notesOffsetY: '175px', notesMaxWidth: '300px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
-    notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)' 
+    notesFontSize: { xl: '14px', lg: '12px' }, notesFontWeight: 400, notesLineHeight: { xl: '15px', lg: '13px' }, notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'
     },
 
     {
@@ -465,14 +466,14 @@ const imageEntries = [
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 2, subtitleOffsetX: '-650px', subtitleOffsetY: '880px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
-    subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
-      
-    descriptionColumn: 2, descriptionOffsetX: '-650px', descriptionOffsetY: '850px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
-    descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
-      
+    subtitleColumn: 2, subtitleOffsetX: '-650px', subtitleOffsetY: '880px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px',
+    subtitleFontSize: { xl: '20px', lg: '14px' }, subtitleFontWeight: 400, subtitleLineHeight: { xl: '26px', lg: '19px' }, subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
+
+    descriptionColumn: 2, descriptionOffsetX: '-650px', descriptionOffsetY: '850px', descriptionMaxWidth: '500px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px',
+    descriptionFontSize: { xl: '28px', lg: '18px' }, descriptionFontWeight: 200, descriptionLineHeight: { xl: '26px', lg: '20px' }, descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
+
     notesColumn: 2, notesOffsetX: '-260px', notesOffsetY: '840px', notesMaxWidth: '310px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
-    notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
+    notesFontSize: { xl: '14px', lg: '12px' }, notesFontWeight: 400, notesLineHeight: { xl: '15px', lg: '13px' }, notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
          },
   {
     id: 'in2media',
@@ -483,21 +484,21 @@ const imageEntries = [
     imgWidth: '88%',
     maxH: '250px',
     padding: '14px',
-    imgOffsetX: '230px',
+    imgOffsetX: '0px',
     imgOffsetY: '-10px',
     textColumns: 2, textGridTemplate: '1.5fr 4fr', textMarginTop: '-10px', textMarginLeft: '-400px', textAlignSelf: 'stretch', textOffsetX: '0px', textOffsetY: '0px',
     textMaxWidth: '720px',  
     textColumnGap: '28px',
     textRowGap: '16px',
       
-    subtitleColumn: 2, subtitleOffsetX: '230px', subtitleOffsetY: '438px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', 
-    subtitleFontSize: '20px', subtitleFontWeight: 400, subtitleLineHeight: '26px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
-      
-    descriptionColumn: 2, descriptionOffsetX: '230px', descriptionOffsetY: '380px', descriptionMaxWidth: '300px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', 
-    descriptionFontSize: '28px', descriptionFontWeight: 200, descriptionLineHeight: '26px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
-      
+    subtitleColumn: 2, subtitleOffsetX: '230px', subtitleOffsetY: '438px', subtitleTextAlign: 'left', subtitleMarginTop: '0px', subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px',
+    subtitleFontSize: { xl: '20px', lg: '14px' }, subtitleFontWeight: 400, subtitleLineHeight: { xl: '26px', lg: '19px' }, subtitleMarginBottom: '4px', subtitleMarginBottomTwoCol: '10px', subtitleColor: '#fff', subtitleTextTransform: 'capitalize', subtitleFontFamily: 'var(--font-karla)',
+
+    descriptionColumn: 2, descriptionOffsetX: '230px', descriptionOffsetY: '380px', descriptionMaxWidth: '300px', descriptionTextAlign: 'left', descriptionMarginTop: '0px', descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px',
+    descriptionFontSize: { xl: '28px', lg: '18px' }, descriptionFontWeight: 200, descriptionLineHeight: { xl: '26px', lg: '20px' }, descriptionMarginBottom: '12px', descriptionMarginBottomTwoCol: '0px', descriptionColor: '#f1f1f1', descriptionFontFamily: 'var(--font-karla)',
+
     notesColumn: 2, notesOffsetX: '230px', notesOffsetY: '342px', notesMaxWidth: '250px', notesTextAlign: 'left', notesMarginTop: '0px', notesMarginBottom: '0px', notesMarginBottomTwoCol: '0px',
-    notesFontSize: '14px', notesFontWeight: 400, notesLineHeight: '15px', notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
+    notesFontSize: { xl: '14px', lg: '12px' }, notesFontWeight: 400, notesLineHeight: { xl: '15px', lg: '13px' }, notesColor: '#d8d8d8', notesFontFamily: 'var(--font-karla)'  
          }
   ]
 
@@ -516,19 +517,22 @@ export default function SpeculationsPage() {
   )
   const [mobileTextTab, setMobileTextTab] = useState('description')
   const isMobile = useMediaQuery('(max-width: 768px)')
+  const isTouchDevice = useMediaQuery('(hover: none) and (pointer: coarse)')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeMenuCategory, setActiveMenuCategory] = useState(null)
   const [canGoBack, setCanGoBack] = useState(false)
   const expandTimerRef = useRef(null)
   const collapseTimerRef = useRef(null)
   const scrollAreaRef = useRef(null)
-  const wheelCooldownRef = useRef(0)
   const cardSwipeStartRef = useRef(null)
   const textSwipeStartRef = useRef(null)
+  const desktopSwipeStartRef = useRef(null)
   const [viewportWidth, setViewportWidth] = useState(0)
   const isMobileLayout = isMobile || viewportWidth <= 820
+  const [desktopOverlayAwake, setDesktopOverlayAwake] = useState(false)
   const itemRefs = useRef({})
   const contentRefs = useRef({})
+  const overlayTimerRef = useRef(null)
   const rafRef = useRef(0)
   const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
     const target = path.startsWith('/') ? path : `/${path}`
@@ -544,9 +548,6 @@ export default function SpeculationsPage() {
   const handleCardWheel = (e) => {
     if (isMobileLayout) return
     e.preventDefault()
-    const now = Date.now()
-    if (now - wheelCooldownRef.current < 260) return
-    wheelCooldownRef.current = now
     const delta = e.deltaY
     if (delta > 0) {
       setCardIndex((prev) => (prev + 1) % imageEntries.length)
@@ -554,6 +555,22 @@ export default function SpeculationsPage() {
       setCardIndex((prev) => (prev - 1 + imageEntries.length) % imageEntries.length)
     }
   }
+
+  const wakeOverlay = (autoHideMs = 2000) => {
+    if (isMobileLayout) return
+    setDesktopOverlayAwake(true)
+    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
+    overlayTimerRef.current = setTimeout(() => setDesktopOverlayAwake(false), autoHideMs)
+  }
+
+  const hideOverlay = () => {
+    if (overlayTimerRef.current) {
+      clearTimeout(overlayTimerRef.current)
+      overlayTimerRef.current = null
+    }
+    setDesktopOverlayAwake(false)
+  }
+
   const handleBack = () => {
     const prev = getNavStackLength() > 0 ? popNavStack() : null
     if (prev) {
@@ -599,6 +616,10 @@ export default function SpeculationsPage() {
     handleResize()
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  useEffect(() => () => {
+    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
   }, [])
 
   useEffect(() => {
@@ -761,6 +782,28 @@ export default function SpeculationsPage() {
       setMobileTextTab('notes')
     } else {
       setMobileTextTab('description')
+    }
+  }
+
+  const handleDesktopTouchStart = (event) => {
+    if (isMobileLayout || !isTouchDevice) return
+    if (!event.touches || event.touches.length !== 1) return
+    const touch = event.touches[0]
+    desktopSwipeStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  const handleDesktopTouchEnd = (event) => {
+    if (isMobileLayout || !isTouchDevice) return
+    const start = desktopSwipeStartRef.current
+    desktopSwipeStartRef.current = null
+    if (!start || !event.changedTouches || event.changedTouches.length !== 1) return
+    const touch = event.changedTouches[0]
+    const deltaY = touch.clientY - start.y
+    if (Math.abs(deltaY) < 50) return
+    if (deltaY < 0) {
+      setCardIndex((prev) => (prev + 1) % imageEntries.length)
+    } else {
+      setCardIndex((prev) => (prev - 1 + imageEntries.length) % imageEntries.length)
     }
   }
 
@@ -992,8 +1035,16 @@ export default function SpeculationsPage() {
             gap: isMobile ? '16px' : '48px',
             minHeight: isMobile ? '480px' : '520px',
             boxShadow: '0 32px 80px rgba(0,0,0,0.18)',
-            maxHeight: isMobile ? 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 160px)' : '76vh',
-            height: isMobile ? 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 160px)' : '76vh',
+            maxHeight: isMobile
+              ? 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 160px)'
+              : viewportWidth > 820 && viewportWidth < 1400
+                ? '64vh'
+                : '76vh',
+            height: isMobile
+              ? 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 160px)'
+              : viewportWidth > 820 && viewportWidth < 1400
+                ? '64vh'
+                : '76vh',
             width: isMobile ? '100%' : 'auto',
             maxWidth: isMobile ? 'calc(100% - 10px)' : 'auto',
             margin: isMobile ? '0 auto' : '0',
@@ -1003,7 +1054,6 @@ export default function SpeculationsPage() {
             position: 'relative',
             boxSizing: 'border-box'
           }}
-          onWheel={handleCardWheel}
           onTouchStart={handleMobileTouchStart}
           onTouchEnd={handleMobileTouchEnd}
         >
@@ -1138,33 +1188,7 @@ export default function SpeculationsPage() {
                             ) : (
                               renderImg(slot, currentIndex)
                             )}
-                          </div>
-                          {displayLength > 1 && (
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', width: '100%', paddingBottom: '6px' }}>
-                              {imageList.map((_, idx) => (
-                                <button
-                                  key={`${activeEntry.id}-img-${idx}`}
-                                  type="button"
-                                  onClick={() =>
-                                    setImageIndices((prev) => ({
-                                      ...prev,
-                                      [activeEntry.id]: idx
-                                    }))}
-                                  aria-label={`Image ${idx + 1}`}
-                                  style={{
-                                    width: '28px',
-                                    height: '4px',
-                                    borderRadius: '999px',
-                                    border: 'none',
-                                    background: idx === currentIndex ? '#fff' : 'rgba(255,255,255,0.25)',
-                                    cursor: 'pointer',
-                                    padding: 0
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </>
+                          </div>                        </>
                       )
                     })()}
                     <div style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.14)' }} />
@@ -1191,7 +1215,12 @@ export default function SpeculationsPage() {
                 {activeEntry && (
                   <>
                     {activeEntry.subtitle && (
-                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#fff', lineHeight: '20px' }}>
+                      <div style={{
+                        fontSize: resolveResponsive({ base: '14px', sm: '12px' }, viewportWidth),
+                        fontWeight: 500,
+                        color: '#fff',
+                        lineHeight: resolveResponsive({ base: '20px', sm: '16px' }, viewportWidth)
+                      }}>
                         {activeEntry.subtitle}
                       </div>
                     )}
@@ -1199,9 +1228,13 @@ export default function SpeculationsPage() {
                       <div
                         onClick={handleMobileTextClick}
                         style={{
-                          fontSize: mobileTextTab === 'notes' && activeEntry.notes ? '14px' : '20px',
+                          fontSize: mobileTextTab === 'notes' && activeEntry.notes
+                            ? resolveResponsive({ base: '12px', sm: '10px' }, viewportWidth)
+                            : resolveResponsive({ base: '18px', sm: '15px', md: '16px' }, viewportWidth),
                           fontWeight: 200,
-                          lineHeight: mobileTextTab === 'notes' && activeEntry.notes ? '18px' : '24px',
+                          lineHeight: mobileTextTab === 'notes' && activeEntry.notes
+                            ? resolveResponsive({ base: '14px', sm: '12px' }, viewportWidth)
+                            : resolveResponsive({ base: '20px', sm: '17px', md: '18px' }, viewportWidth),
                           color: '#f1f1f1',
                           cursor: canToggleNotes ? 'pointer' : 'default'
                         }}
@@ -1287,19 +1320,9 @@ export default function SpeculationsPage() {
               ref={scrollAreaRef}
               data-scroll-pane
               onMouseEnter={() => scrollAreaRef.current && scrollAreaRef.current.focus()}
-              onMouseMove={(e) => {
-                if (!scrollAreaRef.current) return
-                const rect = scrollAreaRef.current.getBoundingClientRect()
-                const edgeZone = Math.min(80, rect.height / 4)
-                const offsetY = e.clientY - rect.top
-                if (offsetY < edgeZone) {
-                  const intensity = 1 - offsetY / edgeZone
-                  scrollAreaRef.current.scrollBy({ top: -12 * intensity, behavior: 'auto' })
-                } else if (offsetY > rect.height - edgeZone) {
-                  const intensity = 1 - (rect.height - offsetY) / edgeZone
-                  scrollAreaRef.current.scrollBy({ top: 12 * intensity, behavior: 'auto' })
-                }
-              }}
+              onWheel={isTouchDevice ? undefined : handleCardWheel}
+              onTouchStart={handleDesktopTouchStart}
+              onTouchEnd={handleDesktopTouchEnd}
               style={{
                 overflowY: 'hidden',
                 display: 'flex',
@@ -1349,11 +1372,16 @@ export default function SpeculationsPage() {
                       display: 'grid',
                       gridTemplateColumns: '1fr 0.9fr',
                       gap: '24px',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      ...(viewportWidth > 820 && viewportWidth < 1400 && { transform: 'translateY(-80px)' })
                     }}
                   >
                     {/* Left column: single image with arrows */}
                     <div
+                      onMouseEnter={() => wakeOverlay()}
+                      onMouseLeave={hideOverlay}
+                      onFocus={() => wakeOverlay()}
+                      onPointerDown={(e) => { if (e.pointerType !== 'mouse') wakeOverlay() }}
                       style={{
                         position: 'relative',
                         display: 'flex',
@@ -1436,20 +1464,23 @@ export default function SpeculationsPage() {
                             ) : (
                               imgElement
                             )}
-                            {displayLength > 1 && (
+                            {!isMobileLayout && displayLength > 1 && (
                               <div
                                 style={{
                                   position: 'absolute',
-                                  bottom: '0',
-                                  left: 0,
-                                  right: 0,
+                                  top: '50%',
+                                  right: '12px',
+                                  transform: 'translateY(-50%)',
                                   display: 'flex',
-                                  justifyContent: 'center',
+                                  flexDirection: 'column',
                                   alignItems: 'center',
-                                  gap: '10px',
-                                  background: 'rgba(15,15,15,0.65)',
-                                  padding: '8px 12px',
-                                  borderRadius: '12px'
+                                  gap: '6px',
+                                  background: 'rgba(15,15,15,0.24)',
+                                  padding: '8px 6px',
+                                  borderRadius: '10px',
+                                  boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+                                  opacity: desktopOverlayAwake ? 0.85 : 0.3,
+                                  transition: 'opacity 180ms ease'
                                 }}
                               >
                                 <button
@@ -1460,11 +1491,21 @@ export default function SpeculationsPage() {
                                       [entry.id]: (currentIndex - 1 + displayLength) % displayLength
                                     }))
                                   }
-                                  style={{ border: '1px solid #888', borderRadius: '20px', padding: '6px 12px', background: '#111', color: '#fff' }}
+                                  style={{
+                                    border: '1px solid #666',
+                                    borderRadius: '50%',
+                                    width: '28px',
+                                    height: '28px',
+                                    background: '#0f0f0f',
+                                    color: '#fff',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    cursor: 'pointer'
+                                  }}
                                 >
                                   {'<'}
                                 </button>
-                                <div style={{ color: '#fff', fontSize: '12px', fontWeight: 500 }}>
+                                <div style={{ color: '#fff', fontSize: '10px', fontWeight: 600 }}>
                                   {currentIndex + 1} / {displayLength}
                                 </div>
                                 <button
@@ -1475,7 +1516,17 @@ export default function SpeculationsPage() {
                                       [entry.id]: (currentIndex + 1) % displayLength
                                     }))
                                   }
-                                  style={{ border: '1px solid #888', borderRadius: '20px', padding: '6px 12px', background: '#111', color: '#fff' }}
+                                  style={{
+                                    border: '1px solid #666',
+                                    borderRadius: '50%',
+                                    width: '28px',
+                                    height: '28px',
+                                    background: '#0f0f0f',
+                                    color: '#fff',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    cursor: 'pointer'
+                                  }}
                                 >
                                   {'>'}
                                 </button>
@@ -1490,9 +1541,12 @@ export default function SpeculationsPage() {
                     <div
                       style={{
                         color: '#f1f1f1',
-                        display: 'block',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                        height: '100%',
                         maxWidth: resolveLength(entry.textMaxWidth, '520px', '100%'),
-                        minHeight: '100%',
                         position: 'relative',
                         padding: '8px',
                         transform: 'translateX(10px)'
@@ -1500,9 +1554,7 @@ export default function SpeculationsPage() {
                     >
                       <div
                         style={{
-                          position: 'absolute',
-                          left: 0,
-                          bottom: '50%',
+                          position: 'relative',
                           maxWidth: resolveLength(entry.descriptionMaxWidth, '700px', '700px')
                         }}
                       >
@@ -1546,16 +1598,13 @@ export default function SpeculationsPage() {
                         <div
                           ref={registerContentRef('texts', 2)}
                           style={{
-                            position: 'absolute',
-                            left: 0,
-                            top: '50%',
+                            position: 'relative',
                             fontSize: resolve(entry.notesFontSize, '14px'),
                             fontWeight: resolve(entry.notesFontWeight, 400),
                             lineHeight: resolve(entry.notesLineHeight, '16px'),
                             maxWidth: resolve(entry.notesMaxWidth, '260px'),
                             color: resolve(entry.notesColor, '#d8d8d8'),
-                            paddingTop: '15px',
-                            marginTop: resolveLength(entry.notesMarginTop, '0px', '0px'),
+                            marginTop: '24px',
                             marginBottom: resolveLength(entry.notesMarginBottom, '0px', '0px'),
                             fontFamily: resolve(entry.notesFontFamily, undefined),
                             textAlign: resolve(entry.notesTextAlign, 'left'),
@@ -1607,4 +1656,3 @@ export default function SpeculationsPage() {
     </div>
   )
 }
-

@@ -190,8 +190,8 @@ const cvCategories = [
               {
                 fullWidth: true,
                 lines: [
-                  'Leader | TF7: Immersive Media | QUALINET COST Action IC1003',
-                  'Member | WG3: Evaluations | INDCOR COST Action CA18230'
+                  'Leader, TF7 Immersive Media in QUALINET COST Action IC1003',
+                  'Member, WG3 Evaluations in INDCOR COST Action CA18230'
                 ]
               }
             ]
@@ -202,9 +202,9 @@ const cvCategories = [
               {
                 fullWidth: true,
                 lines: [
-                  'IMPACT | Horizon Europe 2018 | XR and Health',
-                  'IDN4CCI | Horizon Europe 2021 | Culture and Creative Industries',
-                  'METASTORIES | Horizon MSCA 2024 | Transformative Technologies'
+                  'IMPACT, Horizon Europe 2018: XR and Health',
+                  'IDN4CCI, Horizon Europe 2021: Culture and Creative Industries',
+                  'METASTORIES, MSCA 2024: Transformative Technologies'
                 ]
               }
             ]
@@ -215,24 +215,24 @@ const cvCategories = [
         sectionTitle: 'TEACHING & MENTORING',
         subsections: [
           {
-            heading: 'Ntnu / 2109-2022',
+            heading: 'Teaching Duties / 2011-2024',
             rows: [
               {
                 fullWidth: true,
                 lines: [
-                  'Mandated work duty during PhD, co-supervised master\'s students at the Sense-IT Lab.\n\nPresented lectures for the master\'s course TT8108.'
+                  '1600+ hours of design studio and 600+ hours of theory courses at undergrad level. Delivered theory-based lectures to Master\'s students on Immersive Media Technologies in the course TT8108. In addition, cosupervised Master\'s theses for 4+ students at SenseIt Lab, providing mentorship from proposal to defense with positive feedback.'
                 ],
                 linesGap: 3
               }
             ]
           },
           {
-            heading: 'Various / 2021-2025',
+            heading: 'Lectures / 2017-2025',
             rows: [
               {
                 fullWidth: true,
                 lines: [
-                  'Invited Guest Lectures on a range of topics related to design and science methodologies, with particular focus on immersive technologies and practices.'
+                  'Guest Lectures on topics related to design & science methodologies, with particular focus on immersive technologies and practices.'
                 ],
                 linesGap: 3
               }
@@ -501,17 +501,20 @@ export default function CurriculumVitaePage() {
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeMenuCategory, setActiveMenuCategory] = useState('connect')
+  const [hydrated, setHydrated] = useState(false)
   const isMobile = useMediaQuery('(max-width: 768px)')
+  const isNarrowDesktop = useMediaQuery('(max-width: 1400px)')
+  const gatedIsNarrowDesktop = hydrated ? isNarrowDesktop : false
 
   // Consolidated heading styles
   const mainHeadingStyle = {
-    fontSize: isMobile ? '16px' : '22px',
+    fontSize: isMobile ? '16px' : gatedIsNarrowDesktop ? '18px' : '22px',
     fontWeight: 500,
     marginTop: isMobile ? '24px' : '0',
     marginBottom: '12px',
     textTransform: isMobile ? 'uppercase' : 'lowercase'
   }
-  const subsectionHeadingStyle = { fontWeight: 600, marginBottom: '4px' }
+  const subsectionHeadingStyle = { fontSize: gatedIsNarrowDesktop ? '12px' : 'inherit', fontWeight: 600, marginBottom: '4px' }
 
   const navigateWithFade = (path, { preserveHomeLayout = true } = {}) => {
     const target = path.startsWith('/') ? path : `/${path}`
@@ -526,6 +529,10 @@ export default function CurriculumVitaePage() {
   const handleBack = () => {
     navigateWithFade('/connect')
   }
+
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => setPageOpacity(1), 30)
@@ -843,14 +850,42 @@ export default function CurriculumVitaePage() {
         :root { --glow-offset: 0deg; }
         @property --glow-rotation { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
         @keyframes glowHue { 0% { --glow-rotation: 0deg; } 100% { --glow-rotation: 360deg; } }
-        .glow-core-static { position: absolute; width: 160px; height: 160px; left: 20%; top: 36%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent); opacity: 0.7; filter: blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset))); pointer-events: none; z-index: 2; }
-        .glow-core-transition { position: absolute; width: 500px; height: 500px; left: 30%; top: 58%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent); opacity: 0.6; filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg)); pointer-events: none; z-index: 0; }
-        .glow-core-intersection { position: absolute; width: 300px; height: 300px; left: 26%; top: 52%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent); opacity: 0.75; filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg)); pointer-events: none; z-index: 1; }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes restlessMove {
+          0% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+          15% { transform: translate(-50%, -50%) translate(40px, -30px) scale(1.05); }
+          30% { transform: translate(-50%, -50%) translate(-50px, 20px) scale(0.96); }
+          45% { transform: translate(-50%, -50%) translate(35px, 45px) scale(1.03); }
+          60% { transform: translate(-50%, -50%) translate(-60px, -15px) scale(0.94); }
+          75% { transform: translate(-50%, -50%) translate(30px, -40px) scale(1.06); }
+          90% { transform: translate(-50%, -50%) translate(-40px, 30px) scale(0.98); }
+          100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+        }
+        @keyframes hueRotate70 {
+          0% { filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg + 0deg)); }
+          100% { filter: blur(45px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 70deg + 360deg)); }
+        }
+        @keyframes hueRotate80 {
+          0% { filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg + 0deg)); }
+          100% { filter: blur(50px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset) + 80deg + 360deg)); }
+        }
+        .glow-core-static { position: absolute; width: 160px; height: 160px; left: 20%; top: 36%; background: radial-gradient(circle at center, #FDABD3, #FDABD3, rgba(253, 171, 211, 0.6), transparent); opacity: 0.7; filter: blur(30px) hue-rotate(calc(var(--glow-rotation) + var(--glow-offset))); animation: restlessMove 60s ease-in-out infinite; pointer-events: none; z-index: 2; }
+        .glow-core-transition { position: absolute; width: 500px; height: 500px; left: 30%; top: 58%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, #FD7174, rgba(253, 113, 116, 0.7), rgba(253, 113, 116, 0.4), rgba(253, 113, 116, 0.15), transparent); opacity: 0.6; animation: hueRotate80 80s linear infinite; pointer-events: none; z-index: 0; }
+        .glow-core-intersection { position: absolute; width: 300px; height: 300px; left: 26%; top: 52%; transform: translate(-50%, -50%); background: radial-gradient(circle at center, #FD7174, rgba(253, 113, 116, 0.9), rgba(253, 113, 116, 0.5), transparent); opacity: 0.75; animation: hueRotate70 70s linear infinite; pointer-events: none; z-index: 1; }
       `}</style>
 
-      <div className="glow-core-transition" />
-      <div className="glow-core-intersection" />
-      <div className="glow-core-static" />
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 2
+        }}
+      >
+        <div className="glow-core-transition" />
+        <div className="glow-core-intersection" />
+        <div className="glow-core-static" />
+      </div>
 
       {!isMobile && (
         <div
@@ -868,18 +903,82 @@ export default function CurriculumVitaePage() {
       )}
 
       {!isMobile && (
-        <TopBarTransform
-          hoveredElement={hoveredElement}
-          setHoveredElement={setHoveredElement}
-          readingMode={readingMode}
-          analyticsText="CURRICULUM VITAE"
-          glowFilter={glowFilter}
-          showTooltip={showTooltip}
-          hideTooltip={hideTooltip}
-          activePage="connect"
-          glowActive
-          onNavigate={(category) => navigateWithFade(`/${category}`)}
-        />
+        <>
+          <TopBarTransform
+            hoveredElement={hoveredElement}
+            setHoveredElement={setHoveredElement}
+            readingMode={readingMode}
+            analyticsText=""
+            glowFilter={glowFilter}
+            showTooltip={showTooltip}
+            hideTooltip={hideTooltip}
+            activePage="connect"
+            glowActive
+            onNavigate={(category) => navigateWithFade(`/${category}`)}
+          />
+          <div
+            style={{
+              position: 'fixed',
+              top: 40,
+              left: 100,
+              zIndex: 6,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              fontFamily: 'var(--font-karla)',
+              fontSize: '14px',
+              fontWeight: 500
+            }}
+          >
+            <div style={{ display: 'flex', gap: '14px' }}>
+              {cvCategories.map((category, idx) => {
+                const isActive = category.id === activeCategory?.id
+                return (
+                  <button
+                    key={`cv-index-${category.id}`}
+                    type="button"
+                    onClick={() => selectCategory(category.id)}
+                    style={{
+                      border: isActive ? '1px solid #000' : '1px solid transparent',
+                      background: isActive ? '#000' : 'none',
+                      padding: '4px 6px',
+                      cursor: isActive ? 'default' : 'pointer',
+                      fontFamily: 'inherit',
+                      fontSize: 'inherit',
+                      fontWeight: 600,
+                      color: isActive ? '#fff' : '#000',
+                      borderRadius: '999px',
+                      lineHeight: 1,
+                      minWidth: '24px',
+                      height: '20px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {idx + 1}
+                  </button>
+                )
+              })}
+            </div>
+
+            {hydrated && gatedIsNarrowDesktop && (
+              <div
+                key={`cv-label-${activeCategory?.id}`}
+                style={{
+                  fontFamily: 'var(--font-karla)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#000',
+                  textTransform: 'lowercase',
+                  animation: 'fadeIn 220ms ease'
+                }}
+              >
+                {activeCategory?.label}
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       {!isMobile && (
@@ -1026,11 +1125,12 @@ export default function CurriculumVitaePage() {
       <div
         style={{
           position: 'relative',
-          zIndex: 1,
-          padding: isMobile ? '120px 18px 180px' : '140px 240px 120px 140px',
+          zIndex: 3,
+          padding: isMobile ? '120px 18px 180px' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
+          marginLeft: gatedIsNarrowDesktop ? '-140px' : '-100px',
           display: isMobile ? 'block' : 'grid',
-          gridTemplateColumns: isMobile ? undefined : '200px minmax(420px, 1fr)',
-          gap: isMobile ? undefined : '100px',
+          gridTemplateColumns: isMobile ? undefined : gatedIsNarrowDesktop ? '1fr' : '200px minmax(420px, 1fr)',
+          gap: isMobile ? undefined : gatedIsNarrowDesktop ? '0' : '100px',
           alignItems: 'start'
         }}
       >
@@ -1041,7 +1141,7 @@ export default function CurriculumVitaePage() {
                 position: 'fixed',
                 left: '140px',
                 top: '380px',
-                display: 'flex',
+                display: gatedIsNarrowDesktop ? 'none' : 'flex',
                 flexDirection: 'column',
                 gap: '8px',
                 fontFamily: 'var(--font-karla)',
@@ -1079,7 +1179,7 @@ export default function CurriculumVitaePage() {
 
         <div style={{ maxWidth: isMobile ? '100%' : '820px', fontFamily: 'var(--font-karla)', color: '#000', marginTop: isMobile ? '24px' : '60px', marginLeft: isMobile ? 0 : '220px' }}>
 
-          <div style={{ fontSize: '13px', lineHeight: 1.55, maxWidth: '760px' }}>
+          <div style={{ fontSize: gatedIsNarrowDesktop ? '12px' : '13px', lineHeight: 1.1, maxWidth: '760px' }}>
             {activeCategory.type === 'grid' ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '24px' }}>
                 {activeCategory.columns.map((column, idx) => (
@@ -1116,7 +1216,7 @@ export default function CurriculumVitaePage() {
                           {section.sectionTitle}
                         </div>
                         {!isMobile && <div style={{ height: '1px', backgroundColor: '#000', width: '100%', marginBottom: '20px' }} />}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div style={{ display: section.sectionTitle === 'ACADEMIC ACTIVITIES' && !isMobile ? 'grid' : 'flex', gridTemplateColumns: section.sectionTitle === 'ACADEMIC ACTIVITIES' && !isMobile ? '1fr 1fr' : undefined, flexDirection: section.sectionTitle === 'ACADEMIC ACTIVITIES' && !isMobile ? undefined : 'column', gap: '20px' }}>
                           {section.subsections.map((subsection, subsectionIndex) => (
                             <div key={`${section.sectionTitle}-${subsection.heading}-${subsectionIndex}`}>
                               {subsection.heading ? (

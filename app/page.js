@@ -1146,6 +1146,8 @@ export default function Home() {
   const [hoveredElement, setHoveredElement] = useState(null)  // 'make', 'view', 'reflect', 'connect', or null
   const [expandedCategory, setExpandedCategory] = useState(null)  // same values
   const [readingMode, setReadingMode] = useState(false)
+  const [readingPage, setReadingPage] = useState(0)
+  const [readingSwipeStart, setReadingSwipeStart] = useState(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeMenuCategory, setActiveMenuCategory] = useState(null)
   const [notice, setNotice] = useState(null)
@@ -1331,6 +1333,7 @@ const navigateWithFade = (category, coords) => {
     setHoveredElement(null)
     setHoveredLetter(null)
     setExpandedCategory(null)
+    setReadingPage(0)
     setReadingMode((prev) => {
       const next = !prev
       const label = next ? 'READING MODE ON' : 'READING MODE OFF'
@@ -1468,6 +1471,30 @@ useEffect(() => {
     if (absX < 50 || absX < absY) return
     if (dx < -50) {
       navigateWithFade('make')
+    }
+  }
+
+  const handleReadingTouchStart = (e) => {
+    const touch = e.touches?.[0]
+    if (!touch) return
+    setReadingSwipeStart({ x: touch.clientX, y: touch.clientY })
+  }
+
+  const handleReadingTouchEnd = (e) => {
+    if (!readingSwipeStart) return
+    const touch = e.changedTouches?.[0]
+    if (!touch) {
+      setReadingSwipeStart(null)
+      return
+    }
+    const dx = touch.clientX - readingSwipeStart.x
+    const dy = touch.clientY - readingSwipeStart.y
+    setReadingSwipeStart(null)
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return
+    if (dx < -50) {
+      setReadingPage(1)
+    } else if (dx > 50) {
+      setReadingPage(0)
     }
   }
 
@@ -1630,89 +1657,150 @@ if (!hasMounted) return null
     )}
     {readingMode && isMobile && (
       <div
+        className="mobile-reading-overlay"
+        onTouchStart={handleReadingTouchStart}
+        onTouchEnd={handleReadingTouchEnd}
         style={{
-          position: 'fixed',
-          inset: 0,
-          padding: '110px 18px 120px',
           zIndex: 60,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '14px',
-          fontFamily: 'var(--font-karla)',
-          color: '#000',
-          overflowY: 'auto',
-          pointerEvents: 'auto'
+          gap: 'var(--m-space-3, 16px)',
+          alignItems: 'stretch',
+          overflow: 'hidden',
+          padding: 0
         }}
       >
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: 0,
-            pointerEvents: 'auto',
-            border: '1px solid #000',
-            maxWidth: '90%',
-            alignSelf: 'center'
+            width: '200%',
+            transform: `translateX(-${readingPage * 50}%)`,
+            transition: 'transform 280ms ease',
+            height: '100%'
           }}
         >
-          {letterOrder.map((key) => {
-            const letterOffsets = {
-              ayin: { x: 6, y: -15 }, 
-              alif: { x: -4, y: -5 },
-              sad: { x: 2, y: -12 },
-              mim: { x: 0, y: -17 }
-            }
-            const offsets = letterOffsets[key] || {}
-            return (
-              <div
-                key={key}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 12px',
-                  background: 'transparent',
-                  borderBottom: key !== letterOrder[letterOrder.length - 1] ? '1.25px solid #000' : 'none'
-                }}
-              >
+          <div
+            style={{
+              width: '50%',
+              flex: '0 0 50%',
+              paddingLeft: 'var(--m-space-2)',
+              paddingRight: 'var(--m-space-2)',
+              overflowY: 'auto',
+              boxSizing: 'border-box',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'flex-start'
+            }}
+          >
+            <div
+              style={{
+                maxWidth: 'var(--m-reading-max)',
+                width: '100%',
+                fontSize: 'var(--m-reading-body-size)',
+                lineHeight: 'var(--m-reading-body-line)',
+                fontWeight: 300,
+                textAlign: 'right',
+                paddingBottom: 'var(--m-space-2)',
+                marginTop: '160px'
+              }}
+            >
+              Welcome. I am Asim (عاصم), and this portfolio is an experiment in spatial interaction, where the arabic letters to my name serve as the interface. By moving, rotating, scaling, and mirroring these letters, you navigate the different facets of my work. These transformations form the essential actions through which we perceive, inhabit, and reshape our environments.
+            </div>
+          </div>
+          <div
+            style={{
+              width: '50%',
+              flex: '0 0 50%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'clamp(6px, 1.5vw, 12px)',
+              marginTop: '30px',
+              paddingRight: 'var(--m-space-2)',
+              overflowY: 'auto',
+              boxSizing: 'border-box'
+            }}
+          >
+            {letterOrder.map((key) => {
+              const letterOffsets = {
+                ayin: { x: 6, y: -15 },
+                alif: { x: -4, y: -5 },
+                sad: { x: 2, y: -12 },
+                mim: { x: 0, y: -17 }
+              }
+              const offsets = letterOffsets[key] || {}
+              const isLast = key === letterOrder[letterOrder.length - 1]
+              return (
                 <div
+                  key={key}
                   style={{
-                    fontFamily: 'var(--font-nastaliq)',
-                    fontSize: '30px',
-                    lineHeight: 1,
-                    minWidth: '52px',
-                    textAlign: 'center',
-                    transform: `translate(${offsets.x || 0}px, ${offsets.y || 0}px)`
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'clamp(6px, 1.5vw, 12px)',
+                    padding: 'clamp(6px, 1.5vw, 10px) clamp(10px, 2vw, 14px)',
+                    background: 'transparent',
+                    borderBottom: isLast ? 'none' : 'none'
                   }}
                 >
-                  {letters[key].arabic}
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-nastaliq)',
+                      fontSize: 'clamp(24px, 5.5vw, 32px)',
+                      lineHeight: 1,
+                      minWidth: 'clamp(42px, 10vw, 52px)',
+                      textAlign: 'center',
+                      flexShrink: 0,
+                      transform: `translate(${offsets.x || 0}px, ${offsets.y || 0}px)`
+                    }}
+                  >
+                    {letters[key].arabic}
+                  </div>
+                  <div style={{ fontSize: 'clamp(12px, 3.2vw, 12px)', lineHeight: 'clamp(1.3, 1.5, 1.2)', flex: 1, textAlign: 'right' }}>
+                    {letters[key].trivia}
+                  </div>
                 </div>
-                <div style={{ fontSize: '13px', lineHeight: '16px', flex: 1, textAlign: 'right' }}>
-                  {letters[key].trivia}
-                </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
         <div
           style={{
-            marginTop: '30px',
-            marginRight: '25px',
-            paddingBottom: '16px',
-            fontSize: '21px',
-            lineHeight: '22px',
-            fontWeight: 300,
-            maxWidth: '85%',
+            position: 'absolute',
+            left: '50%',
+            bottom: 'calc(var(--safe-bottom, 0px) + 1px)',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            gap: '10px',
+            alignItems: 'center',
+            padding: '6px 10px',
+            background: 'rgba(255,253,243,0.72)',
+            borderRadius: '999px',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.08)',
             pointerEvents: 'auto',
-            alignSelf: 'flex-end',
-            textAlign: 'right'
+            zIndex: 70
           }}
         >
-          Welcome. I am Asim (عاصم), and this portfolio is an experiment in spatial interaction, where the arabic letters to my name serve as the interface. By moving, rotating, scaling, and mirroring these letters, you navigate the different facets of my work. These four transformations form the fundamental grammar of my practice and the essential actions through which we perceive, inhabit, and reshape our environments. 
+          {[0, 1].map((idx) => {
+            const active = readingPage === idx
+            return (
+              <button
+                key={`reading-page-${idx}`}
+                type="button"
+                aria-label={idx === 0 ? 'Show paragraph' : 'Show glyphs'}
+                onClick={() => setReadingPage(idx)}
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: '999px',
+                  border: '1px solid #000',
+                  background: active ? '#000' : 'transparent',
+                  opacity: active ? 1 : 0.6,
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              />
+            )
+          })}
         </div>
       </div>
     )}
-
     {/* Notice banner */}
     {!isMobile && notice && (
       <div
@@ -1733,23 +1821,7 @@ if (!hasMounted) return null
     )}
 
     {isMobile && readingMode && (
-      <div
-        className="fixed left-1/2 bottom-4"
-        style={{
-          zIndex: 70,
-          background: '#000',
-          color: '#FFFDF3',
-          padding: '6px 12px',
-          borderRadius: '999px',
-          fontFamily: 'var(--font-karla)',
-          fontSize: '12px',
-          letterSpacing: '0.02em',
-          pointerEvents: 'none',
-          transform: 'translateX(-50%)'
-        }}
-      >
-        reading mode
-      </div>
+      <div className="mobile-reading-pill">reading mode</div>
     )}
       {isMobile && !readingMode && showSwipeHint && (
         <div
@@ -1796,7 +1868,7 @@ if (!hasMounted) return null
     {/* Reading mode welcome text */}
     {readingMode && !isMobile && (
       <div className="reading-mode-welcome">
-        Welcome. I am Asim (عاصم), and this portfolio is an experiment in spatial interaction, where the arabic letters to my name serve as the interface. By moving, rotating, scaling, and mirroring these letters, you navigate the different facets of my work. These four transformations form the fundamental grammar of my practice and the essential actions through which we perceive, inhabit, and reshape our environments.
+        Welcome. I am Asim (عاصم), and this portfolio is an experiment in spatial interaction, where the arabic letters to my name serve as the interface. By moving, rotating, scaling, and mirroring these letters, you navigate the different facets of my work. These transformations form the essential actions through which we perceive, inhabit, and reshape our environments.
       </div>
     )}
     
