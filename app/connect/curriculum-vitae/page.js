@@ -1126,7 +1126,7 @@ export default function CurriculumVitaePage() {
         style={{
           position: 'relative',
           zIndex: 3,
-          padding: isMobile ? '120px 18px 180px' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
+          padding: isMobile ? '120px 12px 180px' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
           marginLeft: gatedIsNarrowDesktop ? '-140px' : '-100px',
           display: isMobile ? 'block' : 'grid',
           gridTemplateColumns: isMobile ? undefined : gatedIsNarrowDesktop ? '1fr' : '200px minmax(420px, 1fr)',
@@ -1179,7 +1179,7 @@ export default function CurriculumVitaePage() {
 
         <div style={{ maxWidth: isMobile ? '100%' : '820px', fontFamily: 'var(--font-karla)', color: '#000', marginTop: isMobile ? '24px' : '60px', marginLeft: isMobile ? 0 : '220px' }}>
 
-          <div style={{ fontSize: gatedIsNarrowDesktop ? '12px' : '13px', lineHeight: 1.1, maxWidth: '760px' }}>
+          <div style={{ fontSize: gatedIsNarrowDesktop ? '12px' : '13px', lineHeight: isMobile ? 1.4 : 1.1, maxWidth: isMobile ? '100%' : '760px', overflowWrap: 'break-word' }}>
             {activeCategory.type === 'grid' ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '24px' }}>
                 {activeCategory.columns.map((column, idx) => (
