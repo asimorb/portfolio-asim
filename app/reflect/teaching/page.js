@@ -317,8 +317,8 @@ export default function TeachingPage() {
     }
     if (isMobile) {
       return {
-        cardWidth: 200,
-        cardHeight: 260,
+        cardWidth: 160,
+        cardHeight: 220,
         stackGap: 44,
         stackOffsetX: 50,
         tiltY: -12,
@@ -353,7 +353,7 @@ export default function TeachingPage() {
       selectedScale: 1.16
     }
   }, [isSmallPhone, isMobile, isNarrowDesktop])
-  const mobileCascadeOffsetY = isSmallPhone ? 40 : 120
+  const mobileCascadeOffsetY = isSmallPhone ? 40 : 90
   const mobileNavGap = 160
   const mobileMetaBottomOffset = activeCategoryId === 'mentor' ? 130 : 80
   const mobileArrowSize = 24
@@ -1700,8 +1700,8 @@ export default function TeachingPage() {
             ref={mobileMetaRef}
             style={{
               position: 'fixed',
-              left: 60,
-              right: 70,
+              left: isSmallPhone ? 30 : 60,
+              right: isSmallPhone ? 30 : 70,
               bottom: `${mobileMetaBottomOffset}px`,
               fontFamily: 'var(--font-karla)',
               color: '#000',
@@ -1716,7 +1716,7 @@ export default function TeachingPage() {
               </div>
               <div
                 style={{
-                  fontSize: isSmallPhone ? '15px' : '18px',
+                  fontSize: isSmallPhone ? '14px' : '18px',
                   fontWeight: 300,
                   letterSpacing: '-0.02em',
                   display: '-webkit-box',
@@ -1734,10 +1734,10 @@ export default function TeachingPage() {
               </div>
               <div
                 style={{
-                  fontSize: isSmallPhone ? '15px' : '18px',
+                  fontSize: isSmallPhone ? '14px' : '18px',
                   fontWeight: 300,
                   letterSpacing: '-0.02em',
-                  lineHeight: isSmallPhone ? '18px' : '22px',
+                  lineHeight: isSmallPhone ? '15px' : '22px',
                   display: mobileNotesExpanded ? 'block' : '-webkit-box',
                   WebkitLineClamp: mobileNotesExpanded ? 'unset' : (displayItem.category === 'mentor' ? 3 : 4),
                   WebkitBoxOrient: 'vertical',
