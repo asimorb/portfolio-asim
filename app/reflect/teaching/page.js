@@ -1711,12 +1711,12 @@ export default function TeachingPage() {
             }}
           >
             <div>
-              <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
+              <div style={{ fontSize: isSmallPhone ? '10px' : '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
                 {levelLabel}
               </div>
               <div
                 style={{
-                  fontSize: '18px',
+                  fontSize: isSmallPhone ? '15px' : '18px',
                   fontWeight: 300,
                   letterSpacing: '-0.02em',
                   display: '-webkit-box',
@@ -1729,12 +1729,12 @@ export default function TeachingPage() {
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
+              <div style={{ fontSize: isSmallPhone ? '10px' : '12px', fontWeight: 700, textTransform: 'lowercase', letterSpacing: '0.001em' }}>
                 notes
               </div>
               <div
                 style={{
-                  fontSize: '18px',
+                  fontSize: isSmallPhone ? '15px' : '18px',
                   fontWeight: 300,
                   letterSpacing: '-0.02em',
                   lineHeight: '22px',
@@ -1755,7 +1755,7 @@ export default function TeachingPage() {
                       background: 'none',
                       border: 'none',
                       padding: 0,
-                      fontSize: '12px',
+                      fontSize: isSmallPhone ? '10px' : '12px',
                       fontWeight: 600,
                       color: '#000',
                       cursor: 'pointer',
