@@ -1052,6 +1052,8 @@ export default function CurriculumVitaePage() {
             right: 20,
             zIndex: 82,
             display: 'flex',
+            flexWrap: 'wrap',
+            maxWidth: '100%',
             gap: '18px',
             fontFamily: 'var(--font-karla)',
             fontSize: '16px'
@@ -1126,8 +1128,8 @@ export default function CurriculumVitaePage() {
         style={{
           position: 'relative',
           zIndex: 3,
-          padding: isMobile ? '120px 12px 180px' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
-          marginLeft: gatedIsNarrowDesktop ? '-140px' : '-100px',
+          padding: isMobile ? '120px 12px calc(env(safe-area-inset-bottom, 0px) + 100px)' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
+          marginLeft: isMobile ? 0 : (gatedIsNarrowDesktop ? '-140px' : '-100px'),
           display: isMobile ? 'block' : 'grid',
           gridTemplateColumns: isMobile ? undefined : gatedIsNarrowDesktop ? '1fr' : '200px minmax(420px, 1fr)',
           gap: isMobile ? undefined : gatedIsNarrowDesktop ? '0' : '100px',
