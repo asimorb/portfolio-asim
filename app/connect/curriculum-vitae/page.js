@@ -505,6 +505,8 @@ export default function CurriculumVitaePage() {
   const isMobile = useMediaQuery('(max-width: 768px)')
   const isNarrowDesktop = useMediaQuery('(max-width: 1400px)')
   const gatedIsNarrowDesktop = hydrated ? isNarrowDesktop : false
+  const isExtraSmallPhone = useMediaQuery('(max-width: 400px)')
+  const gatedIsExtraSmallPhone = hydrated ? isExtraSmallPhone : false
 
   // Consolidated heading styles
   const mainHeadingStyle = {
@@ -1056,7 +1058,7 @@ export default function CurriculumVitaePage() {
             maxWidth: '100%',
             gap: '18px',
             fontFamily: 'var(--font-karla)',
-            fontSize: '16px'
+            fontSize: gatedIsExtraSmallPhone ? '13px' : '16px'
           }}
         >
           {cvCategories.map((category) => {
@@ -1128,7 +1130,7 @@ export default function CurriculumVitaePage() {
         style={{
           position: 'relative',
           zIndex: 3,
-          padding: isMobile ? '120px 12px calc(env(safe-area-inset-bottom, 0px) + 100px)' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
+          padding: isMobile ? '120px 12px calc(env(safe-area-inset-bottom, 0px) + 140px)' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
           marginLeft: isMobile ? 0 : (gatedIsNarrowDesktop ? '-140px' : '-100px'),
           display: isMobile ? 'block' : 'grid',
           gridTemplateColumns: isMobile ? undefined : gatedIsNarrowDesktop ? '1fr' : '200px minmax(420px, 1fr)',
