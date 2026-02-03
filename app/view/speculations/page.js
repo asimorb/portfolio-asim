@@ -1229,12 +1229,12 @@ export default function SpeculationsPage() {
                         onClick={handleMobileTextClick}
                         style={{
                           fontSize: mobileTextTab === 'notes' && activeEntry.notes
-                            ? resolveResponsive({ base: '12px', sm: '10px' }, viewportWidth)
-                            : resolveResponsive({ base: '18px', sm: '15px', md: '16px' }, viewportWidth),
+                            ? resolveResponsive({ base: '12px', sm: '12px' }, viewportWidth)
+                            : resolveResponsive({ base: '18px', sm: '16px', md: '16px' }, viewportWidth),
                           fontWeight: 200,
                           lineHeight: mobileTextTab === 'notes' && activeEntry.notes
-                            ? resolveResponsive({ base: '14px', sm: '12px' }, viewportWidth)
-                            : resolveResponsive({ base: '20px', sm: '17px', md: '18px' }, viewportWidth),
+                            ? resolveResponsive({ base: '12px', sm: '12px' }, viewportWidth)
+                            : resolveResponsive({ base: '18px', sm: '16px', md: '18px' }, viewportWidth),
                           color: '#f1f1f1',
                           cursor: canToggleNotes ? 'pointer' : 'default'
                         }}

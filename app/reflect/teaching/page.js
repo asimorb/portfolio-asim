@@ -258,6 +258,8 @@ export default function TeachingPage() {
   const isMobile = hydrated ? mediaQueryMatch : false
   const mediaQueryNarrow = useMediaQuery('(max-width: 1400px)')
   const isNarrowDesktop = hydrated ? mediaQueryNarrow : false
+  const mediaQueryShortHeight = useMediaQuery('(max-height: 750px)')
+  const isSmallPhone = hydrated ? (isMobile && mediaQueryShortHeight) : false
   const isTouchDevice = useMediaQuery('(hover: none) and (pointer: coarse)')
   const [glowDelaySeconds] = useState(() => syncGlowOffset().delaySeconds)
   const [activeCategoryId, setActiveCategoryId] = useState('studio')
@@ -300,6 +302,19 @@ export default function TeachingPage() {
     window.location.href = target
   }
   const carouselSettings = useMemo(() => {
+    if (isSmallPhone) {
+      return {
+        cardWidth: 150,
+        cardHeight: 195,
+        stackGap: 33,
+        stackOffsetX: 38,
+        tiltY: -9,
+        perspective: 390,
+        baseScaleStep: 0.06,
+        baseMaxScale: 0.95,
+        selectedScale: 1.08
+      }
+    }
     if (isMobile) {
       return {
         cardWidth: 200,
@@ -337,8 +352,8 @@ export default function TeachingPage() {
       baseMaxScale: 0.92,
       selectedScale: 1.16
     }
-  }, [isMobile, isNarrowDesktop])
-  const mobileCascadeOffsetY = 120
+  }, [isSmallPhone, isMobile, isNarrowDesktop])
+  const mobileCascadeOffsetY = isSmallPhone ? 80 : 120
   const mobileNavGap = 160
   const mobileMetaBottomOffset = activeCategoryId === 'mentor' ? 130 : 80
   const mobileArrowSize = 24
@@ -1420,7 +1435,7 @@ export default function TeachingPage() {
           left: isMobile ? 'auto' : (isNarrowDesktop ? 'calc(48% - 15px)' : '48%'),
           top: isMobile ? 'auto' : (isNarrowDesktop ? 200 : 220),
           width: isMobile ? '100%' : 640,
-          height: isMobile ? 280 : 360,
+          height: isSmallPhone ? 210 : (isMobile ? 280 : 360),
           zIndex: 40,
           transform: isMobile ? 'none' : 'translateX(-50%)',
           margin: isMobile ? `${mobileCascadeOffsetY}px auto 12px` : undefined

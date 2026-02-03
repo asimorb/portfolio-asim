@@ -1451,7 +1451,7 @@ export default function ReflectResearchPage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    fontSize: '12px',
+                    fontSize: isMobile ? '12px' : '12px',
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     letterSpacing: '0.08em',
@@ -1465,18 +1465,18 @@ export default function ReflectResearchPage() {
                 </div>
 
                 <div style={{ height: '1px', background: '#000', opacity: 0.35 }} />
-                <div style={{ marginTop: '16px', fontSize: '28px', fontWeight: 300, lineHeight: 1.3 }}>
+                <div style={{ marginTop: '16px', fontSize: isMobile ? '20px' : '28px', fontWeight: 300, lineHeight: isMobile ? 1.3 : 1.3 }}>
                   {activeItem?.title}
                 </div>
                 {showExpanded ? (
-                  <div style={{ marginTop: '18px', fontSize: '13px', lineHeight: 1.55, maxWidth: activeCategory.id === 'studies' && !isMobile ? 'none' : '820px' }} >
+                  <div style={{ marginTop: '18px', fontSize: isMobile ? '12px' : '13px', lineHeight: isMobile ? 1.55 : 1.55, maxWidth: activeCategory.id === 'studies' && !isMobile ? 'none' : '820px' }} >
                     {activeItem?.details?.length ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                         {activeItem.details.map((detail) => (
                           <div key={detail.label}>
                             <div
                               style={{
-                                fontSize: '11px',
+                                fontSize: isMobile ? '11px' : '11px',
                                 fontWeight: 700,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.08em'
@@ -1547,7 +1547,7 @@ export default function ReflectResearchPage() {
                   style={{
                     marginTop: `${mobileImagesGap}px`,
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? 'repeat(auto-fill, 80px)' : 'repeat(auto-fill, 110px)',
+                    gridTemplateColumns: isMobile ? 'repeat(auto-fill, 40px)' : 'repeat(auto-fill, 110px)',
                     gap: '10px',
                     maxWidth: '100%',
                     width: '100%',
@@ -1565,8 +1565,8 @@ export default function ReflectResearchPage() {
                         padding: 0,
                         background: 'transparent',
                         cursor: 'zoom-in',
-                        width: isMobile ? '80px' : '110px',
-                        height: isMobile ? '80px' : '110px'
+                        width: isMobile ? '40px' : '110px',
+                        height: isMobile ? '40px' : '110px'
                       }}
                     >
                       <img
