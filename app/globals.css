@@ -84,7 +84,7 @@
     left: 68%;
     bottom: calc(var(--safe-bottom) + 22px);
     transform: translateX(-50%);
-    z-index: 70;
+    z-index: 85;
     background: #000;
     color: #FFFDF3;
     padding: 6px 14px;

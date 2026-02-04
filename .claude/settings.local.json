@@ -12,7 +12,8 @@
       "Bash(xargs kill -9)",
       "Bash(netstat:*)",
       "Bash(curl:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(ls -la \"c:\\\\Users\\\\asimo\\\\Downloads\\\\portfolio-asim\\\\app\\\\components\"\" | grep -i \"mobile|media \")"
     ]
   }
 }

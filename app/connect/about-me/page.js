@@ -311,7 +311,7 @@ export default function AboutMePage() {
   const glowFilter = 'hue-rotate(calc(var(--glow-rotation) + var(--glow-offset)))'
   const readingBodyStyle = { top: 230, left: isMediumDesktop ? 460 : 800, maxWidth: 470 }
   const messageBoxHeight = isMediumDesktop ? 450 : 545
-  const messageBoxBottomBuffer = 28
+  const messageBoxBottomBuffer = 12
   const messageTextareaMinHeight = 140
   const messageBoxStyle = { top: 200, left: isMediumDesktop ? 460 : 800, width: isMediumDesktop ? 450 : 600, height: messageBoxHeight }
   const infoCalloutStyle = { left: 90, bottom: 48, lineLength: 54 }
@@ -472,6 +472,7 @@ export default function AboutMePage() {
         .message-field { width: 100%; border: none; background: transparent; padding: 6px 0 10px; font-family: var(--font-karla); font-size: 22px; font-weight: 500; line-height: 1.3; color: #000; }
         .message-field::placeholder { font-size: 22px; font-weight: 500; letter-spacing: 0; text-transform: none; color: rgba(0, 0, 0, 0.35); }
         .message-field:focus { outline: none; }
+        @media (max-width: 768px) { .message-field { font-size: 16px; } .message-field::placeholder { font-size: 16px; } .message-textarea { resize: none; } }
         .message-textarea { resize: vertical; min-height: 80px; }
         .message-emoji-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
         .message-emoji { background: transparent; border: none; font-size: 18px; cursor: pointer; padding: 2px; }
@@ -603,7 +604,7 @@ export default function AboutMePage() {
             top: 'calc(env(safe-area-inset-top, 0px) + 80px)',
             left: '50%',
             transform: 'translateX(-50%)',
-            zIndex: 60,
+            zIndex: 85,
             background: '#000',
             color: '#fff',
             padding: '8px 12px',
@@ -622,14 +623,14 @@ export default function AboutMePage() {
         style={{
           zIndex: 40,
           fontFamily: 'var(--font-karla)',
-          fontSize: isMobile ? '24px' : isMediumDesktop ? '26px' : '40px',
-          fontWeight: 200,
-          lineHeight: isMobile ? '28px' : isMediumDesktop ? '26px' : '40px',
+          fontSize: isMobile ? 'clamp(18px, 6vw, 28px)' : isMediumDesktop ? '26px' : '40px',
+          fontWeight: isMobile ? 300 : 200,
+          lineHeight: isMobile ? 'clamp(16px, 6vw, 26px)' : isMediumDesktop ? '26px' : '40px',
           maxWidth: isMobile ? '100%' : isMediumDesktop ? '270px' : '450px',
           top: isMobile ? 'auto' : isMediumDesktop ? '19rem' : '22.5rem',
           textAlign: isMobile ? 'left' : 'right',
           color: '#000',
-          padding: isMobile ? '120px 18px 40px' : 0
+          padding: isMobile ? '100px 18px 20px' : 0
         }}
       >
         Interdisciplinary researcher-designer bridging architecture, interaction design, immersive technologies, and empirical methods. I investigate how people perceive possibilities for action in physical and digital environments.
@@ -642,7 +643,7 @@ export default function AboutMePage() {
             ...(isMobile ? {} : readingBodyStyle),
             zIndex: 40,
             fontFamily: 'var(--font-karla)',
-            fontSize: '13px',
+            fontSize: isMobile ? '12px' : '13px',
             fontWeight: 400,
             lineHeight: '16px',
             color: '#000',
@@ -678,7 +679,7 @@ export default function AboutMePage() {
             zIndex: 40,
             fontFamily: 'var(--font-karla)',
             color: '#000',
-            padding: isMobile ? '0 18px 180px' : 0
+            padding: isMobile ? '0 18px 100px' : 0
           }}
         >
           <div style={{ position: 'relative', height: isMobile ? 'auto' : '100%' }}>
@@ -721,7 +722,7 @@ export default function AboutMePage() {
             zIndex: 40,
             fontFamily: 'var(--font-karla)',
             color: '#000',
-            padding: isMobile ? '0 18px 180px' : 0
+            padding: isMobile ? '0 18px 100px' : 0
           }}
         >
           <form
@@ -782,7 +783,16 @@ export default function AboutMePage() {
               placeholder="Message"
               className="message-field message-textarea"
               ref={messageTextareaRef}
-              style={{ marginTop: 12, minHeight: messageTextareaMinHeight, flexGrow: 1 }}
+              style={{
+                marginTop: 12,
+                minHeight: isMobile ? 80 : messageTextareaMinHeight,
+                flexGrow: isMobile ? 0 : 1,
+                height: isMobile ? 'auto' : undefined
+              }}
+              onInput={isMobile ? (e) => {
+                e.target.style.height = 'auto'
+                e.target.style.height = e.target.scrollHeight + 'px'
+              } : undefined}
             />
             <div className="message-emoji-row" style={{ marginTop: messageBoxBottomBuffer }}>
               {emojiOptions.map((emoji) => (

@@ -507,6 +507,8 @@ export default function CurriculumVitaePage() {
   const gatedIsNarrowDesktop = hydrated ? isNarrowDesktop : false
   const isExtraSmallPhone = useMediaQuery('(max-width: 400px)')
   const gatedIsExtraSmallPhone = hydrated ? isExtraSmallPhone : false
+  const mobileContentTop = 'calc(env(safe-area-inset-top, 0px) + 120px)'
+  const mobileContentBottom = 'calc(env(safe-area-inset-bottom, 0px) + 120px)'
 
   // Consolidated heading styles
   const mainHeadingStyle = {
@@ -840,7 +842,9 @@ export default function CurriculumVitaePage() {
         backgroundColor: '#FFFDF3',
         position: 'fixed',
         inset: 0,
-        overflow: isMobile ? 'hidden' : 'auto',
+        overflow: 'auto',
+        overscrollBehavior: isMobile ? 'contain' : undefined,
+        padding: isMobile ? `${mobileContentTop} 12px ${mobileContentBottom}` : 0,
         animation: 'glowHue 60s linear infinite',
         animationDelay: `-${glowDelaySeconds}s`,
         opacity: pageOpacity,
@@ -1047,19 +1051,19 @@ export default function CurriculumVitaePage() {
 
       {isMobile && (
         <div
-          style={{
-            position: 'fixed',
-            top: 'calc(env(safe-area-inset-top, 0px) + 60px)',
-            left: 20,
-            right: 20,
-            zIndex: 82,
-            display: 'flex',
-            flexWrap: 'wrap',
-            maxWidth: '100%',
-            gap: '18px',
-            fontFamily: 'var(--font-karla)',
-            fontSize: gatedIsExtraSmallPhone ? '14.5px' : '16px'
-          }}
+        style={{
+          position: 'fixed',
+          top: 'calc(env(safe-area-inset-top, 0px) + 60px)',
+          left: 20,
+          right: 20,
+          zIndex: 82,
+          display: 'flex',
+          flexWrap: 'wrap',
+          maxWidth: '100%',
+          gap: '18px',
+          fontFamily: 'var(--font-karla)',
+          fontSize: gatedIsExtraSmallPhone ? '14.5px' : '16px'
+        }}
         >
           {cvCategories.map((category) => {
             const isActive = category.id === activeCategory?.id
@@ -1130,14 +1134,14 @@ export default function CurriculumVitaePage() {
         style={{
           position: 'relative',
           zIndex: 3,
-          height: isMobile ? 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))' : 'auto',
-          padding: isMobile ? '120px 12px 160px' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
+          height: 'auto',
+          padding: isMobile ? 0 : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
           marginLeft: isMobile ? 0 : (gatedIsNarrowDesktop ? '-140px' : '-100px'),
           display: isMobile ? 'block' : 'grid',
           gridTemplateColumns: isMobile ? undefined : gatedIsNarrowDesktop ? '1fr' : '200px minmax(420px, 1fr)',
           gap: isMobile ? undefined : gatedIsNarrowDesktop ? '0' : '100px',
           alignItems: 'start',
-          overflowY: isMobile ? 'auto' : 'visible',
+          overflowY: 'visible',
           boxSizing: 'border-box'
         }}
       >

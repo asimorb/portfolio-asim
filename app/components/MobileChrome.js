@@ -116,7 +116,10 @@ const defaultBack = () => {
           right: 0,
           zIndex: 80,
           pointerEvents: readingMode ? 'none' : 'auto',
-          padding: 'calc(var(--safe-top) + var(--m-space-3, 14px)) var(--m-inline, 18px) var(--m-space-2, 12px)',
+          padding: 'calc(var(--safe-top) + var(--m-space-3, 14px)) var(--m-inline, 18px) 30px',
+          background: 'rgba(255, 253, 243, 0.3)',
+          backdropFilter: 'blur(16px) saturate(1.2)',
+          WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
           fontFamily: 'var(--font-karla)',
           color: '#000'
         }}
@@ -223,9 +226,11 @@ const defaultBack = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          background: 'rgba(255, 253, 243, 0.3)',
+          backdropFilter: 'blur(16px) saturate(1.2)',
+          WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
           fontFamily: 'var(--font-karla)',
-          color: '#000',
-          position: 'fixed'
+          color: '#000'
         }}
       >
         <div
