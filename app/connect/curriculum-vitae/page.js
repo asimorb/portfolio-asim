@@ -1130,6 +1130,7 @@ export default function CurriculumVitaePage() {
         style={{
           position: 'relative',
           zIndex: 3,
+          height: isMobile ? '100vh' : 'auto',
           padding: isMobile ? '120px 12px calc(env(safe-area-inset-bottom, 0px) + 140px)' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
           marginLeft: isMobile ? 0 : (gatedIsNarrowDesktop ? '-140px' : '-100px'),
           display: isMobile ? 'block' : 'grid',
