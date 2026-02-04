@@ -840,7 +840,7 @@ export default function CurriculumVitaePage() {
         backgroundColor: '#FFFDF3',
         position: 'fixed',
         inset: 0,
-        overflow: 'auto',
+        overflow: isMobile ? 'hidden' : 'auto',
         animation: 'glowHue 60s linear infinite',
         animationDelay: `-${glowDelaySeconds}s`,
         opacity: pageOpacity,
@@ -1130,14 +1130,15 @@ export default function CurriculumVitaePage() {
         style={{
           position: 'relative',
           zIndex: 3,
-          height: isMobile ? '100vh' : 'auto',
-          padding: isMobile ? '120px 12px calc(env(safe-area-inset-bottom, 0px) + 140px)' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
+          height: isMobile ? 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))' : 'auto',
+          padding: isMobile ? '120px 12px 80px' : gatedIsNarrowDesktop ? '140px 240px 120px 50px' : '140px 240px 120px 140px',
           marginLeft: isMobile ? 0 : (gatedIsNarrowDesktop ? '-140px' : '-100px'),
           display: isMobile ? 'block' : 'grid',
           gridTemplateColumns: isMobile ? undefined : gatedIsNarrowDesktop ? '1fr' : '200px minmax(420px, 1fr)',
           gap: isMobile ? undefined : gatedIsNarrowDesktop ? '0' : '100px',
           alignItems: 'start',
-          overflow: isMobile ? 'hidden' : 'visible'
+          overflowY: isMobile ? 'auto' : 'visible',
+          boxSizing: 'border-box'
         }}
       >
         {!isMobile && (
