@@ -1058,7 +1058,7 @@ export default function CurriculumVitaePage() {
             maxWidth: '100%',
             gap: '18px',
             fontFamily: 'var(--font-karla)',
-            fontSize: gatedIsExtraSmallPhone ? '13px' : '16px'
+            fontSize: gatedIsExtraSmallPhone ? '14.5px' : '16px'
           }}
         >
           {cvCategories.map((category) => {
@@ -1135,7 +1135,8 @@ export default function CurriculumVitaePage() {
           display: isMobile ? 'block' : 'grid',
           gridTemplateColumns: isMobile ? undefined : gatedIsNarrowDesktop ? '1fr' : '200px minmax(420px, 1fr)',
           gap: isMobile ? undefined : gatedIsNarrowDesktop ? '0' : '100px',
-          alignItems: 'start'
+          alignItems: 'start',
+          overflow: isMobile ? 'hidden' : 'visible'
         }}
       >
         {!isMobile && (
